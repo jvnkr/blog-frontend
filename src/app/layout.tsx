@@ -8,6 +8,8 @@ import { AuthContextProvider } from "@/context/AuthContext";
 import { cookies } from "next/headers";
 import PatternCircles from "@/components/CirclePattern";
 import NoiseTexture from "@/components/NoiseTexture";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "next-themes";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -38,9 +40,10 @@ export default async function RootLayout({
   const refreshToken = cookieStore.get("r_t")?.value;
 
   const res = await fetcher("/api/auth/session", {
-    method: "GET",
+    method: "POST",
     credentials: "include",
     headers: {
+      "Content-Type": "application/json",
       Cookie: `a_t=${accessToken}; r_t=${refreshToken}`,
     },
   });
@@ -51,32 +54,36 @@ export default async function RootLayout({
     name: "",
     loggedIn: res.status === 200,
   };
+  const data = await res.json();
 
-  // Means that session expired
-  if (res.status === 401) {
-    const data = await res.json();
-    console.log(data);
-    if (data && data.accessToken) {
-      serverAuthData.username = data.username;
-      serverAuthData.name = data.name;
-      serverAuthData.userId = data.userId;
-      serverAuthData.accessToken = data.accessToken;
+  if (res.ok) {
+    serverAuthData.username = data.username;
+    serverAuthData.name = data.name;
+    serverAuthData.userId = data.userId;
+    if (data.accessToken) {
       serverAuthData.loggedIn = true;
+      serverAuthData.accessToken = data.accessToken;
     }
   }
 
   return (
-    <html lang="en">
+    <html suppressHydrationWarning lang="en">
+      {/* <head>
+        <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />
+      </head> */}
       <AuthContextProvider serverData={serverAuthData}>
         <body
           suppressHydrationWarning
-          className={`min-h-screen h-screen mx-auto overflow-x-hidden bg-zinc-900 ${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`min-h-screen h-screen  mx-auto bg-zinc-900 ${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <PatternCircles />
-          {/* <GridPattern /> */}
-          {/* <DiagonalStripes /> */}
-          <NoiseTexture />
-          <div className="flex justify-center items-center">{children}</div>
+          <ThemeProvider attribute="class" defaultTheme="dark">
+            <Toaster />
+            <PatternCircles />
+            {/* <GridPattern /> */}
+            {/* <DiagonalStripes /> */}
+            <NoiseTexture />
+            <div className="flex justify-center items-center">{children}</div>
+          </ThemeProvider>
         </body>
       </AuthContextProvider>
     </html>

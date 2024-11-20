@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const API_URL = "http://localhost:8080";
+const API_URL = `http://localhost:8080`;
 
 export async function fetcher(url: string, options: RequestInit = {}) {
   return await fetch(API_URL + url, options);

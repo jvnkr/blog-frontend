@@ -2,6 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   FormControl,
   FormField,
   FormLabel,
@@ -9,15 +16,16 @@ import {
   FormItem,
   Form,
 } from "@/components/ui/form";
-import React, { useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
 import { fetcher } from "@/lib/utils";
-import { setCookie } from "cookies-next";
 import { redirect, useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
+import { toast } from "sonner";
+import Link from "next/link";
 
 const formSchema = z
   .object({
@@ -41,7 +49,8 @@ const formSchema = z
   });
 
 const RegisterPage = () => {
-  const { loggedIn, setLoggedIn, setAccessToken } = useAuthContext();
+  const { loggedIn } = useAuthContext();
+  const [registered, setRegistered] = useState(false);
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,15 +74,26 @@ const RegisterPage = () => {
         body: JSON.stringify(values),
       });
       if (response.ok) {
-        const { accessToken, refreshToken } = await response.json();
-        setCookie("a_t", accessToken);
-        setCookie("r_t", refreshToken);
-        setAccessToken(accessToken);
-        setLoggedIn(true);
-        router.push("/home");
+        setRegistered(true);
+        toast.success("Registered successfully", {
+          description: "Please check your email for verification",
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+        // router.push("/home");
+      } else {
+        const data = await response.json();
+        throw new Error(data.error);
       }
     } catch (error) {
-      console.log(error);
+      toast.error((error as Error).message, {
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
     }
   }
 
@@ -84,111 +104,133 @@ const RegisterPage = () => {
   if (loggedIn) return null;
 
   return (
-    <div
-      style={{
-        zIndex: 9999,
-      }}
-      className="flex flex-col items-center justify-center w-full h-screen"
-    >
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col justify-between items-center border border-zinc-700 bg-zinc-800 space-y-8 w-[22rem] min-h-[18rem] p-[2rem] rounded-lg"
-        >
-          <div className="space-y-4 w-full">
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white">Username</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="text-white border-neutral-600"
-                      placeholder="Enter your username"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white">Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="text-white border-neutral-600"
-                      placeholder="Enter your email"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white">Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="text-white border-neutral-600"
-                      placeholder="Enter your name"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white">Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      className="text-white border-neutral-600"
-                      placeholder="Enter your password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white">Confirm Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      className="text-white border-neutral-600"
-                      placeholder="Confirm your password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <div className="flex justify-center items-center h-screen">
+      <Card
+        style={{
+          zIndex: 99,
+        }}
+        className="mx-auto dark:bg-zinc-900 max-w-sm"
+      >
+        <CardHeader>
+          <CardTitle className="text-2xl">Register</CardTitle>
+          <CardDescription>
+            Fill in the details below to create a new account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+              <div className="flex flex-col gap-6 mb-4">
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input
+                          required
+                          className="text-white"
+                          placeholder="Enter your username"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          required
+                          className="text-white"
+                          placeholder="Enter your email"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          required
+                          className="text-white"
+                          placeholder="Enter your name"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          required
+                          type="password"
+                          className="text-white"
+                          placeholder="Enter your password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          required
+                          type="password"
+                          className="text-white"
+                          placeholder="Confirm your password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <Button
+                disabled={registered}
+                className="w-full select-none"
+                type="submit"
+              >
+                Register
+              </Button>
+            </form>
+          </Form>
+          <div className="mt-4 text-center text-sm">
+            Already have an account?{" "}
+            <Link tabIndex={-1} href="/login" className="underline">
+              Login
+            </Link>
           </div>
-          <Button className="w-full" type="submit">
-            Register
-          </Button>
-        </form>
-      </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 };

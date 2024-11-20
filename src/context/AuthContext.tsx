@@ -2,7 +2,7 @@
 
 import { createContext, useEffect } from "react";
 
-import { deleteCookie, setCookie } from "cookies-next";
+import { deleteCookie, getCookie, setCookie } from "cookies-next";
 import { ReactNode, useState, useContext } from "react";
 import { fetcher } from "@/lib/utils";
 import useSWR from "swr";
@@ -82,20 +82,34 @@ export const AuthContextProvider = ({
   const updateLoggedInStatus = async (url: string) => {
     if (!loggedIn) return null;
     try {
-      // Artificial access token
       const response = await fetcher(url, {
-        method: "GET",
+        method: "POST",
         credentials: "include",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          Cookie: `a_t=${accessToken}; r_t=${getCookie("r_t")}`,
+        },
       });
 
-      if (response.ok) return;
+      const data = await response.json();
 
-      // 401 - session expired
-      if (response.status === 401) {
+      if (response.ok) {
+        setUsername(data.username);
+        setName(data.name);
+        setUserId(data.userId);
+        return;
+      }
+
+      if (data.accessToken) {
         console.log("Session expired");
-        const { accessToken } = await response.json();
-        setCookie("a_t", accessToken);
-        setAccessToken(accessToken);
+        setCookie("a_t", data.accessToken, {
+          // httpOnly: true,
+          // secure: true,
+          // sameSite: "lax",
+          // domain: API_DOMAIN,
+        });
+        setAccessToken(data.accessToken);
         setLoggedIn(true);
         return response;
       } else {
@@ -109,7 +123,11 @@ export const AuthContextProvider = ({
   useEffect(() => {
     if (serverData.accessToken) {
       setAccessToken(serverData.accessToken);
-      setCookie("a_t", serverData.accessToken);
+      setCookie("a_t", serverData.accessToken, {
+        // httpOnly: true,
+        // secure: true,
+        // sameSite: "lax",
+      });
     } else {
       clearAll();
     }

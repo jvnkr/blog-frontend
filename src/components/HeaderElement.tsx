@@ -18,7 +18,7 @@ const HeaderElement = ({ text, selectedPath }: HeaderElementProps) => {
       <span className={"flex flex-wrap truncate justify-center items-center relative h-full"}>
         {text}
         {pathname === selectedPath &&
-          <div className={"absolute w-full bottom-0 bg-blue-600 h-[4px] rounded-full"}></div>}
+          <div className={"absolute w-full bottom-0 bg-white h-[4px] rounded-full"}></div>}
       </span>
     </Link>
   );

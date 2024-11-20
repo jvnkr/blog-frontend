@@ -1,10 +1,10 @@
 import React from "react";
 
 interface AvatarProps {
-  firstName: string;
+  name: string;
 }
 
-export default function Avatar({ firstName }: AvatarProps) {
+export default function Avatar({ name }: AvatarProps) {
   const letterColors: { [key: string]: string } = {
     A: "#FF6B6B", // Red
     B: "#4ECDC4", // Teal
@@ -34,7 +34,7 @@ export default function Avatar({ firstName }: AvatarProps) {
     Z: "#F8C471", // Light Orange
   };
 
-  const firstLetter = firstName.at(0)?.toUpperCase() || "A";
+  const firstLetter = name.at(0)?.toUpperCase() || "A";
   const bgColor = letterColors[firstLetter] || "#6B7280"; // Fallback to neutral gray
 
   return (
