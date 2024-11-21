@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { SessionData } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -8,7 +9,56 @@ export function cn(...inputs: ClassValue[]) {
 const API_URL = `http://localhost:8080`;
 
 export async function fetcher(url: string, options: RequestInit = {}) {
-  return await fetch(API_URL + url, options);
+  const mainResponse = await fetch(API_URL + url, {
+    ...options,
+    credentials: "include",
+  });
+
+  if (mainResponse.status === 401 || mainResponse.status === 403) {
+    try {
+      const data = await refreshSession();
+      if (data) {
+        // Make a new request with the refreshed token instead of recursively calling fetcher
+        const retryResponse = await fetch(API_URL + url, {
+          ...options,
+          credentials: "include",
+          headers: {
+            ...options.headers,
+            Authorization: `Bearer ${data.accessToken}`,
+          },
+        });
+        return retryResponse;
+      }
+    } catch (error) {
+      console.log("Error refreshing session:", error);
+      throw new Error("Error refreshing session");
+    }
+    return mainResponse;
+  }
+
+  return mainResponse;
+}
+
+export async function refreshSession() {
+  try {
+    console.log("Refreshing session...");
+    const response = await fetch(`${API_URL}/api/auth/session`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.ok) {
+      const data = (await response.json()) as SessionData;
+      console.log("Refreshed session successfully!");
+      return data;
+    }
+  } catch (error) {
+    console.log("Error refreshing session:", error);
+    return null;
+  }
 }
 
 export function formatTimeDifference(date: Date): string {

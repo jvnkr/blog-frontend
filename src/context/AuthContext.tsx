@@ -2,9 +2,9 @@
 
 import { createContext, useEffect } from "react";
 
-import { deleteCookie, getCookie, setCookie } from "cookies-next";
+import { deleteCookie, setCookie } from "cookies-next";
 import { ReactNode, useState, useContext } from "react";
-import { fetcher } from "@/lib/utils";
+import { refreshSession } from "@/lib/utils";
 import useSWR from "swr";
 
 interface AuthContextProps {
@@ -79,28 +79,15 @@ export const AuthContextProvider = ({
    * (on focus, on stale, etc.) currently is on focus by default
    * @param url request url
    */
-  const updateLoggedInStatus = async (url: string) => {
+  const updateLoggedInStatus = async () => {
     if (!loggedIn) return null;
-    try {
-      const response = await fetcher(url, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-          Cookie: `a_t=${accessToken}; r_t=${getCookie("r_t")}`,
-        },
-      });
 
-      const data = await response.json();
+    const data = await refreshSession();
 
-      if (response.ok) {
-        setUsername(data.username);
-        setName(data.name);
-        setUserId(data.userId);
-        return;
-      }
-
+    if (data) {
+      setUsername(data.username);
+      setName(data.name);
+      setUserId(data.userId);
       if (data.accessToken) {
         console.log("Session expired");
         setCookie("a_t", data.accessToken, {
@@ -111,12 +98,9 @@ export const AuthContextProvider = ({
         });
         setAccessToken(data.accessToken);
         setLoggedIn(true);
-        return response;
-      } else {
-        clearAll();
       }
-    } catch (error) {
-      console.log("Error checking auth status:", error);
+    } else {
+      clearAll();
     }
   };
 
