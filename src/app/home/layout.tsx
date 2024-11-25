@@ -28,7 +28,7 @@ export default function HomeLayout({
     <>
       <div
         style={{
-          zIndex: 99999,
+          zIndex: 9,
         }}
         className="flex bg-zinc-900 bg-opacity-[0.45] border p-4 border-y-0 border-[#272629] min-h-screen overflow-x-hidden justify-start items-center flex-col w-[45rem] mx-auto"
       >

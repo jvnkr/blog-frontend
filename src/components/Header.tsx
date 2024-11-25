@@ -14,12 +14,12 @@ export const Header = () => {
       }
     >
       <HeaderElement
-        className="rounded-br-[1px]"
+        className="focus-within:rounded-br-[1px] rounded-bl-[14px]"
         text={"For you"}
         selectedPath={"/home"}
       />
       <HeaderElement
-        className="rounded-bl-[1px]"
+        className="focus-within:rounded-bl-[1px] rounded-br-[14px]"
         text={"Following"}
         selectedPath={"/following"}
       />

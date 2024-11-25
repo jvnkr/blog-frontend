@@ -20,7 +20,7 @@ const HeaderElement = ({
     <Link
       href={selectedPath}
       className={
-        "flex focus-within:ring-2 ring-[#888] rounded-b-[15px] outline-none w-full flex-grow px-2 transition-all ease-in-out duration-300 h-full hover:bg-neutral-500 hover:bg-opacity-[0.5] justify-center items-center" +
+        "flex focus-within:ring-2 ring-[#888] outline-none w-full flex-grow px-2 transition-all ease-in-out duration-300 h-full hover:bg-neutral-500 hover:bg-opacity-[0.5] justify-center items-center" +
         (className ? " " + className : "")
       }
     >

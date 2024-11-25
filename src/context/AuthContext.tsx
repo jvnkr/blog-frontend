@@ -6,6 +6,7 @@ import { deleteCookie, setCookie } from "cookies-next";
 import { ReactNode, useState, useContext } from "react";
 import { refreshSession } from "@/lib/utils";
 import useSWR from "swr";
+import AuthWall from "@/components/AuthWall";
 
 interface AuthContextProps {
   loggedIn: boolean | null;
@@ -66,6 +67,7 @@ export const AuthContextProvider = ({
 
   const clearAll = () => {
     setLoggedIn(false);
+    setUnauthWall(false);
     deleteCookie("a_t");
     deleteCookie("r_t");
     setUsername("");
@@ -141,6 +143,7 @@ export const AuthContextProvider = ({
         setAccessToken,
       }}
     >
+      {unauthWall && <AuthWall />}
       {children}
     </AuthContext.Provider>
   );

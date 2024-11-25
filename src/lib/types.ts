@@ -13,6 +13,7 @@ export interface PostData {
     id: string;
     username: string;
     name: string;
+    verified: boolean;
   };
 }
 

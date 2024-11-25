@@ -6,32 +6,32 @@ interface AvatarProps {
 
 export default function Avatar({ name }: AvatarProps) {
   const letterColors: { [key: string]: string } = {
-    A: "#FF6B6B", // Red
-    B: "#4ECDC4", // Teal
-    C: "#45B7D1", // Light Blue
-    D: "#96CEB4", // Sage Green
-    E: "#FFEEAD", // Light Yellow
-    F: "#D4A5A5", // Dusty Rose
-    G: "#9B59B6", // Purple
-    H: "#3498DB", // Blue
-    I: "#E74C3C", // Dark Red
-    J: "#2ECC71", // Green
-    K: "#F1C40F", // Yellow
-    L: "#E67E22", // Orange
-    M: "#1ABC9C", // Turquoise
-    N: "#D35400", // Burnt Orange
-    O: "#8E44AD", // Dark Purple
-    P: "#16A085", // Dark Turquoise
-    Q: "#F39C12", // Dark Yellow
-    R: "#C0392B", // Maroon
-    S: "#27AE60", // Dark Green
-    T: "#2980B9", // Dark Blue
-    U: "#F7DC6F", // Light Gold
-    V: "#82E0AA", // Light Green
-    W: "#85C1E9", // Sky Blue
-    X: "#F1948A", // Salmon
-    Y: "#BB8FCE", // Light Purple
-    Z: "#F8C471", // Light Orange
+    A: "#FF0000", // Bright Red
+    B: "#00FF00", // Bright Green
+    C: "#0000FF", // Bright Blue
+    D: "#FF00FF", // Magenta
+    E: "#00FFFF", // Cyan
+    F: "#FF8000", // Orange
+    G: "#8000FF", // Purple
+    H: "#FFC0CB", // Pinky
+    I: "#00FF80", // Spring Green
+    J: "#8000FF", // Violet
+    K: "#FFFF00", // Yellow
+    L: "#FF4000", // Vermillion
+    M: "#00FF40", // Lime Green
+    N: "#4000FF", // Ultramarine
+    O: "#FF0040", // Crimson
+    P: "#FF0080", // Hot Pink
+    Q: "#0040FF", // Royal Blue
+    R: "#FF8040", // Coral
+    S: "#80FF00", // Yellow Green
+    T: "#0080FF", // Azure
+    U: "#FF0080", // Deep Pink
+    V: "#00FF80", // Mint
+    W: "#8040FF", // Amethyst
+    X: "#FF4080", // Rose
+    Y: "#40FF80", // Sea Green
+    Z: "#4080FF", // Cornflower Blue
   };
 
   const firstLetter = name.at(0)?.toUpperCase() || "B";
@@ -44,7 +44,9 @@ export default function Avatar({ name }: AvatarProps) {
         "flex font-medium justify-center items-center rounded-full w-[2.5rem] h-[2.5rem] text-white"
       }
     >
-      {firstLetter}
+      <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.)] text-lg">
+        {firstLetter}
+      </span>
     </div>
   );
 }

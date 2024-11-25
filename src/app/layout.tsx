@@ -9,7 +9,7 @@ import { cookies } from "next/headers";
 import PatternCircles from "@/components/CirclePattern";
 import NoiseTexture from "@/components/NoiseTexture";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "next-themes";
+import { ThemeProviders } from "@/components/Providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -39,30 +39,36 @@ export default async function RootLayout({
   const accessToken = cookieStore.get("a_t")?.value;
   const refreshToken = cookieStore.get("r_t")?.value;
 
-  const res = await fetcher("/api/auth/session", {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: `a_t=${accessToken}; r_t=${refreshToken}`,
-    },
-  });
-  const serverAuthData: SessionData = {
+  let serverAuthData: SessionData = {
     accessToken: accessToken || "",
     username: "",
     userId: "",
     name: "",
-    loggedIn: res.status === 200,
+    loggedIn: false,
   };
-  const data = await res.json();
-  if (res.ok) {
-    serverAuthData.username = data.username;
-    serverAuthData.name = data.name;
-    serverAuthData.userId = data.userId;
-    if (data.accessToken) {
-      serverAuthData.loggedIn = true;
-      serverAuthData.accessToken = data.accessToken;
+
+  try {
+    const res = await fetcher("/api/auth/session", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `a_t=${accessToken}; r_t=${refreshToken}`,
+      },
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      serverAuthData = {
+        accessToken: data.accessToken || accessToken || "",
+        username: data.username || "",
+        userId: data.userId || "",
+        name: data.name || "",
+        loggedIn: true,
+      };
     }
+  } catch (error) {
+    console.error("Failed to fetch session:", error);
   }
 
   return (
@@ -70,19 +76,19 @@ export default async function RootLayout({
       {/* <head>
         <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />
       </head> */}
-      <AuthContextProvider serverData={serverAuthData}>
-        <body
-          suppressHydrationWarning
-          className={`min-h-screen h-screen  mx-auto bg-zinc-900 ${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <ThemeProvider attribute="class" defaultTheme="dark">
+      <body
+        suppressHydrationWarning
+        className={`min-h-screen h-screen mx-auto bg-zinc-900 ${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <AuthContextProvider serverData={serverAuthData}>
+          <ThemeProviders>
             <Toaster />
             <PatternCircles />
             <NoiseTexture />
             <div className="flex justify-center items-center">{children}</div>
-          </ThemeProvider>
-        </body>
-      </AuthContextProvider>
+          </ThemeProviders>
+        </AuthContextProvider>
+      </body>
     </html>
   );
 }

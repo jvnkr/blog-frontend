@@ -2,12 +2,14 @@
 
 import { PostData } from "@/lib/types";
 import {
+  BadgeCheck,
   Dot,
   EllipsisVertical,
   Flag,
   Heart,
   MessageSquare,
   Share,
+  Trash2,
   UserRoundMinus,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -18,14 +20,19 @@ import { fetcher, formatTimeDifference } from "@/lib/utils";
 import { useAuthContext } from "@/context/AuthContext";
 import { getCookie } from "cookies-next";
 import { Card } from "./ui/card";
+import { toast } from "sonner";
+
+interface PostProps {
+  post: PostData;
+  onUpdatePost: (post: PostData) => void;
+  setPosts: React.Dispatch<React.SetStateAction<PostData[]>>;
+}
 
 export const Post = ({
   post: initialPost,
   onUpdatePost,
-}: {
-  post: PostData;
-  onUpdatePost: (post: PostData) => void;
-}) => {
+  setPosts,
+}: PostProps) => {
   const [post, setPost] = useState(initialPost);
 
   const [options, setOptions] = useState(false);
@@ -33,10 +40,8 @@ export const Post = ({
   const [hoverReport, setHoverReport] = useState(false);
   const [hoverMinus, setHoverMinus] = useState(false);
   const responsiveClass = useResponsiveClass();
-  const { loggedIn } = useAuthContext();
+  const { loggedIn, setUnauthWall, userId } = useAuthContext();
 
-  // Debounced API call
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const updatePost = async (postId: string, updatedPost: PostData) => {
     try {
       const endpoint = updatedPost.liked ? "like" : "unlike";
@@ -61,8 +66,31 @@ export const Post = ({
     }
   };
 
+  const handleDelete = async () => {
+    if (!loggedIn) {
+      setUnauthWall(true);
+      return;
+    }
+    try {
+      await fetcher(`/api/v1/posts/${post.id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${getCookie("a_t")}`,
+        },
+      });
+      setPosts((prevPosts) => prevPosts.filter((p) => p.id !== post.id));
+      toast.success("Post deleted");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleLike = async () => {
-    if (!loggedIn) return;
+    if (!loggedIn) {
+      setUnauthWall(true);
+      return;
+    }
 
     // Optimistic update
     const newLiked = !post.liked;
@@ -83,7 +111,7 @@ export const Post = ({
         zIndex: 99,
       }}
       className={
-        "flex relative overflow-hidden flex-col w-full h-full mb-2 max-h-[22rem]"
+        "flex relative overflow-hidden flex-col w-full h-full mb-2 max-h-[30rem]"
       }
     >
       <div
@@ -103,9 +131,14 @@ export const Post = ({
                 "flex flex-col relative justify-start items-start text-[15px] font-semibold"
               }
             >
-              <span className="flex items-center h-[19px]">
-                {post.author.name}
-              </span>
+              <div className="flex items-center gap-1">
+                <span className="flex items-center h-[19px]">
+                  {post.author.name}
+                </span>
+                {post.author.verified && (
+                  <BadgeCheck className="w-4 h-4 fill-blue-500" />
+                )}
+              </div>
               <span
                 className={
                   "flex font-normal text-neutral-500 items-center h-full text-[12px]"
@@ -155,17 +188,33 @@ export const Post = ({
                 }}
                 className="flex bg-[#212123] h-full justify-center items-center w-full p-2 gap-3 overflow-hidden"
               >
-                <div
-                  onMouseEnter={() => setHoverMinus(true)}
-                  onMouseLeave={() => setHoverMinus(false)}
-                  className="flex cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
-                >
-                  <UserRoundMinus
-                    className={`${
-                      hoverMinus ? "text-yellow-500" : ""
-                    } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
-                  />
-                </div>
+                {post.author.id !== userId && (
+                  <div
+                    onMouseEnter={() => setHoverMinus(true)}
+                    onMouseLeave={() => setHoverMinus(false)}
+                    className="flex cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
+                  >
+                    <UserRoundMinus
+                      className={`${
+                        hoverMinus ? "text-yellow-500" : ""
+                      } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
+                    />
+                  </div>
+                )}
+                {post.author.id === userId && (
+                  <div
+                    onMouseEnter={() => setHoverMinus(true)}
+                    onMouseLeave={() => setHoverMinus(false)}
+                    onClick={handleDelete}
+                    className="flex cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
+                  >
+                    <Trash2
+                      className={`${
+                        hoverMinus ? "text-red-500" : ""
+                      } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
+                    />
+                  </div>
+                )}
                 <div
                   onMouseEnter={() => setHoverReport(true)}
                   onMouseLeave={() => setHoverReport(false)}
@@ -216,9 +265,18 @@ export const Post = ({
           <div className="flex font-semibold tracking-tight text-2xl w-full h-fit">
             <span>{post.title}</span>
           </div>
-          <div className="flex flex-col w-full">
-            <div className={`inline-block relative`}>
-              <span className="text-sm">{post.description}</span>
+          <div className="flex flex-col w-full h-full break-all">
+            <div
+              className={`inline-block relative break-words whitespace-pre-wrap`}
+            >
+              <span className="text-sm">
+                {post.description.split(/\n/).map((segment, i, arr) => (
+                  <span key={i}>
+                    {segment}
+                    {i < arr.length - 1 && <br />}
+                  </span>
+                ))}
+              </span>
               {post.overDescLimit && (
                 <div className="inline-block ml-[-4px] text-opacity-[0.7] hover:text-opacity-[1] transition-all duration-300 cursor-pointer text-md text-blue-600">
                   ...show more
