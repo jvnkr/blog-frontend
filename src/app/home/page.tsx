@@ -12,7 +12,7 @@ async function getPosts(accessToken: string) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: accessToken ? `Bearer ${accessToken}` : "",
       },
       body: JSON.stringify({
         pageNumber: 0,

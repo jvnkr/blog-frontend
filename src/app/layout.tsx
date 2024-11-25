@@ -55,7 +55,6 @@ export default async function RootLayout({
     loggedIn: res.status === 200,
   };
   const data = await res.json();
-
   if (res.ok) {
     serverAuthData.username = data.username;
     serverAuthData.name = data.name;

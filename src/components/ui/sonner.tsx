@@ -1,17 +1,26 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { Toaster as Sonner } from "sonner";
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { Toaster as Sonner, toast } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
 
+  const pathname = usePathname();
+
+  // Clearing toast when the pathname changes (to prevent toast from being shown on the next page)
+  useEffect(() => {
+    toast.dismiss();
+  }, [pathname]);
+
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      className="toaster group bg-red-500"
+      className="toaster group"
       toastOptions={{
         // unstyled: true,
         className: "bg-zinc-900 border border-[#272629]",

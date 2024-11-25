@@ -26,6 +26,7 @@ import { redirect, useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 const formSchema = z
   .object({
@@ -111,10 +112,15 @@ const RegisterPage = () => {
         }}
         className="mx-auto dark:bg-zinc-900 max-w-sm"
       >
-        <CardHeader>
-          <CardTitle className="text-2xl">Register</CardTitle>
-          <CardDescription>
-            Fill in the details below to create a new account
+        <CardHeader className="gap-2">
+          <div className="flex justify-center items-center">
+            <Logo size={64} />
+          </div>
+          <CardTitle className="text-3xl text-center">Sign up</CardTitle>
+          <CardDescription className="flex flex-col text-center">
+            <span>
+              Enter your details below to create a new account and get started
+            </span>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -219,14 +225,14 @@ const RegisterPage = () => {
                 className="w-full select-none"
                 type="submit"
               >
-                Register
+                Sign up
               </Button>
             </form>
           </Form>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
             <Link tabIndex={-1} href="/login" className="underline">
-              Login
+              Sign in
             </Link>
           </div>
         </CardContent>

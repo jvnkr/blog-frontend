@@ -2,9 +2,11 @@
 
 import Avatar from "@/components/Avatar";
 import { Header } from "@/components/Header";
+import Logo from "@/components/Logo";
 
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/context/AuthContext";
+import { Ellipsis, Search } from "lucide-react";
 import Link from "next/link";
 
 export default function HomeLayout({
@@ -14,8 +16,8 @@ export default function HomeLayout({
 }>) {
   const { loggedIn, clearAll, username, name } = useAuthContext();
   const handleLogout = async () => {
-    window.location.reload();
     clearAll();
+    window.location.reload();
   };
 
   return (
@@ -37,45 +39,86 @@ export default function HomeLayout({
       </div>
       {loggedIn && (
         <div
-          onClick={handleLogout}
-          className={
-            "flex select-none cursor-pointer hover:bg-zinc-900 border border-transparent hover:border-[#272629] rounded-xl transition-all duration-150 ease-in-out p-2 fixed top-[5px] gap-2 h-fit w-fit right-[5px]"
-          }
+          style={{ left: "calc(50% - 22.5rem - 24px)" }}
+          className="fixed flex flex-col h-full justify-between top-0 py-[10px] translate-x-[-100%]"
         >
-          <Avatar name={name} />
+          <Logo />
           <div
+            onClick={handleLogout}
             className={
-              "flex flex-col relative justify-start items-start text-[15px] font-semibold"
+              "flex justify-between items-center select-none cursor-pointer hover:bg-zinc-900 border border-transparent hover:border-[#272629] rounded-xl transition-all duration-150 ease-in-out p-2  gap-8"
             }
           >
-            <span className="flex items-center h-[19px]">{name}</span>
-            <span
-              className={
-                "flex font-normal text-neutral-500 items-center h-full text-[12px]"
-              }
-            >
-              @{username}
-            </span>
+            <div className="flex gap-2">
+              <Avatar name={name} />
+              <div
+                className={
+                  "flex flex-col relative justify-start items-start text-[15px] font-semibold"
+                }
+              >
+                <span className="flex items-center h-[19px]">{name}</span>
+                <span
+                  className={
+                    "flex font-normal text-neutral-500 items-center h-full text-[12px]"
+                  }
+                >
+                  @{username}
+                </span>
+              </div>
+            </div>
+            <Ellipsis className="text-[#555] w-5 h-5" />
           </div>
         </div>
       )}
-      {!loggedIn && (
-        <Button
-          variant={"default"}
-          asChild
-          className="fixed top-[10px] w-fit right-[calc(50%-22.5rem-80px)]"
+      <div
+        style={{ left: "calc(50% + 22.5rem + 24px)" }}
+        className="fixed flex flex-col h-full justify-between top-0 py-[10px]"
+      >
+        <div
+          className={"flex select-none cursor-pointer rounded-xl h-fit w-fit"}
         >
-          <Link href="/login">Login</Link>
-        </Button>
-      )}
+          <div className="flex search-input cursor-default border border-[#272629] focus-within:ring-2 ring-[#999] bg-zinc-900 transition-all duration-150 ease-in-out p-2 py-0 rounded-lg items-center">
+            <Search className="search-icon text-zinc-500 ml-[0.2rem] w-5 h-5 transition-colors duration-150 ease-in-out" />
+            <input
+              spellCheck={false}
+              className="pl-2 bg-transparent py-1 outline-none ring-0 text-lg text-white/75 border-none"
+              style={{
+                boxShadow: "none",
+                fontSize: "1rem",
+              }}
+              type="text"
+              placeholder="Search"
+            />
+          </div>
+        </div>
+      </div>
       {!loggedIn && (
-        <Button
-          variant={"secondary"}
-          asChild
-          className="fixed top-[10px] w-fit right-[calc(50%-22.5rem-175px)]"
+        <div
+          style={{ left: "calc(50% - 22.5rem - 24px)" }}
+          className="fixed top-[10px] translate-x-[-100%] flex flex-col gap-2 h-fit"
         >
-          <Link href="/register">Register</Link>
-        </Button>
+          <Logo />
+          <div className="flex text-2xl font-bold flex-col">
+            <span>Join the</span>
+            <span>community</span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              className="font-medium h-[34px]"
+              variant={"default"}
+              asChild
+            >
+              <Link href="/register">Sign up</Link>
+            </Button>
+            <Button
+              className="font-medium h-[34px]"
+              variant={"secondary"}
+              asChild
+            >
+              <Link href="/login">Sign in</Link>
+            </Button>
+          </div>
+        </div>
       )}
     </>
   );

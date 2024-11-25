@@ -27,6 +27,7 @@ import { setCookie } from "cookies-next";
 import { redirect, useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
+import Logo from "@/components/Logo";
 
 const formSchema = z.object({
   usernameOrEmail: z.string().min(3, {
@@ -114,10 +115,15 @@ const LoginPage = () => {
         }}
         className="mx-auto dark:bg-zinc-900 max-w-sm"
       >
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your username or email below to login to your account
+        <CardHeader className="gap-2">
+          <div className="flex justify-center items-center">
+            <Logo size={64} />
+          </div>
+          <CardTitle className="text-3xl text-center">Welcome Back</CardTitle>
+
+          <CardDescription className="flex flex-col text-center">
+            <span>Glad to see you again 👋</span>
+            <span>Enter your credentials below to sign in to your account</span>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -177,7 +183,7 @@ const LoginPage = () => {
                 </div>
               </div>
               <Button type="submit" className="w-full">
-                Login
+                Sign in
               </Button>
               {/* <Button variant="outline" className="w-full">
                 Login with Google
