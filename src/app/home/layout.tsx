@@ -41,7 +41,7 @@ export default function HomeLayout({
         style={{ left: "calc(50% - 22.5rem - 24px)" }}
         className="fixed flex flex-col h-full justify-between top-0 py-[10px] translate-x-[-100%]"
       >
-        <div className="flex flex-col gap-2">
+        <div className="flex text-white flex-col gap-2">
           <Logo text />
           {!loggedIn && (
             <>

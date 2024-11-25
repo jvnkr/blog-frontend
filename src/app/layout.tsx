@@ -9,7 +9,7 @@ import { cookies } from "next/headers";
 import PatternCircles from "@/components/CirclePattern";
 import NoiseTexture from "@/components/NoiseTexture";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProviders } from "@/components/Providers";
+import { ThemeProvider } from "next-themes";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -81,12 +81,12 @@ export default async function RootLayout({
         className={`min-h-screen h-screen mx-auto bg-zinc-900 ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthContextProvider serverData={serverAuthData}>
-          <ThemeProviders>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Toaster />
             <PatternCircles />
             <NoiseTexture />
             <div className="flex justify-center items-center">{children}</div>
-          </ThemeProviders>
+          </ThemeProvider>
         </AuthContextProvider>
       </body>
     </html>
