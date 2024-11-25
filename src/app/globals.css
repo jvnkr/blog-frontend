@@ -68,19 +68,10 @@ body {
   }
 }
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> a7fc272 (style: removed unnecessary css comments)
 .search-input:focus-within .search-icon {
   color: #999;
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> f48a4c5 (style: removed unnecessary css comments)
->>>>>>> a7fc272 (style: removed unnecessary css comments)
 @layer base {
   * {
     @apply border-border;
