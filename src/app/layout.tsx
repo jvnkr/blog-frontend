@@ -26,8 +26,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Blog",
-  description: "blog app",
+  title: "Blogify",
+  description: "Write your own stories",
 };
 
 export default async function RootLayout({
@@ -78,8 +78,6 @@ export default async function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="dark">
             <Toaster />
             <PatternCircles />
-            {/* <GridPattern /> */}
-            {/* <DiagonalStripes /> */}
             <NoiseTexture />
             <div className="flex justify-center items-center">{children}</div>
           </ThemeProvider>

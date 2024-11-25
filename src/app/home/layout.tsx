@@ -71,7 +71,7 @@ export default function HomeLayout({
             <>
               <Link
                 href="/home"
-                className={`flex mt-2 text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
+                className={`flex outline-none focus-within:ring-2 ring-[#888] mt-2 text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
                   pathname === "/home" ? " font-bold" : ""
                 }`}
               >
@@ -84,8 +84,8 @@ export default function HomeLayout({
               </Link>
               <Link
                 href={`/profile/${userId}`}
-                className={`flex text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
-                  pathname === "/home" ? " font-bold" : ""
+                className={`flex outline-none focus-within:ring-2 ring-[#888] text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
+                  pathname === "/profile" ? " font-bold" : ""
                 }`}
               >
                 {pathname === "/profile" ? (
@@ -97,11 +97,11 @@ export default function HomeLayout({
               </Link>
               <Link
                 href={"/settings"}
-                className={`flex text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
-                  pathname === "/home" ? " font-bold" : ""
+                className={`flex outline-none focus-within:ring-2 ring-[#888] text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
+                  pathname === "/settings" ? " font-bold" : ""
                 }`}
               >
-                {pathname === "/profile" ? (
+                {pathname === "/settings" ? (
                   <TbSettingsFilled className="w-6 h-6 fill-white" />
                 ) : (
                   <TbSettings className="w-6 h-6" />
@@ -111,31 +111,33 @@ export default function HomeLayout({
             </>
           )}
         </div>
-        <div
-          onClick={handleLogout}
-          className={
-            "flex justify-between items-center select-none cursor-pointer hover:bg-zinc-900 border border-transparent hover:border-[#272629] rounded-xl transition-all duration-150 ease-in-out p-2  gap-8"
-          }
-        >
-          <div className="flex gap-2">
-            <Avatar name={name} />
-            <div
-              className={
-                "flex flex-col relative justify-start items-start text-[15px] font-semibold"
-              }
-            >
-              <span className="flex items-center h-[19px]">{name}</span>
-              <span
+        {loggedIn && (
+          <div
+            onClick={handleLogout}
+            className={
+              "flex justify-between items-center select-none cursor-pointer hover:bg-zinc-900 border border-transparent hover:border-[#272629] rounded-xl transition-all duration-150 ease-in-out p-2  gap-8"
+            }
+          >
+            <div className="flex gap-2">
+              <Avatar name={name} />
+              <div
                 className={
-                  "flex font-normal text-neutral-500 items-center h-full text-[12px]"
+                  "flex flex-col relative justify-start items-start text-[15px] font-semibold"
                 }
               >
-                @{username}
-              </span>
+                <span className="flex items-center h-[19px]">{name}</span>
+                <span
+                  className={
+                    "flex font-normal text-neutral-500 items-center h-full text-[12px]"
+                  }
+                >
+                  @{username}
+                </span>
+              </div>
             </div>
+            <Ellipsis className="text-[#555] w-5 h-5" />
           </div>
-          <Ellipsis className="text-[#555] w-5 h-5" />
-        </div>
+        )}
       </div>
       <div
         style={{ left: "calc(50% + 22.5rem + 24px)" }}

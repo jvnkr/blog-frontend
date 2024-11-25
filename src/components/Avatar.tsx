@@ -34,7 +34,7 @@ export default function Avatar({ name }: AvatarProps) {
     Z: "#F8C471", // Light Orange
   };
 
-  const firstLetter = name.at(0)?.toUpperCase() || "A";
+  const firstLetter = name.at(0)?.toUpperCase() || "B";
   const bgColor = letterColors[firstLetter] || "#6B7280"; // Fallback to neutral gray
 
   return (
