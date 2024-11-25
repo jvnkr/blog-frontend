@@ -16,7 +16,7 @@ const Logo = ({
 }: LogoProps) => {
   return (
     <Link
-      href={"/home"}
+      href={"/"}
       className={`flex focus-visible:ring-2 ring-[#777] transition-all duration-150 ease-in-out outline-none select-none rounded-lg w-fit gap-2 justify-center items-center ${
         vertical ? "flex-col" : ""
       }`}
@@ -27,7 +27,7 @@ const Logo = ({
           height: `${size}px`,
         }}
         className={
-          `flex justify-center items-center w-fit font-bold bg-[#272629] p-4 rounded-lg border border-[#333333]` +
+          `flex justify-center items-center w-fit h-full font-bold bg-[#272629] p-4 rounded-lg border border-[#333333]` +
           (className ? " " + className : "")
         }
       >
@@ -45,6 +45,7 @@ const Logo = ({
           style={{
             fontSize: `${size / 32}rem`,
           }}
+          className="flex justify-center items-center h-full"
         >
           Blogify
         </span>

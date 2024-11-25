@@ -3,18 +3,22 @@
 import Avatar from "@/components/Avatar";
 import { Header } from "@/components/Header";
 import Logo from "@/components/Logo";
-
+import { PiHouse, PiHouseFill } from "react-icons/pi";
+import { TbSettings, TbSettingsFilled } from "react-icons/tb";
+import { FaRegUserCircle, FaUserCircle } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/context/AuthContext";
 import { Ellipsis, Search } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function HomeLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { loggedIn, clearAll, username, name } = useAuthContext();
+  const { loggedIn, clearAll, username, name, userId } = useAuthContext();
+  const pathname = usePathname();
   const handleLogout = async () => {
     clearAll();
     window.location.reload();
@@ -22,10 +26,6 @@ export default function HomeLayout({
 
   return (
     <>
-      {/* 60px is the desired distance from the left edge of the main content
-              22.5rem is half of the main content width (45rem/2)
-              So this positions the button 90px to the left of the main content
-      */}
       <div
         style={{
           zIndex: 99999,
@@ -37,39 +37,106 @@ export default function HomeLayout({
           {children}
         </div>
       </div>
-      {loggedIn && (
+      <div
+        style={{ left: "calc(50% - 22.5rem - 24px)" }}
+        className="fixed flex flex-col h-full justify-between top-0 py-[10px] translate-x-[-100%]"
+      >
+        <div className="flex flex-col gap-2">
+          <Logo text />
+          {!loggedIn && (
+            <>
+              <div className="flex text-2xl font-bold flex-col">
+                <span>Join the</span>
+                <span>community</span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  className="font-medium h-[34px]"
+                  variant={"default"}
+                  asChild
+                >
+                  <Link href="/register">Sign up</Link>
+                </Button>
+                <Button
+                  className="font-medium h-[34px]"
+                  variant={"secondary"}
+                  asChild
+                >
+                  <Link href="/login">Sign in</Link>
+                </Button>
+              </div>
+            </>
+          )}
+          {loggedIn && (
+            <>
+              <Link
+                href="/home"
+                className={`flex mt-2 text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
+                  pathname === "/home" ? " font-bold" : ""
+                }`}
+              >
+                {pathname === "/home" ? (
+                  <PiHouseFill className="w-6 h-6 fill-white" />
+                ) : (
+                  <PiHouse className="w-6 h-6" />
+                )}
+                <span>Home</span>
+              </Link>
+              <Link
+                href={`/profile/${userId}`}
+                className={`flex text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
+                  pathname === "/home" ? " font-bold" : ""
+                }`}
+              >
+                {pathname === "/profile" ? (
+                  <FaUserCircle className="w-6 h-6 fill-white" />
+                ) : (
+                  <FaRegUserCircle className="w-6 h-6" />
+                )}
+                <span>Profile</span>
+              </Link>
+              <Link
+                href={"/settings"}
+                className={`flex text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
+                  pathname === "/home" ? " font-bold" : ""
+                }`}
+              >
+                {pathname === "/profile" ? (
+                  <TbSettingsFilled className="w-6 h-6 fill-white" />
+                ) : (
+                  <TbSettings className="w-6 h-6" />
+                )}
+                <span>Settings</span>
+              </Link>
+            </>
+          )}
+        </div>
         <div
-          style={{ left: "calc(50% - 22.5rem - 24px)" }}
-          className="fixed flex flex-col h-full justify-between top-0 py-[10px] translate-x-[-100%]"
+          onClick={handleLogout}
+          className={
+            "flex justify-between items-center select-none cursor-pointer hover:bg-zinc-900 border border-transparent hover:border-[#272629] rounded-xl transition-all duration-150 ease-in-out p-2  gap-8"
+          }
         >
-          <Logo />
-          <div
-            onClick={handleLogout}
-            className={
-              "flex justify-between items-center select-none cursor-pointer hover:bg-zinc-900 border border-transparent hover:border-[#272629] rounded-xl transition-all duration-150 ease-in-out p-2  gap-8"
-            }
-          >
-            <div className="flex gap-2">
-              <Avatar name={name} />
-              <div
+          <div className="flex gap-2">
+            <Avatar name={name} />
+            <div
+              className={
+                "flex flex-col relative justify-start items-start text-[15px] font-semibold"
+              }
+            >
+              <span className="flex items-center h-[19px]">{name}</span>
+              <span
                 className={
-                  "flex flex-col relative justify-start items-start text-[15px] font-semibold"
+                  "flex font-normal text-neutral-500 items-center h-full text-[12px]"
                 }
               >
-                <span className="flex items-center h-[19px]">{name}</span>
-                <span
-                  className={
-                    "flex font-normal text-neutral-500 items-center h-full text-[12px]"
-                  }
-                >
-                  @{username}
-                </span>
-              </div>
+                @{username}
+              </span>
             </div>
-            <Ellipsis className="text-[#555] w-5 h-5" />
           </div>
+          <Ellipsis className="text-[#555] w-5 h-5" />
         </div>
-      )}
+      </div>
       <div
         style={{ left: "calc(50% + 22.5rem + 24px)" }}
         className="fixed flex flex-col h-full justify-between top-0 py-[10px]"
@@ -92,34 +159,6 @@ export default function HomeLayout({
           </div>
         </div>
       </div>
-      {!loggedIn && (
-        <div
-          style={{ left: "calc(50% - 22.5rem - 24px)" }}
-          className="fixed top-[10px] translate-x-[-100%] flex flex-col gap-2 h-fit"
-        >
-          <Logo />
-          <div className="flex text-2xl font-bold flex-col">
-            <span>Join the</span>
-            <span>community</span>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              className="font-medium h-[34px]"
-              variant={"default"}
-              asChild
-            >
-              <Link href="/register">Sign up</Link>
-            </Button>
-            <Button
-              className="font-medium h-[34px]"
-              variant={"secondary"}
-              asChild
-            >
-              <Link href="/login">Sign in</Link>
-            </Button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
