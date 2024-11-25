@@ -68,9 +68,8 @@ body {
   }
 }
 
-/* Add this to your CSS file */
 .search-input:focus-within .search-icon {
-  color: #999; /* Change to red when input is focused */
+  color: #999;
 }
 
 @layer base {
