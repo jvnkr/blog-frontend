@@ -18,7 +18,6 @@ export async function fetcher(url: string, options: RequestInit = {}) {
     try {
       const data = await refreshSession();
       if (data) {
-        // Make a new request with the refreshed token instead of recursively calling fetcher
         const retryResponse = await fetch(API_URL + url, {
           ...options,
           credentials: "include",
@@ -87,8 +86,8 @@ export function formatTimeDifference(date: Date): string {
   }
 
   // If more than 30 days have passed, show date format
+  // 30 days in seconds
   if (diffInSeconds >= 2592000) {
-    // 30 days in seconds
     const months = [
       "Jan",
       "Feb",
@@ -107,8 +106,8 @@ export function formatTimeDifference(date: Date): string {
     const month = months[date.getMonth()];
 
     // If more than a year has passed, include the year
+    // 1 year in seconds
     if (diffInSeconds >= 31536000) {
-      // 1 year in seconds
       const year = date.getFullYear();
       return `${month} ${day}, ${year}`;
     }
@@ -130,5 +129,6 @@ export function formatTimeDifference(date: Date): string {
       return `${quotient}${unit.label}`;
     }
   }
-  return "0s"; // fallback for very recent posts
+
+  return "now"; // fallback for very recent posts
 }

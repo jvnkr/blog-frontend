@@ -32,7 +32,9 @@ const HeaderElement = ({
         {text}
         {pathname === selectedPath && (
           <div
-            className={"absolute w-full bottom-0 bg-white h-[4px] rounded-full"}
+            className={
+              "absolute w-full bottom-[-2px] bg-white h-[4.5px] rounded-full"
+            }
           ></div>
         )}
       </span>

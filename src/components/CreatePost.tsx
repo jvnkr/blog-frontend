@@ -15,6 +15,16 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
   const contentRef = useRef<HTMLTextAreaElement>(null);
 
   const handlePost = async () => {
+    if (!titleRef.current?.value || !contentRef.current?.value) {
+      toast.error("Please fill in all fields", {
+        action: {
+          label: "Close",
+          onClick: () => null,
+        },
+        closeButton: false,
+      });
+      return;
+    }
     console.log("Posting...");
     try {
       const res = await fetcher("/api/v1/posts", {
@@ -35,7 +45,13 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
           titleRef.current!.value = "";
           contentRef.current!.value = "";
           setPosts((prevPosts) => [data, ...prevPosts]);
-          toast.success("Post created successfully");
+          toast.success("Post created successfully", {
+            action: {
+              label: "Close",
+              onClick: () => null,
+            },
+            closeButton: false,
+          });
         } catch (error) {
           console.error(error);
         }
@@ -51,7 +67,7 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
         zIndex: 99,
       }}
       className={
-        "flex relative overflow-hidden flex-col w-full h-full mb-2 max-h-[22rem]"
+        "flex relative border-[#272629] bg-transparent text-white overflow-hidden flex-col w-full h-full max-h-[22rem]"
       }
     >
       <div className="flex relative overflow-auto pt-0 max-h-[500px] w-full h-full bg-zinc-900 flex-col">

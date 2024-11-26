@@ -1,9 +1,12 @@
+"use client";
+import { useAuthContext } from "@/context/AuthContext";
 import HeaderElement from "@/components/HeaderElement";
 
 // export const NGROK_URL = "https://9624-37-122-170-44.ngrok-free.app";
 export const NGROK_URL = "http://localhost:8080";
 
 export const Header = () => {
+  const { loggedIn } = useAuthContext();
   return (
     <div
       style={{
@@ -14,15 +17,19 @@ export const Header = () => {
       }
     >
       <HeaderElement
-        className="focus-within:rounded-br-[1px] rounded-bl-[14px]"
+        className={`focus-within:rounded-br-[1px] rounded-bl-[14px]${
+          !loggedIn ? " rounded-br-[14px] focus-within:rounded-br-xl" : ""
+        }`}
         text={"For you"}
         selectedPath={"/home"}
       />
-      <HeaderElement
-        className="focus-within:rounded-bl-[1px] rounded-br-[14px]"
-        text={"Following"}
-        selectedPath={"/following"}
-      />
+      {loggedIn && (
+        <HeaderElement
+          className="focus-within:rounded-bl-[1px] rounded-br-[14px]"
+          text={"Following"}
+          selectedPath={"/following"}
+        />
+      )}
     </div>
   );
 };

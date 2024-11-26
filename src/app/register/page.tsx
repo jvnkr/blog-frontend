@@ -80,7 +80,7 @@ const RegisterPage = () => {
           description: "Please check your email for verification",
           action: {
             label: "Close",
-            onClick: () => {},
+            onClick: () => null,
           },
         });
         // router.push("/home");
@@ -92,7 +92,7 @@ const RegisterPage = () => {
       toast.error((error as Error).message, {
         action: {
           label: "Close",
-          onClick: () => {},
+          onClick: () => null,
         },
       });
     }
@@ -110,7 +110,7 @@ const RegisterPage = () => {
         style={{
           zIndex: 99,
         }}
-        className="mx-auto dark:bg-zinc-900 max-w-sm"
+        className="mx-auto border-[#272629] text-white bg-zinc-900 max-w-sm"
       >
         <CardHeader className="gap-2">
           <div className="flex justify-center items-center">

@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/context/AuthContext";
 import { Ellipsis, Search } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 export default function HomeLayout({
   children,
@@ -21,21 +22,22 @@ export default function HomeLayout({
   const pathname = usePathname();
   const handleLogout = async () => {
     clearAll();
-    window.location.reload();
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
   };
+
+  useEffect(() => {
+    if (pathname === "/following" && !loggedIn) {
+      redirect("/home");
+    }
+  }, [loggedIn, pathname]);
 
   return (
     <>
-      <div
-        style={{
-          zIndex: 9,
-        }}
-        className="flex bg-zinc-900 bg-opacity-[0.45] border p-4 border-y-0 border-[#272629] min-h-screen overflow-x-hidden justify-start items-center flex-col w-[45rem] mx-auto"
-      >
-        <div className={"flex pt-[60px] gap-2 relative h-fit flex-col w-full"}>
-          <Header />
-          {children}
-        </div>
+      <div className={"flex gap-2 relative h-fit flex-col w-full"}>
+        <Header />
+        {children}
       </div>
       <div
         style={{ left: "calc(50% - 22.5rem - 24px)" }}

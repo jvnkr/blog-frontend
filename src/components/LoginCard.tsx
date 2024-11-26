@@ -84,7 +84,7 @@ const LoginCard = ({ next = "/home" }: LoginCardProps) => {
       toast.error((error as Error).message, {
         action: {
           label: "Close",
-          onClick: () => {},
+          onClick: () => null,
         },
         closeButton: false,
       });
@@ -92,7 +92,7 @@ const LoginCard = ({ next = "/home" }: LoginCardProps) => {
   }
 
   return (
-    <Card className="mx-auto dark:bg-zinc-900 max-w-sm" style={{ zIndex: 99 }}>
+    <Card className="mx-auto border-[#272629] text-white bg-zinc-900 max-w-sm" style={{ zIndex: 99 }}>
       <CardHeader className="gap-2">
         <div className="flex justify-center items-center">
           <Logo size={64} />

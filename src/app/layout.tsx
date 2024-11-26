@@ -9,7 +9,7 @@ import { cookies } from "next/headers";
 import PatternCircles from "@/components/CirclePattern";
 import NoiseTexture from "@/components/NoiseTexture";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "next-themes";
+import { ClientProviders } from "@/components/ClientProviders";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -72,21 +72,18 @@ export default async function RootLayout({
   }
 
   return (
-    <html suppressHydrationWarning lang="en">
-      {/* <head>
-        <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />
-      </head> */}
+    <html className="dark" suppressHydrationWarning lang="en">
       <body
         suppressHydrationWarning
         className={`min-h-screen h-screen mx-auto bg-zinc-900 ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthContextProvider serverData={serverAuthData}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ClientProviders>
             <Toaster />
             <PatternCircles />
             <NoiseTexture />
             <div className="flex justify-center items-center">{children}</div>
-          </ThemeProvider>
+          </ClientProviders>
         </AuthContextProvider>
       </body>
     </html>

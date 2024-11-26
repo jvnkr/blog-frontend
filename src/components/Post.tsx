@@ -13,7 +13,7 @@ import {
   UserRoundMinus,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import useResponsiveClass from "@/hooks/useResponsiveClass";
 import Avatar from "./Avatar";
 import { fetcher, formatTimeDifference } from "@/lib/utils";
@@ -21,6 +21,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import { getCookie } from "cookies-next";
 import { Card } from "./ui/card";
 import { toast } from "sonner";
+import PostInteraction from "./PostInteraction";
 
 interface PostProps {
   post: PostData;
@@ -34,6 +35,7 @@ export const Post = ({
   setPosts,
 }: PostProps) => {
   const [post, setPost] = useState(initialPost);
+  const postRef = useRef<HTMLDivElement>(null);
 
   const [options, setOptions] = useState(false);
   const [hoverShare, setHoverShare] = useState(false);
@@ -66,11 +68,13 @@ export const Post = ({
     }
   };
 
+  const handlePostClick = () => {
+    if (triggerAuthWall()) return;
+  };
+
   const handleDelete = async () => {
-    if (!loggedIn) {
-      setUnauthWall(true);
-      return;
-    }
+    if (triggerAuthWall()) return;
+
     try {
       await fetcher(`/api/v1/posts/${post.id}`, {
         method: "DELETE",
@@ -86,11 +90,16 @@ export const Post = ({
     }
   };
 
-  const handleLike = async () => {
+  const triggerAuthWall = () => {
     if (!loggedIn) {
       setUnauthWall(true);
-      return;
+      return true;
     }
+    return false;
+  };
+
+  const handleLike = async () => {
+    if (triggerAuthWall()) return;
 
     // Optimistic update
     const newLiked = !post.liked;
@@ -107,16 +116,17 @@ export const Post = ({
 
   return (
     <Card
+      ref={postRef}
       style={{
         zIndex: 99,
       }}
       className={
-        "flex relative overflow-hidden flex-col w-full h-full mb-2 max-h-[30rem]"
+        "flex relative bg-transparent border-[#272629] text-white overflow-hidden flex-col w-full h-full max-h-[30rem]"
       }
     >
       <div
         className={
-          "flex absolute bg-[#202023] overflow-hidden top-0 w-[calc(100%+2px)] pl-2 h-[60px] left-[-1px] border border-t-0 rounded-b-xl border-[#272629] justify-between items-center"
+          "flex absolute bg-[#202023] overflow-hidden top-0 w-[calc(100%+2px)] pl-2 h-[60px] left-[-1px] border border-t-0 rounded-b-xl dark:border-[#272629] justify-between items-center"
         }
       >
         <div
@@ -257,7 +267,7 @@ export const Post = ({
             e.preventDefault();
             return;
           }
-          window.location.href = "/";
+          handlePostClick();
         }}
         className="flex pt-[60px] bg-zinc-900 cursor-pointer flex-col"
       >
@@ -285,27 +295,64 @@ export const Post = ({
             </div>
           </div>
         </div>
-        <div className="flex p-3 gap-3 pt-0 justify-start border-0 border-t-[#272629] border-x-0 border-b-0 items-center mt-1 w-full h-fit">
-          <div className="flex gap-1 items-center text-neutral-400">
-            <Heart
-              onMouseUp={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleLike();
-              }}
-              className={`font-semibold  w-[20px] h-[20px] ${
-                loggedIn && post.liked ? "text-red-500 fill-red-500" : ""
-              }`}
-            />
-            <span>{post.likes}</span>
+        <div className="flex p-3 gap-4 pt-0 justify-start border-0 border-t-[#272629] border-x-0 border-b-0 items-center mt-1 w-full h-fit">
+          <div
+            onMouseUp={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleLike();
+            }}
+            className="flex relative w-fit gap-1 items-center text-neutral-400"
+          >
+            <PostInteraction>
+              <Heart
+                style={{
+                  zIndex: 1,
+                }}
+                className={`font-semibold  w-[20px] h-[20px] ${
+                  loggedIn && post.liked ? "text-red-500 fill-red-500" : ""
+                }`}
+              />
+              <span
+                style={{
+                  zIndex: 1,
+                }}
+              >
+                {post.likes}
+              </span>
+            </PostInteraction>
           </div>
-          <div className="flex gap-1 items-center text-neutral-400">
-            <MessageSquare className="font-semibold w-[20px] h-[20px]" />
-            <span>{post.comments}</span>
+          <div
+            onMouseUp={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (triggerAuthWall()) return;
+            }}
+            className="flex relative w-fit gap-1 items-center text-neutral-400"
+          >
+            <PostInteraction>
+              <MessageSquare
+                style={{
+                  zIndex: 1,
+                }}
+                className="font-semibold w-[20px] h-[20px]"
+              />
+              <span
+                style={{
+                  zIndex: 1,
+                }}
+              >
+                {post.comments}
+              </span>
+            </PostInteraction>
           </div>
         </div>
       </div>
