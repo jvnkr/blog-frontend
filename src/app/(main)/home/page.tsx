@@ -24,6 +24,14 @@ export default function HomePage() {
     );
   };
 
+  useEffect(() => {
+    if (loading) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "visible";
+    }
+  }, [loading]);
+
   async function getPosts(accessToken: string) {
     try {
       const response = await fetcher(`/api/v1/posts/batch`, {
@@ -81,10 +89,14 @@ export default function HomePage() {
         endReached={async () => {
           if (!loading && posts.length > 0) {
             try {
+              const accessToken = getCookie("a_t") as string;
               const response = await fetcher(`/api/v1/posts/batch`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
+                  Authorization: accessToken
+                    ? `Bearer ${getCookie("a_t")}`
+                    : "",
                 },
                 body: JSON.stringify({
                   pageNumber: pageNumber + 1,

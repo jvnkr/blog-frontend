@@ -11,8 +11,12 @@ import { PostData } from "@/lib/types";
 
 interface PostsContextType {
   posts: PostData[];
+  followingPosts: PostData[];
+  followingPageNumber: number;
   pageNumber: number;
   setPosts: React.Dispatch<React.SetStateAction<PostData[]>>;
+  setFollowingPosts: React.Dispatch<React.SetStateAction<PostData[]>>;
+  setFollowingPageNumber: React.Dispatch<React.SetStateAction<number>>;
   setPageNumber: React.Dispatch<React.SetStateAction<number>>;
 }
 
@@ -20,7 +24,9 @@ const PostsContext = createContext<PostsContextType | undefined>(undefined);
 
 export const PostsProvider = ({ children }: { children: ReactNode }) => {
   const [posts, setPosts] = useState<PostData[]>([]);
-  const [pageNumber, setPageNumber] = useState(0);
+  const [followingPosts, setFollowingPosts] = useState<PostData[]>([]);
+  const [pageNumber, setPageNumber] = useState(-1);
+  const [followingPageNumber, setFollowingPageNumber] = useState(-1);
 
   useEffect(() => {
     const savedPosts =
@@ -36,7 +42,16 @@ export const PostsProvider = ({ children }: { children: ReactNode }) => {
   }, []);
   return (
     <PostsContext.Provider
-      value={{ posts, setPosts, pageNumber, setPageNumber }}
+      value={{
+        posts,
+        setPosts,
+        followingPosts,
+        setFollowingPosts,
+        pageNumber,
+        setPageNumber,
+        followingPageNumber,
+        setFollowingPageNumber,
+      }}
     >
       {children}
     </PostsContext.Provider>
