@@ -5,10 +5,16 @@
 html {
   overflow: -moz-scrollbars-vertical;
   overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+}
+
+html body[style] {
+  margin-right: 0px !important;
 }
 
 @layer base {

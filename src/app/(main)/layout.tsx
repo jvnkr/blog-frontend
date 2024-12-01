@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/context/AuthContext";
 import { Ellipsis, Search } from "lucide-react";
 import Link from "next/link";
-import { redirect, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 export default function HomeLayout({
@@ -18,7 +18,7 @@ export default function HomeLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { loggedIn, clearAll, username, name, userId } = useAuthContext();
+  const { loggedIn, clearAll, username, name } = useAuthContext();
   const pathname = usePathname();
   const handleLogout = async () => {
     clearAll();
@@ -29,13 +29,18 @@ export default function HomeLayout({
 
   useEffect(() => {
     if (pathname === "/following" && !loggedIn) {
-      redirect("/home");
+      window.location.href = "/home";
     }
   }, [loggedIn, pathname]);
 
   return (
     <>
-      <div className={"flex gap-2 relative h-fit flex-col w-full"}>
+      <div
+        style={{
+          zIndex: 9,
+        }}
+        className="flex bg-zinc-900/30 bg-opacity-[0.45] border border-y-0 border-[#272629] min-h-screen overflow-x-hidden justify-start items-center flex-col w-[45rem] pt-[60px] mx-auto"
+      >
         <Header />
         {children}
       </div>
@@ -85,7 +90,7 @@ export default function HomeLayout({
                 <span>Home</span>
               </Link>
               <Link
-                href={`/profile/${userId}`}
+                href={`/@${username}`}
                 className={`flex outline-none focus-within:ring-2 ring-[#888] text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
                   pathname === "/profile" ? " font-bold" : ""
                 }`}

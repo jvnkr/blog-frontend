@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
-} from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { PostData } from "@/lib/types";
 
 interface PostsContextType {
@@ -14,6 +8,10 @@ interface PostsContextType {
   followingPosts: PostData[];
   followingPageNumber: number;
   pageNumber: number;
+  hasMoreFollowingPosts: boolean;
+  hasMorePosts: boolean;
+  setHasMorePosts: React.Dispatch<React.SetStateAction<boolean>>;
+  setHasMoreFollowingPosts: React.Dispatch<React.SetStateAction<boolean>>;
   setPosts: React.Dispatch<React.SetStateAction<PostData[]>>;
   setFollowingPosts: React.Dispatch<React.SetStateAction<PostData[]>>;
   setFollowingPageNumber: React.Dispatch<React.SetStateAction<number>>;
@@ -25,21 +23,11 @@ const PostsContext = createContext<PostsContextType | undefined>(undefined);
 export const PostsProvider = ({ children }: { children: ReactNode }) => {
   const [posts, setPosts] = useState<PostData[]>([]);
   const [followingPosts, setFollowingPosts] = useState<PostData[]>([]);
-  const [pageNumber, setPageNumber] = useState(-1);
-  const [followingPageNumber, setFollowingPageNumber] = useState(-1);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [followingPageNumber, setFollowingPageNumber] = useState(0);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [hasMoreFollowingPosts, setHasMoreFollowingPosts] = useState(true);
 
-  useEffect(() => {
-    const savedPosts =
-      typeof window !== "undefined"
-        ? JSON.parse(sessionStorage.getItem("cachedPosts") || "null")
-        : undefined;
-    if (savedPosts) {
-      setPosts(savedPosts);
-    }
-    return () => {
-      sessionStorage.removeItem("cachedPosts");
-    };
-  }, []);
   return (
     <PostsContext.Provider
       value={{
@@ -51,6 +39,10 @@ export const PostsProvider = ({ children }: { children: ReactNode }) => {
         setPageNumber,
         followingPageNumber,
         setFollowingPageNumber,
+        hasMorePosts,
+        setHasMorePosts,
+        hasMoreFollowingPosts,
+        setHasMoreFollowingPosts,
       }}
     >
       {children}
