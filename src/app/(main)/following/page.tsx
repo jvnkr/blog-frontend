@@ -2,8 +2,8 @@
 
 import React from "react";
 import { useFetchPosts } from "@/hooks/useFetchPosts";
-import { PostsVirtuoso } from "@/components/PostsVirtuoso";
 import { usePostsContext } from "@/context/PostsContext";
+import { VirtualizedPosts } from "@/components/VirtualizedPosts";
 
 export default function FollowingPage() {
   const {
@@ -14,6 +14,7 @@ export default function FollowingPage() {
     hasMoreFollowingPosts,
     setHasMoreFollowingPosts,
   } = usePostsContext();
+
   const { loading, skeletonCount, fetchPosts, handleUpdatePost } =
     useFetchPosts(
       followingPosts,
@@ -26,8 +27,11 @@ export default function FollowingPage() {
     );
 
   return (
-    <PostsVirtuoso
+    <VirtualizedPosts
+      key={followingPosts.length} // Ensures page re-render when updating posts
+      id="following"
       setPosts={setFollowingPosts}
+      hasMorePosts={hasMoreFollowingPosts}
       posts={followingPosts}
       loading={loading}
       skeletonCount={skeletonCount}

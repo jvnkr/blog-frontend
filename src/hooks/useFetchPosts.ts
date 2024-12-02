@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { fetcher } from "@/lib/utils";
 import { getCookie } from "cookies-next";
 import { toast } from "sonner";
@@ -13,17 +13,28 @@ export function useFetchPosts(
   hasMorePosts: boolean,
   setHasMorePosts: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-  const [loading, setLoading] = useState(posts.length === 0);
+  const [loading, setLoading] = useState(false);
   const [skeletonCount, setSkeletonCount] = useState(0);
+  const initialFetchRef = useRef(false);
 
   useEffect(() => {
-    console.log(posts);
-    if (posts.length === 0)
+    if (posts.length === 0 && !initialFetchRef.current && hasMorePosts) {
+      // Hide overflow when initially loading with no posts
+      document.body.style.overflow = "hidden";
       setSkeletonCount(Math.floor(window.innerHeight / (16 * 16)));
-  }, []);
+      initialFetchRef.current = true;
+      fetchPosts();
+    }
+    return () => {
+      // Restore overflow when component unmounts
+      document.body.style.overflow = "visible";
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [posts.length, hasMorePosts]);
 
   const fetchPosts = async () => {
-    if (!hasMorePosts) return;
+    if (loading || !hasMorePosts) return;
+    setLoading(true);
     try {
       const accessToken = getCookie("a_t") as string;
       const response = await fetcher(endpoint, {
@@ -45,22 +56,26 @@ export function useFetchPosts(
       const data = await response.json();
       setPosts((prev) => [...prev, ...data]);
       setPageNumber((prev) => prev + 1);
+      toast.success("Posts fetched successfully");
       setHasMorePosts(data.length > 0);
-      setLoading(false);
-      toast.success("Successfully fetched posts");
     } catch (error) {
       console.error("Failed to fetch posts:", error);
-      setLoading(false);
       setHasMorePosts(false);
-      toast.error("Failed to fetch posts");
+    } finally {
+      setLoading(false);
+      // Restore overflow after posts are loaded or on error
+      document.body.style.overflow = "visible";
     }
   };
 
   const handleUpdatePost = (post: PostData) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((p) => (p.id === post.id ? post : p))
-    );
+    setPosts((prev) => prev.map((p) => (p.id === post.id ? post : p)));
   };
 
-  return { loading, skeletonCount, fetchPosts, handleUpdatePost };
+  return {
+    loading,
+    skeletonCount,
+    fetchPosts,
+    handleUpdatePost,
+  };
 }

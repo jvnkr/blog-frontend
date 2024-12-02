@@ -2,9 +2,9 @@
 
 import React from "react";
 import { useFetchPosts } from "@/hooks/useFetchPosts";
-import { PostsVirtuoso } from "@/components/PostsVirtuoso";
 import { usePostsContext } from "@/context/PostsContext";
 import { useAuthContext } from "@/context/AuthContext";
+import { VirtualizedPosts } from "@/components/VirtualizedPosts";
 
 export default function HomePage() {
   const {
@@ -16,6 +16,7 @@ export default function HomePage() {
     setHasMorePosts,
   } = usePostsContext();
   const { loggedIn } = useAuthContext();
+
   const { loading, skeletonCount, fetchPosts, handleUpdatePost } =
     useFetchPosts(
       posts,
@@ -28,10 +29,13 @@ export default function HomePage() {
     );
 
   return (
-    <PostsVirtuoso
+    <VirtualizedPosts
+      key={posts.length} // Ensures page re-render when updating posts
+      id="home"
       setPosts={setPosts}
       posts={posts}
       loading={loading}
+      hasMorePosts={hasMorePosts}
       skeletonCount={skeletonCount}
       showCreatePost={loggedIn ?? false}
       onEndReached={fetchPosts}

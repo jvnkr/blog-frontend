@@ -7,13 +7,13 @@ import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <PostsProvider>{children}</PostsProvider>
-      <ProgressBar
-        height="4px"
-        color="#fff"
-        options={{ showSpinner: false }}
-        shallowRouting
-      />
+        <PostsProvider>{children}</PostsProvider>
+        <ProgressBar
+          height="4px"
+          color="#fff"
+          options={{ showSpinner: false }}
+          shallowRouting
+        />
     </ThemeProvider>
   );
 }
