@@ -8,7 +8,11 @@ export function cn(...inputs: ClassValue[]) {
 
 const API_URL = `http://localhost:8080`;
 
-export async function fetcher(url: string, options: RequestInit = {}) {
+export async function fetcher(
+  url: string,
+  options: RequestInit = {},
+  serverSideCookies = ""
+) {
   const mainResponse = await fetch(API_URL + url, {
     ...options,
     credentials: "include",
@@ -16,7 +20,10 @@ export async function fetcher(url: string, options: RequestInit = {}) {
 
   if (mainResponse.status === 401 || mainResponse.status === 403) {
     try {
-      const data = await refreshSession();
+      const data =
+        serverSideCookies.length > 0
+          ? await refreshSessionServer(serverSideCookies)
+          : await refreshSession();
       if (data) {
         const retryResponse = await fetch(API_URL + url, {
           ...options,
@@ -25,6 +32,9 @@ export async function fetcher(url: string, options: RequestInit = {}) {
             ...options.headers,
             Authorization: `Bearer ${data.accessToken}`,
           },
+          ...(serverSideCookies.length > 0 && {
+            Cookie: serverSideCookies,
+          }),
         });
         return retryResponse;
       }
@@ -46,6 +56,28 @@ export async function refreshSession() {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+      },
+    });
+
+    if (response.ok) {
+      const data = (await response.json()) as SessionData;
+      console.log("Refreshed session successfully!");
+      return data;
+    }
+  } catch (error) {
+    console.log("Error refreshing session:", error);
+    return null;
+  }
+}
+export async function refreshSessionServer(cookies: string) {
+  try {
+    console.log("Refreshing server side session...");
+    const response = await fetch(`${API_URL}/api/auth/session`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookies,
       },
     });
 

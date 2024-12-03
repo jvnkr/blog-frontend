@@ -5,17 +5,25 @@ import { PostData } from "@/lib/types";
 
 interface PostsContextType {
   posts: PostData[];
+  pageNumber: number;
   followingPosts: PostData[];
   followingPageNumber: number;
-  pageNumber: number;
+  profilePosts: PostData[];
+  profilePageNumber: number;
   hasMoreFollowingPosts: boolean;
   hasMorePosts: boolean;
+  hasMoreProfilePosts: boolean;
+  cachedProfilePath: string;
+  setPageNumber: React.Dispatch<React.SetStateAction<number>>;
   setHasMorePosts: React.Dispatch<React.SetStateAction<boolean>>;
   setHasMoreFollowingPosts: React.Dispatch<React.SetStateAction<boolean>>;
+  setHasMoreProfilePosts: React.Dispatch<React.SetStateAction<boolean>>;
   setPosts: React.Dispatch<React.SetStateAction<PostData[]>>;
   setFollowingPosts: React.Dispatch<React.SetStateAction<PostData[]>>;
+  setProfilePosts: React.Dispatch<React.SetStateAction<PostData[]>>;
   setFollowingPageNumber: React.Dispatch<React.SetStateAction<number>>;
-  setPageNumber: React.Dispatch<React.SetStateAction<number>>;
+  setProfilePageNumber: React.Dispatch<React.SetStateAction<number>>;
+  setCachedProfilePath: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
@@ -27,6 +35,10 @@ export const PostsProvider = ({ children }: { children: ReactNode }) => {
   const [followingPageNumber, setFollowingPageNumber] = useState(0);
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [hasMoreFollowingPosts, setHasMoreFollowingPosts] = useState(true);
+  const [profilePosts, setProfilePosts] = useState<PostData[]>([]);
+  const [profilePageNumber, setProfilePageNumber] = useState(0);
+  const [hasMoreProfilePosts, setHasMoreProfilePosts] = useState(true);
+  const [cachedProfilePath, setCachedProfilePath] = useState<string>("");
 
   return (
     <PostsContext.Provider
@@ -43,6 +55,14 @@ export const PostsProvider = ({ children }: { children: ReactNode }) => {
         setHasMorePosts,
         hasMoreFollowingPosts,
         setHasMoreFollowingPosts,
+        profilePosts,
+        setProfilePosts,
+        profilePageNumber,
+        setProfilePageNumber,
+        hasMoreProfilePosts,
+        setHasMoreProfilePosts,
+        cachedProfilePath,
+        setCachedProfilePath,
       }}
     >
       {children}

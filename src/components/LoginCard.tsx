@@ -68,7 +68,7 @@ const LoginCard = ({ next = "/home" }: LoginCardProps) => {
         const { accessToken, refreshToken, username, name, userId } =
           await response.json();
         setUnauthWall(false);
-        setCookie("a_t", accessToken);
+        // Access is set from headers
         setCookie("r_t", refreshToken);
         setUsername(username);
         setName(name);
@@ -92,7 +92,10 @@ const LoginCard = ({ next = "/home" }: LoginCardProps) => {
   }
 
   return (
-    <Card className="mx-auto border-[#272629] text-white bg-zinc-900 max-w-sm" style={{ zIndex: 99 }}>
+    <Card
+      className="mx-auto border-[#272629] text-white bg-zinc-900 max-w-sm"
+      style={{ zIndex: 99 }}
+    >
       <CardHeader className="gap-2">
         <div className="flex justify-center items-center">
           <Logo size={64} />

@@ -12,24 +12,30 @@ interface VirtualizedPostsProps {
   id: string;
   posts: PostData[];
   loading: boolean;
+  initialLoading: boolean;
   skeletonCount: number;
   hasMorePosts: boolean;
   onEndReached: () => void;
-  setPosts: React.Dispatch<React.SetStateAction<PostData[]>>;
+  handleCreatePost: (newPost: PostData) => void;
+  handleDeletePost: (newPosts: PostData[], deletedPostUsername: string) => void;
   onUpdatePost: (post: PostData) => void;
   showCreatePost?: boolean;
+  paddingStart?: number;
 }
 
 export function VirtualizedPosts({
   id,
   posts,
   loading,
+  initialLoading,
   skeletonCount,
   hasMorePosts,
   onEndReached,
   onUpdatePost,
-  setPosts,
+  handleCreatePost,
+  handleDeletePost,
   showCreatePost = false,
+  paddingStart = 60 + 16,
 }: VirtualizedPostsProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -49,8 +55,8 @@ export function VirtualizedPosts({
   // Initialize TanStack virtual window scroller
   const virtualizer = useWindowVirtualizer({
     estimateSize: () => 256, // Estimated height of each post
-    overscan: 3, // Number of items to render outside of viewport
-    paddingStart: 16,
+    overscan: 5, // Number of items to render outside of viewport
+    paddingStart,
     count:
       posts.length === undefined
         ? restoreItemCount
@@ -112,9 +118,14 @@ export function VirtualizedPosts({
     return null;
   }
 
-  if (loading && posts.length === 0) {
+  if (initialLoading && posts.length === 0) {
     return (
-      <div className="flex pt-4 flex-col gap-4 px-4 w-full">
+      <div
+        style={{
+          paddingTop: `${paddingStart}px`,
+        }}
+        className="flex flex-col gap-4 px-4 w-full"
+      >
         {Array.from({ length: skeletonCount }).map((_, i) => (
           <Skeleton
             key={i}
@@ -149,7 +160,7 @@ export function VirtualizedPosts({
           }}
         >
           {virtualizer.getVirtualItems().map((virtualRow) => {
-            if (!loading && showCreatePost && virtualRow.index === 0) {
+            if (!initialLoading && showCreatePost && virtualRow.index === 0) {
               return (
                 <div
                   key={virtualRow.key}
@@ -157,7 +168,7 @@ export function VirtualizedPosts({
                   ref={virtualizer.measureElement}
                   className="pb-4"
                 >
-                  <CreatePost setPosts={setPosts} />
+                  <CreatePost setPosts={handleCreatePost} />
                 </div>
               );
             }
@@ -181,7 +192,7 @@ export function VirtualizedPosts({
               ? virtualRow.index - 1
               : virtualRow.index;
 
-            if (loading) return null;
+            if (initialLoading) return null;
 
             return (
               <div
@@ -191,9 +202,10 @@ export function VirtualizedPosts({
                 className="pb-4"
               >
                 <Post
+                  posts={posts}
                   post={posts[postIndex]}
                   onUpdatePost={onUpdatePost}
-                  setPosts={setPosts}
+                  handleDeletePost={handleDeletePost}
                 />
               </div>
             );

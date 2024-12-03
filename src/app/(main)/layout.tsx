@@ -39,7 +39,7 @@ export default function HomeLayout({
         style={{
           zIndex: 9,
         }}
-        className="flex bg-zinc-900/30 bg-opacity-[0.45] border border-y-0 border-[#272629] min-h-screen overflow-x-hidden justify-start items-center flex-col w-[45rem] pt-[60px] mx-auto"
+        className="flex bg-zinc-900/30 bg-opacity-[0.45] border border-y-0 border-[#272629] min-h-screen overflow-x-hidden justify-start items-center flex-col w-[45rem] mx-auto"
       >
         <Header />
         {children}
@@ -78,7 +78,7 @@ export default function HomeLayout({
             <>
               <Link
                 href="/home"
-                className={`flex outline-none focus-within:ring-2 ring-[#888] mt-2 text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
+                className={`flex outline-[#888] outline-2 mt-2 text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
                   pathname === "/home" ? " font-bold" : ""
                 }`}
               >
@@ -91,11 +91,11 @@ export default function HomeLayout({
               </Link>
               <Link
                 href={`/@${username}`}
-                className={`flex outline-none focus-within:ring-2 ring-[#888] text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
-                  pathname === "/profile" ? " font-bold" : ""
+                className={`flex outline-[#888] outline-2 text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
+                  pathname.endsWith(`/@${username}`) ? " font-bold" : ""
                 }`}
               >
-                {pathname === "/profile" ? (
+                {pathname.endsWith(`/@${username}`) ? (
                   <FaUserCircle className="w-6 h-6 fill-white" />
                 ) : (
                   <FaRegUserCircle className="w-6 h-6" />
@@ -104,7 +104,7 @@ export default function HomeLayout({
               </Link>
               <Link
                 href={"/settings"}
-                className={`flex outline-none focus-within:ring-2 ring-[#888] text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
+                className={`flex outline-[#888] outline-2 text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
                   pathname === "/settings" ? " font-bold" : ""
                 }`}
               >
@@ -153,8 +153,8 @@ export default function HomeLayout({
         <div
           className={"flex select-none cursor-pointer rounded-xl h-fit w-fit"}
         >
-          <div className="flex search-input cursor-default border border-[#272629] focus-within:ring-2 ring-[#999] bg-zinc-900 transition-all duration-150 ease-in-out p-2 py-0 rounded-lg items-center">
-            <Search className="search-icon text-zinc-500 ml-[0.2rem] w-5 h-5 transition-colors duration-150 ease-in-out" />
+          <div className="flex search-input cursor-default border border-[#272629] focus-within:outline focus-within:outline-2 focus-within:outline-[#999] bg-zinc-900 p-2 py-0 rounded-lg items-center">
+            <Search className="search-icon text-zinc-500 ml-[0.2rem] w-5 h-5" />
             <input
               spellCheck={false}
               className="pl-2 bg-transparent py-1 outline-none ring-0 text-lg text-white/75 border-none"

@@ -2,9 +2,17 @@ import React from "react";
 
 interface AvatarProps {
   name: string;
+  children?: React.ReactNode;
+  size?: number;
+  className?: string;
 }
 
-export default function Avatar({ name }: AvatarProps) {
+export default function Avatar({
+  name,
+  children,
+  className,
+  size = 40,
+}: AvatarProps) {
   const letterColors: { [key: string]: string } = {
     A: "#FF0000", // Bright Red
     B: "#00FF00", // Bright Green
@@ -34,19 +42,29 @@ export default function Avatar({ name }: AvatarProps) {
     Z: "#4080FF", // Cornflower Blue
   };
 
-  const firstLetter = name.at(0)?.toUpperCase() || "B";
+  const firstLetter = name?.at(0)?.toUpperCase() || "B";
   const bgColor = letterColors[firstLetter] || "#6B7280"; // Fallback to neutral gray
 
   return (
     <div
-      style={{ backgroundColor: bgColor }}
-      className={
-        "flex font-medium justify-center items-center rounded-full w-[2.5rem] h-[2.5rem] text-white"
-      }
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        backgroundColor: bgColor,
+      }}
+      className={`flex font-medium justify-center items-center rounded-full text-white${
+        className ? " " + className : ""
+      }`}
     >
-      <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.)] text-lg">
+      <span
+        style={{
+          fontSize: `${size / 2.5}px`,
+        }}
+        className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.)]"
+      >
         {firstLetter}
       </span>
+      {children}
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { fetcher } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface CreatePostProps {
-  setPosts: React.Dispatch<React.SetStateAction<PostData[]>>;
+  setPosts: (newPost: PostData) => void;
 }
 
 const CreatePost = ({ setPosts }: CreatePostProps) => {
@@ -44,7 +44,8 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
           const data = (await res.json()) as PostData;
           titleRef.current!.value = "";
           contentRef.current!.value = "";
-          setPosts((prevPosts) => [data, ...prevPosts]);
+          console.log(data);
+          setPosts(data);
           toast.success("Post created successfully", {
             action: {
               label: "Close",

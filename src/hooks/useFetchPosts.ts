@@ -14,6 +14,7 @@ export function useFetchPosts(
   setHasMorePosts: React.Dispatch<React.SetStateAction<boolean>>
 ) {
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
   const [skeletonCount, setSkeletonCount] = useState(0);
   const initialFetchRef = useRef(false);
 
@@ -23,7 +24,10 @@ export function useFetchPosts(
       document.body.style.overflow = "hidden";
       setSkeletonCount(Math.floor(window.innerHeight / (16 * 16)));
       initialFetchRef.current = true;
-      fetchPosts();
+      setInitialLoading(true);
+      fetchPosts().then(() => {
+        setInitialLoading(false);
+      });
     }
     return () => {
       // Restore overflow when component unmounts
@@ -75,6 +79,7 @@ export function useFetchPosts(
   return {
     loading,
     skeletonCount,
+    initialLoading,
     fetchPosts,
     handleUpdatePost,
   };

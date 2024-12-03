@@ -32,17 +32,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Link from "next/link";
 
 interface PostProps {
   post: PostData;
+  posts: PostData[];
   onUpdatePost: (post: PostData) => void;
-  setPosts: React.Dispatch<React.SetStateAction<PostData[]>>;
+  handleDeletePost: (newPosts: PostData[], deletedPostUsername: string) => void;
 }
 
 export const Post = ({
   post: initialPost,
+  posts,
   onUpdatePost,
-  setPosts,
+  handleDeletePost,
 }: PostProps) => {
   const [post, setPost] = useState(initialPost);
   const postRef = useRef<HTMLDivElement>(null);
@@ -60,13 +63,14 @@ export const Post = ({
       const endpoint = updatedPost.liked ? "like" : "unlike";
 
       await fetcher(`/api/v1/posts/${endpoint}/${postId}`, {
-        method: "POST",
+        method: "GET",
         credentials: "include",
         keepalive: true, // Ensures request completes even on page unload
         headers: {
           Authorization: `Bearer ${getCookie("a_t")}`,
         },
       });
+      onUpdatePost?.(updatedPost);
     } catch (error) {
       console.log(error);
       // Revert UI state on error
@@ -97,7 +101,8 @@ export const Post = ({
           Authorization: `Bearer ${getCookie("a_t")}`,
         },
       });
-      setPosts((prevPosts) => prevPosts.filter((p) => p.id !== post.id));
+      const newPosts = posts.filter((p) => p.id !== post.id);
+      handleDeletePost(newPosts, post.id);
       toast.success("Post deleted");
     } catch (error) {
       console.log(error);
@@ -167,9 +172,10 @@ export const Post = ({
             "flex absolute bg-[#202023] overflow-hidden top-0 w-[calc(100%+2px)] pl-2 h-[60px] left-[-1px] border border-t-0 rounded-b-xl dark:border-[#272629] justify-between items-center"
           }
         >
-          <div
+          <Link
+            href={`/@${post.author.username}`}
             className={
-              "flex select-none h-full justify-start gap-2 items-center w-full"
+              "flex select-none h-full justify-start gap-2 items-center w-fit"
             }
           >
             <Avatar name={post.author.name} />
@@ -202,7 +208,7 @@ export const Post = ({
                 </span>
               </div>
             </div>
-          </div>
+          </Link>
           <motion.div
             animate={{
               minWidth: options

@@ -98,7 +98,7 @@ export const AuthContextProvider = ({
           // sameSite: "lax",
           // domain: API_DOMAIN,
         });
-        setAccessToken(data.accessToken);
+        // setAccessToken(data.accessToken);
         setLoggedIn(true);
       }
     } else {

@@ -37,7 +37,6 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("a_t")?.value;
-  const refreshToken = cookieStore.get("r_t")?.value;
 
   let serverAuthData: SessionData = {
     accessToken: accessToken || "",
@@ -53,7 +52,7 @@ export default async function RootLayout({
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Cookie: `a_t=${accessToken}; r_t=${refreshToken}`,
+        Cookie: cookieStore.toString(),
       },
     });
 
