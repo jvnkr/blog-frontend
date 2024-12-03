@@ -57,7 +57,6 @@ export default function HomePage() {
     if (cachedProfilePath.endsWith(post.author.username)) {
       setProfilePosts(profilePosts.map((p) => (p.id === post.id ? post : p)));
     }
-    setUpdateKey((prevKey) => prevKey + 1);
   };
 
   return (

@@ -87,7 +87,6 @@ const Profile = ({
   const onUpdatePost = (post: PostData) => {
     handleUpdatePost(post);
     setPosts(posts.map((p) => (p.id === post.id ? post : p)));
-    setUpdateKey((prevKey) => prevKey + 1);
   };
 
   return (
