@@ -25,7 +25,6 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
       });
       return;
     }
-    console.log("Posting...");
     try {
       const res = await fetcher("/api/v1/posts", {
         method: "POST",
@@ -44,7 +43,6 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
           const data = (await res.json()) as PostData;
           titleRef.current!.value = "";
           contentRef.current!.value = "";
-          console.log(data);
           setPosts(data);
           toast.success("Post created successfully", {
             action: {

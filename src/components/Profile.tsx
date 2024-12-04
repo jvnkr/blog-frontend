@@ -58,7 +58,6 @@ const Profile = ({
     hasMoreProfilePosts,
     setHasMoreProfilePosts
   );
-
   const pathname = usePathname();
 
   useEffect(() => {
@@ -66,7 +65,10 @@ const Profile = ({
       setProfilePosts([]);
       setProfilePageNumber(0);
       setHasMoreProfilePosts(true);
-      fetchPosts();
+      // Wait for state updates to complete before fetching
+      Promise.resolve().then(() => {
+        fetchPosts();
+      });
     }
     setCachedProfilePath(pathname);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,12 +89,13 @@ const Profile = ({
   const onUpdatePost = (post: PostData) => {
     handleUpdatePost(post);
     setPosts(posts.map((p) => (p.id === post.id ? post : p)));
+    setFollowingPosts(followingPosts.map((p) => (p.id === post.id ? post : p)));
   };
 
   return (
     <div className="flex relative flex-col w-full">
       <div className="w-full h-[12rem] overflow-hidden relative">
-        <div className="absolute inset-0 bg-zinc-900">
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950">
           <svg width="100%" height="100%" className="block">
             <defs>
               <path
@@ -148,10 +151,10 @@ const Profile = ({
         </div>
         <div
           style={{
-            width: "143.2px",
-            height: "144px",
+            width: "142px",
+            height: "143px",
           }}
-          className="absolute rounded-full left-[0.9rem] bottom-[-1.5px] translate-y-1/2 border-2 border-zinc-800"
+          className="absolute rounded-full left-[0.95rem] bottom-[-1.5px] translate-y-1/2 bg-zinc-800"
         ></div>
       </div>
       <div className="flex relative rounded-b-3xl border ml-[-1px] mr-[-1px] border-zinc-800 pt-[65px] flex-col gap-2 bg-zinc-900">

@@ -18,6 +18,7 @@ export default function FollowingPage() {
     setFollowingPageNumber,
     hasMoreFollowingPosts,
     setHasMoreFollowingPosts,
+    cachedProfilePath,
   } = usePostsContext();
   const [updateKey, setUpdateKey] = useState(0);
 
@@ -34,7 +35,7 @@ export default function FollowingPage() {
     followingPageNumber,
     setFollowingPageNumber,
     hasMoreFollowingPosts,
-    setHasMoreFollowingPosts,
+    setHasMoreFollowingPosts
   );
 
   const handleCreatePost = (newPost: PostData) => {
@@ -49,6 +50,14 @@ export default function FollowingPage() {
     setUpdateKey((prevKey) => prevKey + 1);
   };
 
+  const onUpdatePost = (post: PostData) => {
+    handleUpdatePost(post);
+    if (cachedProfilePath.endsWith(post.author.username)) {
+      setProfilePosts(profilePosts.map((p) => (p.id === post.id ? post : p)));
+    }
+    setPosts(posts.map((p) => (p.id === post.id ? post : p)));
+  };
+
   return (
     <VirtualizedPosts
       key={updateKey}
@@ -60,7 +69,7 @@ export default function FollowingPage() {
       initialLoading={initialLoading}
       skeletonCount={skeletonCount}
       onEndReached={fetchPosts}
-      onUpdatePost={handleUpdatePost}
+      onUpdatePost={onUpdatePost}
       handleDeletePost={handleDeletePost}
     />
   );

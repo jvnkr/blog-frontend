@@ -57,6 +57,7 @@ export default function HomePage() {
     if (cachedProfilePath.endsWith(post.author.username)) {
       setProfilePosts(profilePosts.map((p) => (p.id === post.id ? post : p)));
     }
+    setFollowingPosts(followingPosts.map((p) => (p.id === post.id ? post : p)));
   };
 
   return (

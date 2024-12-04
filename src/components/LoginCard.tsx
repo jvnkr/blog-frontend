@@ -68,7 +68,7 @@ const LoginCard = ({ next = "/home" }: LoginCardProps) => {
         const { accessToken, refreshToken, username, name, userId } =
           await response.json();
         setUnauthWall(false);
-        // Access is set from headers
+        setCookie("a_t", accessToken);
         setCookie("r_t", refreshToken);
         setUsername(username);
         setName(name);

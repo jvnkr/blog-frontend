@@ -33,6 +33,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 interface PostProps {
   post: PostData;
@@ -85,6 +86,7 @@ export const Post = ({
 
   const handlePostClick = () => {
     if (triggerAuthWall()) return;
+    redirect(`/post/${post.id}`);
   };
 
   const handleDelete = async () => {

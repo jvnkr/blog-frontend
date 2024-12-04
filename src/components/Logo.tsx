@@ -23,13 +23,12 @@ const Logo = ({
     >
       <div
         style={{
-          width: `${size}px`,
-          height: `${size}px`,
+          width: size,
+          height: size,
         }}
-        className={
-          `flex justify-center items-center w-fit h-full font-bold bg-[#272629] p-4 rounded-lg border border-[#333333]` +
-          (className ? " " + className : "")
-        }
+        className={`flex justify-center items-center font-bold bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 p-4 rounded-lg border border-[#333333]${
+          className ? " " + className : ""
+        }`}
       >
         <span
           style={{

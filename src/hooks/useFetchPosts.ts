@@ -23,7 +23,6 @@ export function useFetchPosts(
       // Hide overflow when initially loading with no posts
       document.body.style.overflow = "hidden";
       setSkeletonCount(Math.floor(window.innerHeight / (16 * 16)));
-      initialFetchRef.current = true;
       setInitialLoading(true);
       fetchPosts().then(() => {
         setInitialLoading(false);
@@ -34,10 +33,11 @@ export function useFetchPosts(
       document.body.style.overflow = "visible";
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [posts.length, hasMorePosts]);
+  }, [posts.length, hasMorePosts]); // Add dependencies to prevent double fetch
 
   const fetchPosts = async () => {
-    if (loading || !hasMorePosts) return;
+    if (loading || !hasMorePosts || initialFetchRef.current) return;
+    initialFetchRef.current = true;
     setLoading(true);
     try {
       const accessToken = getCookie("a_t") as string;
@@ -62,9 +62,13 @@ export function useFetchPosts(
       setPageNumber((prev) => prev + 1);
       toast.success("Posts fetched successfully");
       setHasMorePosts(data.length > 0);
+      setLoading(false);
+      initialFetchRef.current = false;
     } catch (error) {
       console.error("Failed to fetch posts:", error);
       setHasMorePosts(false);
+      setLoading(false);
+      initialFetchRef.current = false;
     } finally {
       setLoading(false);
       // Restore overflow after posts are loaded or on error

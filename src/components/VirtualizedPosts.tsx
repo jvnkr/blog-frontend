@@ -92,17 +92,14 @@ export function VirtualizedPosts({
     const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
     if (!lastItem) return;
 
-    // Load more posts when reaching end of list
-    if (
-      lastItem.index >= posts.length - 1 &&
-      !loading &&
-      hasMorePosts &&
-      !initialFetchPreventedRef.current
-    ) {
+    // useFetchPosts will handle the initial fetch
+    if (!initialFetchPreventedRef.current) {
       initialFetchPreventedRef.current = true;
+      return;
+    }
+
+    if (lastItem.index >= posts.length - 1 && !loading && hasMorePosts) {
       onEndReached();
-    } else if (lastItem.index < posts.length - 1) {
-      initialFetchPreventedRef.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -112,6 +109,7 @@ export function VirtualizedPosts({
     posts.length,
     hasMorePosts,
     mounted,
+    onEndReached,
   ]);
 
   if (!mounted) {
