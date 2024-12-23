@@ -1,18 +1,26 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card } from "./ui/card";
-import { Button } from "./ui/button";
-import { getCookie } from "cookies-next";
 import { PostData } from "@/lib/types";
-import { fetcher } from "@/lib/utils";
 import { toast } from "sonner";
+import PostFooter from "./PostFooter";
+import useFetcher from "@/hooks/useFetcher";
+import { useAuthContext } from "@/context/AuthContext";
 
 interface CreatePostProps {
   setPosts: (newPost: PostData) => void;
 }
 
+let postTitleCache: string = "";
+let postDescCache: string = "";
+
 const CreatePost = ({ setPosts }: CreatePostProps) => {
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const contentRef = useRef<HTMLTextAreaElement>(null);
+  const [descValue, setDescValue] = useState(postDescCache);
+  const [titleValue, setTitleValue] = useState(postTitleCache);
+  const lastActiveInputRef = useRef<"title" | "content">("content");
+  const fetcher = useFetcher();
+  const { accessToken } = useAuthContext();
 
   const handlePost = async () => {
     if (!titleRef.current?.value || !contentRef.current?.value) {
@@ -34,7 +42,7 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
         }),
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${getCookie("a_t")}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         credentials: "include",
       });
@@ -43,6 +51,10 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
           const data = (await res.json()) as PostData;
           titleRef.current!.value = "";
           contentRef.current!.value = "";
+          postTitleCache = "";
+          postDescCache = "";
+          setTitleValue("");
+          setDescValue("");
           setPosts(data);
           toast.success("Post created successfully", {
             action: {
@@ -60,18 +72,40 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
     }
   };
 
+  useEffect(() => {
+    if (titleRef.current) {
+      titleRef.current.value = postTitleCache;
+      setTitleValue(postTitleCache);
+    }
+    if (contentRef.current) {
+      contentRef.current.value = postDescCache;
+      setDescValue(postDescCache);
+    }
+  }, []);
+
   return (
     <Card
       style={{
-        zIndex: 99,
+        zIndex: 999,
       }}
       className={
-        "flex relative border-[#272629] bg-transparent text-white overflow-hidden flex-col w-full h-full max-h-[22rem]"
+        "flex relative border-[#272629] bg-transparent text-white flex-col w-full h-full max-h-[22rem]"
       }
     >
-      <div className="flex relative overflow-auto pt-0 max-h-[500px] w-full h-full bg-zinc-900 flex-col">
+      <div className="flex relative rounded-t-xl overflow-auto pt-0 max-h-[500px] w-full h-full bg-zinc-900 flex-col">
         <div className="sticky top-0 p-3 pb-2 bg-zinc-900 z-10">
           <textarea
+            value={titleValue}
+            onFocus={() => (lastActiveInputRef.current = "title")}
+            onClick={() => (lastActiveInputRef.current = "title")}
+            onInput={(e) => {
+              const newValue = (e.target as HTMLTextAreaElement).value;
+              setTitleValue(newValue);
+              postTitleCache = newValue;
+              if (titleRef.current) {
+                titleRef.current.value = newValue;
+              }
+            }}
             ref={titleRef}
             className="flex relative backdrop-blur-sm mb-0 bg-transparent outline-none w-full font-semibold cursor-text tracking-tight text-2xl resize-none overflow-y-auto caret-white"
             style={{
@@ -85,33 +119,71 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
         <textarea
           placeholder="Share your thoughts, ideas, or story..."
           ref={contentRef}
+          value={descValue}
+          onFocus={() => (lastActiveInputRef.current = "content")}
+          onClick={() => (lastActiveInputRef.current = "content")}
           className="bg-transparent px-3 mb-3 outline-none resize-none w-full min-h-[100px] text-base"
           style={{
             height: "auto",
           }}
+          maxLength={255}
           onChange={(e) => {
             e.target.style.height = "auto"; // Reset height first
             e.target.style.height = e.target.scrollHeight + "px";
           }}
           onInput={(e) => {
+            const newValue = (e.target as HTMLTextAreaElement).value;
+            setDescValue(newValue);
+            postDescCache = newValue;
+            if (contentRef.current) {
+              contentRef.current.value = newValue;
+            }
             (e.target as HTMLTextAreaElement).style.height = "auto"; // Reset height first
             (e.target as HTMLTextAreaElement).style.height =
               (e.target as HTMLTextAreaElement).scrollHeight + "px";
           }}
         />
       </div>
-      <div
-        style={{
-          zIndex: 999,
+      <PostFooter
+        disabled={descValue.length <= 0 || titleValue.length <= 0}
+        buttonValue="Post"
+        onEmojiClick={(emoji) => {
+          if (lastActiveInputRef.current === "title") {
+            if (titleValue.length >= 50) {
+              toast.error("Title cannot be longer than 50 characters", {
+                action: {
+                  label: "Close",
+                  onClick: () => null,
+                },
+                closeButton: false,
+              });
+              return;
+            }
+            setTitleValue(titleValue + emoji);
+            postTitleCache = titleValue + emoji;
+            if (titleRef.current) {
+              titleRef.current.value = titleValue + emoji;
+            }
+          } else {
+            if (descValue.length >= 255) {
+              toast.error("Description cannot be longer than 255 characters", {
+                action: {
+                  label: "Close",
+                  onClick: () => null,
+                },
+                closeButton: false,
+              });
+              return;
+            }
+            setDescValue(descValue + emoji);
+            postDescCache = descValue + emoji;
+            if (contentRef.current) {
+              contentRef.current.value = descValue + emoji;
+            }
+          }
         }}
-        className={
-          "flex bg-zinc-900 border border-t-[#272629] border-x-0 border-b-0 px-4 min-h-[60px] rounded-b-xl justify-end items-center"
-        }
-      >
-        <Button type="button" onClick={() => handlePost()} className="ml-auto">
-          Post
-        </Button>
-      </div>
+        handleCreate={handlePost}
+      />
     </Card>
   );
 };

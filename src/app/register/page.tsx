@@ -21,12 +21,12 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { fetcher } from "@/lib/utils";
 import { redirect, useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import useFetcher from "@/hooks/useFetcher";
 
 const formSchema = z
   .object({
@@ -53,6 +53,7 @@ const RegisterPage = () => {
   const { loggedIn } = useAuthContext();
   const [registered, setRegistered] = useState(false);
   const router = useRouter();
+  const fetcher = useFetcher();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

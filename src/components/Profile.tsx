@@ -2,14 +2,27 @@
 
 import React, { useState, useEffect } from "react";
 import Avatar from "./Avatar";
-import { CalendarDays, BadgeCheck } from "lucide-react";
-import { VirtualizedPosts } from "./VirtualizedPosts";
+import { CalendarDays, BadgeCheck, UserRoundPen } from "lucide-react";
+import { VirtualizedItems } from "./VirtualizedPosts";
 import { usePostsContext } from "@/context/PostsContext";
-import { useFetchPosts } from "@/hooks/useFetchPosts";
+import { useFetchItems } from "@/hooks/useFetchPosts";
 import { PostData } from "@/lib/types";
 import { usePathname } from "next/navigation";
+import { Post } from "./Post";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Button } from "./ui/button";
+import { useAuthContext } from "@/context/AuthContext";
 
-interface ProfileProps {
+export interface ProfileProps {
   username: string;
   name: string;
   bio: string;
@@ -41,15 +54,21 @@ const Profile = ({
     setHasMoreProfilePosts,
     cachedProfilePath,
     setCachedProfilePath,
+    setProfileData,
   } = usePostsContext();
+  const { loggedIn, username: currentUsername } = useAuthContext();
   const [updateKey, setUpdateKey] = useState(0);
+  const [editedUsername, setEditedUsername] = useState(username);
+  const [editedName, setEditedName] = useState(name);
+  const [editedBio, setEditedBio] = useState<string | null>(bio);
+
   const {
     loading,
     initialLoading,
     skeletonCount,
-    fetchPosts,
-    handleUpdatePost,
-  } = useFetchPosts(
+    fetchItems: fetchPosts,
+    handleUpdateItem: handleUpdatePost,
+  } = useFetchItems(
     profilePosts,
     setProfilePosts,
     `/api/v1/posts/batch/${username}`,
@@ -61,9 +80,14 @@ const Profile = ({
   const pathname = usePathname();
 
   useEffect(() => {
-    if (pathname.startsWith("/@") && pathname !== cachedProfilePath) {
+    if (
+      pathname.startsWith("/@") &&
+      cachedProfilePath &&
+      pathname !== cachedProfilePath
+    ) {
       setProfilePosts([]);
       setProfilePageNumber(0);
+      setProfileData(null);
       setHasMoreProfilePosts(true);
       // Wait for state updates to complete before fetching
       Promise.resolve().then(() => {
@@ -73,11 +97,6 @@ const Profile = ({
     setCachedProfilePath(pathname);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, cachedProfilePath]);
-
-  const handleCreatePost = (newPost: PostData) => {
-    setProfilePosts([newPost, ...profilePosts]);
-    setUpdateKey((prevKey) => prevKey + 1);
-  };
 
   const handleDeletePost = (newPosts: PostData[], deletedPostId: string) => {
     setProfilePosts(newPosts);
@@ -158,6 +177,64 @@ const Profile = ({
         ></div>
       </div>
       <div className="flex relative rounded-b-3xl border ml-[-1px] mr-[-1px] border-zinc-800 pt-[65px] flex-col gap-2 bg-zinc-900">
+        {loggedIn && username === currentUsername && (
+          <Dialog>
+            <DialogTrigger>
+              <UserRoundPen className="absolute top-2 right-2 text-zinc-300 w-10 h-10 cursor-pointer p-2 rounded-full hover:bg-neutral-500 hover:bg-opacity-[0.5] transition-all duration-150" />
+            </DialogTrigger>
+            <DialogContent className="bg-zinc-900 border-[#272629]">
+              <DialogHeader>
+                <DialogTitle>Edit Profile</DialogTitle>
+                <DialogDescription>
+                  {
+                    "Make quick changes to your profile here. Click save when you're done."
+                  }
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-center items-center gap-2">
+                <Label className="min-w-[80px]">Name</Label>
+                <Input
+                  onChange={(e) => setEditedName(e.target.value)}
+                  placeholder={name ? "" : "Name"}
+                  defaultValue={name}
+                />
+              </div>
+              <div className="flex justify-center items-center gap-2">
+                <Label className="min-w-[80px]">Username</Label>
+                <Input
+                  onChange={(e) => setEditedUsername(e.target.value)}
+                  placeholder={username ? "" : "Username"}
+                  defaultValue={username}
+                />
+              </div>
+              <div className="flex justify-center items-center gap-2">
+                <Label className="min-w-[80px]">Bio</Label>
+                <Input
+                  onChange={(e) =>
+                    setEditedBio(
+                      e.target.value.length > 0 ? e.target.value : null
+                    )
+                  }
+                  placeholder={bio ? "" : "Bio"}
+                  defaultValue={bio}
+                  className="w-full"
+                />
+              </div>
+              <div className="flex justify-end w-full items-center">
+                <Button
+                  disabled={
+                    editedUsername === username &&
+                    editedName === name &&
+                    editedBio === bio
+                  }
+                  className="w-fit cursor-pointer"
+                >
+                  Save changes
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
         <Avatar
           size={140}
           name={name}
@@ -194,17 +271,22 @@ const Profile = ({
           </div>
         </div>
       </div>
-      <VirtualizedPosts
+      <VirtualizedItems
+        ItemComponent={(index) => (
+          <Post
+            posts={profilePosts}
+            post={profilePosts[index]}
+            onUpdatePost={onUpdatePost}
+            handleDeletePost={handleDeletePost}
+          />
+        )}
         key={updateKey}
         id={username}
-        posts={profilePosts}
+        items={profilePosts}
         loading={loading}
         initialLoading={initialLoading}
         skeletonCount={skeletonCount}
-        hasMorePosts={hasMoreProfilePosts}
-        handleCreatePost={handleCreatePost}
-        handleDeletePost={handleDeletePost}
-        onUpdatePost={onUpdatePost}
+        hasMoreItems={hasMoreProfilePosts}
         onEndReached={fetchPosts}
         paddingStart={16}
       />

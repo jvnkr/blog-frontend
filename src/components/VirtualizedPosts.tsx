@@ -1,42 +1,38 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Post } from "@/components/Post";
-import { PostData } from "@/lib/types";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import CreatePost from "./CreatePost";
 import { useWindowScroll, useDebounce } from "@uidotdev/usehooks";
 import { Skeleton } from "@/components/ui/skeleton";
+import LoadingSpinner from "./LoadingSpinner";
 
-interface VirtualizedPostsProps {
+interface VirtualizedItemsProps {
   id: string;
-  posts: PostData[];
+  items: unknown[];
   loading: boolean;
   initialLoading: boolean;
   skeletonCount: number;
-  hasMorePosts: boolean;
+  hasMoreItems: boolean;
   onEndReached: () => void;
-  handleCreatePost: (newPost: PostData) => void;
-  handleDeletePost: (newPosts: PostData[], deletedPostUsername: string) => void;
-  onUpdatePost: (post: PostData) => void;
-  showCreatePost?: boolean;
+  showCreateItem?: boolean;
   paddingStart?: number;
+  ItemComponent: (index: number) => React.ReactNode;
+  CreateItemComponent?: React.ReactNode;
 }
 
-export function VirtualizedPosts({
+export function VirtualizedItems({
   id,
-  posts,
+  items: posts,
   loading,
   initialLoading,
   skeletonCount,
-  hasMorePosts,
+  hasMoreItems,
   onEndReached,
-  onUpdatePost,
-  handleCreatePost,
-  handleDeletePost,
-  showCreatePost = false,
+  ItemComponent,
+  CreateItemComponent,
+  showCreateItem = false,
   paddingStart = 60 + 16,
-}: VirtualizedPostsProps) {
+}: VirtualizedItemsProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const initialFetchPreventedRef = useRef(false);
@@ -60,7 +56,7 @@ export function VirtualizedPosts({
     count:
       posts.length === undefined
         ? restoreItemCount
-        : posts.length + (showCreatePost ? 1 : 0),
+        : posts.length + (showCreateItem ? 1 : 0),
     initialOffset: restoreOffset,
     initialMeasurementsCache: restoreMeasurementsCache,
   });
@@ -75,7 +71,7 @@ export function VirtualizedPosts({
     window.history.replaceState(
       {
         ...window.history.state,
-        [`vtableItemCount_${id}`]: posts.length + (showCreatePost ? 1 : 0),
+        [`vtableItemCount_${id}`]: posts.length + (showCreateItem ? 1 : 0),
         [`vtableOffset_${id}`]: scrollPos,
         [`vtableMeasureCache_${id}`]: virtualizer.measurementsCache,
       },
@@ -85,7 +81,6 @@ export function VirtualizedPosts({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posts.length, scrollPos, virtualizer.measurementsCache]);
 
-  // Handle infinite scroll loading
   useEffect(() => {
     if (!mounted) return;
 
@@ -98,7 +93,7 @@ export function VirtualizedPosts({
       return;
     }
 
-    if (lastItem.index >= posts.length - 1 && !loading && hasMorePosts) {
+    if (lastItem.index >= posts.length - 1 && !loading && hasMoreItems) {
       onEndReached();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -107,7 +102,7 @@ export function VirtualizedPosts({
     virtualizer.getVirtualItems(),
     loading,
     posts.length,
-    hasMorePosts,
+    hasMoreItems,
     mounted,
     onEndReached,
   ]);
@@ -158,7 +153,12 @@ export function VirtualizedPosts({
           }}
         >
           {virtualizer.getVirtualItems().map((virtualRow) => {
-            if (!initialLoading && showCreatePost && virtualRow.index === 0) {
+            if (
+              !initialLoading &&
+              showCreateItem &&
+              CreateItemComponent &&
+              virtualRow.index === 0
+            ) {
               return (
                 <div
                   key={virtualRow.key}
@@ -166,12 +166,16 @@ export function VirtualizedPosts({
                   ref={virtualizer.measureElement}
                   className="pb-4"
                 >
-                  <CreatePost setPosts={handleCreatePost} />
+                  {CreateItemComponent}
                 </div>
               );
             }
 
-            if (loading && virtualRow.index >= posts.length - 1) {
+            if (
+              loading &&
+              !initialLoading &&
+              virtualRow.index >= posts.length - 1
+            ) {
               return (
                 <div
                   key={virtualRow.key}
@@ -179,14 +183,12 @@ export function VirtualizedPosts({
                   ref={virtualizer.measureElement}
                   className="pb-4"
                 >
-                  <div className="flex justify-center items-center">
-                    <div className="w-12 h-12 rounded-full border-4 border-zinc-700 border-t-zinc-300 animate-spin" />
-                  </div>
+                  <LoadingSpinner />
                 </div>
               );
             }
 
-            const postIndex = showCreatePost
+            const postIndex = showCreateItem
               ? virtualRow.index - 1
               : virtualRow.index;
 
@@ -199,12 +201,7 @@ export function VirtualizedPosts({
                 ref={virtualizer.measureElement}
                 className="pb-4"
               >
-                <Post
-                  posts={posts}
-                  post={posts[postIndex]}
-                  onUpdatePost={onUpdatePost}
-                  handleDeletePost={handleDeletePost}
-                />
+                {ItemComponent(postIndex)}
               </div>
             );
           })}

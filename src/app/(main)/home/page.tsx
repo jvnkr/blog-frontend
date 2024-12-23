@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { useFetchPosts } from "@/hooks/useFetchPosts";
+import { useFetchItems } from "@/hooks/useFetchPosts";
 import { usePostsContext } from "@/context/PostsContext";
-import { useAuthContext } from "@/context/AuthContext";
-import { VirtualizedPosts } from "@/components/VirtualizedPosts";
+import { VirtualizedItems } from "@/components/VirtualizedPosts";
 import { PostData } from "@/lib/types";
+import { Post } from "@/components/Post";
+import CreatePost from "@/components/CreatePost";
+import { useAuthContext } from "@/context/AuthContext";
 
 export default function HomePage() {
   const {
@@ -21,16 +23,16 @@ export default function HomePage() {
     setHasMorePosts,
     cachedProfilePath,
   } = usePostsContext();
-  const { loggedIn } = useAuthContext();
   const [updateKey, setUpdateKey] = useState(0);
+  const { loggedIn } = useAuthContext();
 
   const {
     loading,
     initialLoading,
     skeletonCount,
-    fetchPosts,
-    handleUpdatePost,
-  } = useFetchPosts(
+    fetchItems: fetchPosts,
+    handleUpdateItem,
+  } = useFetchItems(
     posts,
     setPosts,
     "/api/v1/posts/batch",
@@ -42,6 +44,9 @@ export default function HomePage() {
 
   const handleCreatePost = (newPost: PostData) => {
     setPosts([newPost, ...posts]);
+    if (cachedProfilePath.endsWith(newPost.author.username)) {
+      setProfilePosts([newPost, ...profilePosts]);
+    }
     setUpdateKey((prevKey) => prevKey + 1);
   };
 
@@ -53,7 +58,7 @@ export default function HomePage() {
   };
 
   const onUpdatePost = (post: PostData) => {
-    handleUpdatePost(post);
+    handleUpdateItem(post);
     if (cachedProfilePath.endsWith(post.author.username)) {
       setProfilePosts(profilePosts.map((p) => (p.id === post.id ? post : p)));
     }
@@ -61,19 +66,25 @@ export default function HomePage() {
   };
 
   return (
-    <VirtualizedPosts
+    <VirtualizedItems
+      ItemComponent={(index) => (
+        <Post
+          posts={posts}
+          post={posts[index]}
+          onUpdatePost={onUpdatePost}
+          handleDeletePost={handleDeletePost}
+        />
+      )}
       id="home"
       key={updateKey}
       initialLoading={initialLoading}
-      handleCreatePost={handleCreatePost}
-      posts={posts}
+      showCreateItem={loggedIn ?? false}
+      CreateItemComponent={<CreatePost setPosts={handleCreatePost} />}
+      items={posts}
       loading={loading}
-      hasMorePosts={hasMorePosts}
+      hasMoreItems={hasMorePosts}
       skeletonCount={skeletonCount}
-      showCreatePost={loggedIn ?? false}
       onEndReached={fetchPosts}
-      onUpdatePost={onUpdatePost}
-      handleDeletePost={handleDeletePost}
     />
   );
 }

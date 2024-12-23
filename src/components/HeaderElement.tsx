@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 interface HeaderElementProps {
   selectedPath: string;
   text: string;
+  isClickable?: boolean;
   className?: string;
 }
 
@@ -14,15 +14,23 @@ const HeaderElement = ({
   text,
   selectedPath,
   className,
+  isClickable = true,
 }: HeaderElementProps) => {
   const pathname = usePathname();
+  const router = useRouter();
   return (
-    <Link
-      scroll={false}
-      href={selectedPath}
+    <div
+      onClick={() => {
+        if (isClickable) {
+          router.push(selectedPath);
+        }
+      }}
       className={
-        "flex outline-2 outline-[#888] w-full flex-grow px-2 transition-all ease-in-out duration-300 h-full hover:bg-neutral-500 hover:bg-opacity-[0.5] justify-center items-center" +
-        (className ? " " + className : "")
+        `flex outline-2 outline-[#888] w-full flex-grow px-2 transition-all ease-in-out duration-300 h-full justify-center items-center${
+          isClickable
+            ? " hover:bg-neutral-500 hover:bg-opacity-[0.5] cursor-pointer"
+            : ""
+        }` + (className ? " " + className : "")
       }
     >
       <span
@@ -39,7 +47,7 @@ const HeaderElement = ({
           ></div>
         )}
       </span>
-    </Link>
+    </div>
   );
 };
 

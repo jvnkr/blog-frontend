@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { PostData } from "@/lib/types";
+import { ProfileProps } from "@/components/Profile";
 
 interface PostsContextType {
   posts: PostData[];
@@ -14,6 +15,8 @@ interface PostsContextType {
   hasMorePosts: boolean;
   hasMoreProfilePosts: boolean;
   cachedProfilePath: string;
+  profileData: ProfileProps | null;
+  setProfileData: React.Dispatch<React.SetStateAction<ProfileProps | null>>;
   setPageNumber: React.Dispatch<React.SetStateAction<number>>;
   setHasMorePosts: React.Dispatch<React.SetStateAction<boolean>>;
   setHasMoreFollowingPosts: React.Dispatch<React.SetStateAction<boolean>>;
@@ -39,6 +42,7 @@ export const PostsProvider = ({ children }: { children: ReactNode }) => {
   const [profilePageNumber, setProfilePageNumber] = useState(0);
   const [hasMoreProfilePosts, setHasMoreProfilePosts] = useState(true);
   const [cachedProfilePath, setCachedProfilePath] = useState<string>("");
+  const [profileData, setProfileData] = useState<ProfileProps | null>(null);
 
   return (
     <PostsContext.Provider
@@ -63,6 +67,8 @@ export const PostsProvider = ({ children }: { children: ReactNode }) => {
         setHasMoreProfilePosts,
         cachedProfilePath,
         setCachedProfilePath,
+        profileData,
+        setProfileData,
       }}
     >
       {children}

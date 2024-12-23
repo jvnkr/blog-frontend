@@ -5,11 +5,11 @@ import React from "react";
 import { fetcher } from "@/lib/utils";
 import { SessionData } from "@/lib/types";
 import { AuthContextProvider } from "@/context/AuthContext";
-import { cookies } from "next/headers";
 import PatternCircles from "@/components/CirclePattern";
 import NoiseTexture from "@/components/NoiseTexture";
 import { Toaster } from "@/components/ui/sonner";
 import { ClientProviders } from "@/components/ClientProviders";
+import { cookies } from "next/headers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,35 +35,43 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("a_t")?.value;
-
   let serverAuthData: SessionData = {
-    accessToken: accessToken || "",
+    accessToken: "",
     username: "",
     userId: "",
     name: "",
     loggedIn: false,
+    verified: false,
   };
 
   try {
-    const res = await fetcher("/api/auth/session", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: cookieStore.toString(),
+    const res = await fetcher(
+      "/api/auth/session",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: await cookies().toString(),
+        },
+        body: JSON.stringify({
+          accessToken: "",
+        }),
       },
-    });
+      () => null
+    );
 
+    console.log("res", res);
     if (res.ok) {
       const data = await res.json();
+      console.log("data", data);
       serverAuthData = {
-        accessToken: data.accessToken || accessToken || "",
+        accessToken: data.accessToken || "",
         username: data.username || "",
         userId: data.userId || "",
         name: data.name || "",
         loggedIn: true,
+        verified: data.verified || false,
       };
     }
   } catch (error) {

@@ -1,14 +1,102 @@
 import React from "react";
+import InteractionElement from "./InteractionElement";
+import { Heart, MessageSquare } from "lucide-react";
 
 interface PostInteractionProps {
-  children: React.ReactNode;
+  handleLike: () => void;
+  liked: boolean;
+  likes: number;
+  replies: number;
+  onCommentsClick?: () => void;
+  onReplyClick?: () => void;
+  showReply?: boolean;
+  repliesTo?: boolean;
+  repliesOpen?: boolean;
 }
 
-const PostInteraction = ({ children }: PostInteractionProps) => {
+const PostInteraction = ({
+  handleLike,
+  liked,
+  likes,
+  replies,
+  onReplyClick,
+  onCommentsClick,
+  showReply = false,
+  repliesTo = false,
+  repliesOpen = false,
+}: PostInteractionProps) => {
   return (
-    <div className="flex relative w-fit gap-1 items-center text-neutral-400 group">
-      {children}
-      <div className="absolute rounded-md w-[calc(100%+15px)] h-[calc(100%+6px)] -left-[7.5px] -top-[3px] group-hover:bg-neutral-500/15 transition-colors duration-200"></div>
+    <div className="flex select-none mb-[-4px] mt-[8px] h-[24px] items-center gap-4">
+      <div
+        onMouseUp={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleLike();
+        }}
+        className="flex relative h-full justify-center w-fit gap-1 items-center text-neutral-400"
+      >
+        <InteractionElement>
+          <Heart
+            style={{
+              zIndex: 1,
+            }}
+            className={`font-semibold  w-[20px] h-[20px] ${
+              liked ? "text-red-500 fill-red-500" : ""
+            }`}
+          />
+          <span
+            style={{
+              zIndex: 1,
+            }}
+          >
+            {likes}
+          </span>
+        </InteractionElement>
+      </div>
+      {!repliesTo && (
+        <div
+          onClick={onCommentsClick}
+          className="flex relative h-full justify-center w-fit gap-1 items-center text-neutral-400"
+        >
+          <InteractionElement>
+            <MessageSquare
+              style={{
+                zIndex: 1,
+              }}
+              className={`font-semibold w-[20px] h-[20px] ${
+                repliesOpen ? "fill-blue-500 text-blue-500" : ""
+              }`}
+            />
+            <span
+              style={{
+                zIndex: 1,
+              }}
+            >
+              {replies}
+            </span>
+          </InteractionElement>
+        </div>
+      )}
+      {showReply && (
+        <div
+          onClick={onReplyClick}
+          className="flex relative h-full justify-center text-sm w-fit gap-1 items-center text-neutral-400"
+        >
+          <InteractionElement>
+            <span
+              style={{
+                zIndex: 1,
+              }}
+            >
+              Reply
+            </span>
+          </InteractionElement>
+        </div>
+      )}
     </div>
   );
 };

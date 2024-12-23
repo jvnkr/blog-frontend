@@ -1,30 +1,32 @@
 import { useState, useEffect, useRef } from "react";
-import { fetcher } from "@/lib/utils";
-import { getCookie } from "cookies-next";
 import { toast } from "sonner";
-import { PostData } from "@/lib/types";
+import { useAuthContext } from "@/context/AuthContext";
+import useFetcher from "./useFetcher";
 
-export function useFetchPosts(
-  posts: PostData[],
-  setPosts: React.Dispatch<React.SetStateAction<PostData[]>>,
+export function useFetchItems(
+  items: unknown[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setItems: React.Dispatch<React.SetStateAction<any[]>>,
   endpoint: string,
   pageNumber: number,
   setPageNumber: React.Dispatch<React.SetStateAction<number>>,
-  hasMorePosts: boolean,
-  setHasMorePosts: React.Dispatch<React.SetStateAction<boolean>>
+  hasMoreItems: boolean,
+  setHasMoreItems: React.Dispatch<React.SetStateAction<boolean>>
 ) {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(false);
   const [skeletonCount, setSkeletonCount] = useState(0);
   const initialFetchRef = useRef(false);
+  const { accessToken } = useAuthContext();
+  const fetcher = useFetcher();
 
   useEffect(() => {
-    if (posts.length === 0 && !initialFetchRef.current && hasMorePosts) {
-      // Hide overflow when initially loading with no posts
+    if (items.length === 0 && !initialFetchRef.current && hasMoreItems) {
+      // Hide overflow when initially loading with no items
       document.body.style.overflow = "hidden";
       setSkeletonCount(Math.floor(window.innerHeight / (16 * 16)));
       setInitialLoading(true);
-      fetchPosts().then(() => {
+      fetchItems().then(() => {
         setInitialLoading(false);
       });
     }
@@ -33,19 +35,19 @@ export function useFetchPosts(
       document.body.style.overflow = "visible";
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [posts.length, hasMorePosts]); // Add dependencies to prevent double fetch
+  }, [items.length, hasMoreItems]); // Add dependencies to prevent double fetch
 
-  const fetchPosts = async () => {
-    if (loading || !hasMorePosts || initialFetchRef.current) return;
+  const fetchItems = async () => {
+    if (loading || !hasMoreItems || initialFetchRef.current) return;
     initialFetchRef.current = true;
-    setLoading(true);
+    if (!initialLoading) setLoading(true);
+
     try {
-      const accessToken = getCookie("a_t") as string;
       const response = await fetcher(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: accessToken ? `Bearer ${accessToken}` : "",
+          Authorization: `Bearer ${accessToken}`,
         },
         cache: "force-cache",
         body: JSON.stringify({ pageNumber }),
@@ -53,38 +55,45 @@ export function useFetchPosts(
       });
 
       if (!response.ok) {
-        setHasMorePosts(false);
+        setHasMoreItems(false);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      setPosts((prev) => [...prev, ...data]);
+      setItems((prev) => [...prev, ...data]);
       setPageNumber((prev) => prev + 1);
-      toast.success("Posts fetched successfully");
-      setHasMorePosts(data.length > 0);
+      toast.success("Items fetched successfully");
+      setHasMoreItems(data.length > 0);
       setLoading(false);
       initialFetchRef.current = false;
     } catch (error) {
-      console.error("Failed to fetch posts:", error);
-      setHasMorePosts(false);
+      console.error("Failed to fetch items:", error);
+      setHasMoreItems(false);
       setLoading(false);
       initialFetchRef.current = false;
     } finally {
       setLoading(false);
-      // Restore overflow after posts are loaded or on error
+      // Restore overflow after items are loaded or on error
       document.body.style.overflow = "visible";
     }
   };
 
-  const handleUpdatePost = (post: PostData) => {
-    setPosts((prev) => prev.map((p) => (p.id === post.id ? post : p)));
+  const handleUpdateItem = (item: unknown) => {
+    setItems((prev) =>
+      prev.map((p) =>
+        (p as unknown as { id: string }).id ===
+        (item as unknown as { id: string }).id
+          ? item
+          : p
+      )
+    );
   };
 
   return {
     loading,
     skeletonCount,
     initialLoading,
-    fetchPosts,
-    handleUpdatePost,
+    fetchItems,
+    handleUpdateItem,
   };
 }

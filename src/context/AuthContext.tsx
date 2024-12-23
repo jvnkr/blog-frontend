@@ -2,7 +2,7 @@
 
 import { createContext, useEffect } from "react";
 
-import { deleteCookie, setCookie } from "cookies-next";
+import { deleteCookie } from "cookies-next";
 import { ReactNode, useState, useContext } from "react";
 import { refreshSession } from "@/lib/utils";
 import useSWR from "swr";
@@ -12,32 +12,36 @@ interface AuthContextProps {
   loggedIn: boolean | null;
   name: string;
   username: string;
+  verified: boolean;
   userId: string;
-  unauthWall: boolean;
+  unauthWall: string;
   accessToken: string;
   setAccessToken: (value: string) => void;
+  setVerified: (value: boolean) => void;
   setLoggedIn: (value: boolean | null) => void;
   setName: (value: string) => void;
   setUsername: (value: string) => void;
   setUserId: (value: string) => void;
   clearAll: () => void;
-  setUnauthWall: React.Dispatch<React.SetStateAction<boolean>>;
+  setUnauthWall: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const AuthContext = createContext<AuthContextProps>({
   loggedIn: null,
   name: "",
   username: "",
+  verified: false,
   userId: "",
-  unauthWall: false,
+  unauthWall: "",
   accessToken: "",
   setAccessToken: (): string => "",
   setLoggedIn: (): null => null,
+  setVerified: (): boolean => false,
   setName: (): string => "",
   setUsername: (): string => "",
   setUserId: (): string => "",
   clearAll: () => null,
-  setUnauthWall: () => null,
+  setUnauthWall: (): string => "",
 });
 
 export const AuthContextProvider = ({
@@ -51,29 +55,31 @@ export const AuthContextProvider = ({
     username?: string;
     userId?: string;
     accessToken?: string;
+    verified?: boolean;
   };
 }) => {
   const [loggedIn, setLoggedIn] = useState<boolean | null>(
     serverData.loggedIn || null
   );
   const [name, setName] = useState(serverData.name || "");
-  const [unauthWall, setUnauthWall] = useState(false);
+  const [unauthWall, setUnauthWall] = useState("");
   const [username, setUsername] = useState(serverData.username || "");
   const [userId, setUserId] = useState(serverData.userId || "");
   const [accessToken, setAccessToken] = useState(serverData.accessToken || "");
-
+  const [verified, setVerified] = useState(serverData.verified || false);
   // const pathname = usePathname();
   // const router = useRouter();
 
   const clearAll = () => {
     setLoggedIn(false);
-    setUnauthWall(false);
+    setUnauthWall("");
     deleteCookie("a_t");
     deleteCookie("r_t");
     setUsername("");
     setName("");
     setUserId("");
     setAccessToken("");
+    setVerified(false);
   };
 
   /**
@@ -90,15 +96,8 @@ export const AuthContextProvider = ({
       setUsername(data.username);
       setName(data.name);
       setUserId(data.userId);
+      setVerified(data.verified);
       if (data.accessToken) {
-        console.log("Session expired");
-        setCookie("a_t", data.accessToken, {
-          // httpOnly: true,
-          // secure: true,
-          // sameSite: "lax",
-          // domain: API_DOMAIN,
-        });
-        // setAccessToken(data.accessToken);
         setLoggedIn(true);
       }
     } else {
@@ -109,11 +108,6 @@ export const AuthContextProvider = ({
   useEffect(() => {
     if (serverData.accessToken) {
       setAccessToken(serverData.accessToken);
-      setCookie("a_t", serverData.accessToken, {
-        // httpOnly: true,
-        // secure: true,
-        // sameSite: "lax",
-      });
     } else {
       clearAll();
     }
@@ -121,7 +115,7 @@ export const AuthContextProvider = ({
 
   useSWR("/api/auth/session", updateLoggedInStatus, {
     revalidateIfStale: false,
-    revalidateOnFocus: true,
+    revalidateOnFocus: false,
     refreshInterval: 300000, // 5 minutes
   });
 
@@ -133,6 +127,8 @@ export const AuthContextProvider = ({
         clearAll,
         loggedIn,
         setLoggedIn,
+        verified,
+        setVerified,
         username,
         setUsername,
         userId,
@@ -143,7 +139,7 @@ export const AuthContextProvider = ({
         setAccessToken,
       }}
     >
-      {unauthWall && <AuthWall />}
+      {unauthWall && <AuthWall next={unauthWall} />}
       {children}
     </AuthContext.Provider>
   );

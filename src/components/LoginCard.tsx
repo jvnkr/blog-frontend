@@ -11,8 +11,6 @@ import {
   FormControl,
   FormMessage,
 } from "./ui/form";
-import { fetcher } from "@/lib/utils";
-import { setCookie } from "cookies-next";
 import { toast } from "sonner";
 import { useAuthContext } from "@/context/AuthContext";
 import Link from "next/link";
@@ -24,6 +22,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import Logo from "./Logo";
+import useFetcher from "@/hooks/useFetcher";
 
 const formSchema = z.object({
   usernameOrEmail: z.string().min(3, {
@@ -46,6 +45,7 @@ const LoginCard = ({ next = "/home" }: LoginCardProps) => {
     setUserId,
     setAccessToken,
     setLoggedIn,
+    setVerified,
   } = useAuthContext();
   const formMethods = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,6 +54,7 @@ const LoginCard = ({ next = "/home" }: LoginCardProps) => {
       password: "",
     },
   });
+  const fetcher = useFetcher();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -65,17 +66,16 @@ const LoginCard = ({ next = "/home" }: LoginCardProps) => {
         body: JSON.stringify(values),
       });
       if (response.ok) {
-        const { accessToken, refreshToken, username, name, userId } =
+        const { accessToken, username, name, userId, verified } =
           await response.json();
-        setUnauthWall(false);
-        setCookie("a_t", accessToken);
-        setCookie("r_t", refreshToken);
+        window.location.href = next;
+        setUnauthWall("");
         setUsername(username);
         setName(name);
         setUserId(userId);
+        setVerified(verified);
         setAccessToken(accessToken);
         setLoggedIn(true);
-        window.location.href = next;
       } else {
         const data = await response.json();
         throw new Error(data.error);

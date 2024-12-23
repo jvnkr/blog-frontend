@@ -17,10 +17,31 @@ export interface PostData {
   };
 }
 
+export interface CommentData {
+  id: string;
+  rootId?: string;
+  repliesTo?: {
+    id: string;
+    username: string;
+  };
+  text: string;
+  createdAt: string;
+  liked: boolean;
+  likes: number;
+  replies: number;
+  author: {
+    id: string;
+    username: string;
+    name: string;
+    verified: boolean;
+  };
+}
+
 export interface UserData {
   username: string;
   name: string;
   email: string;
+  verified: boolean;
 }
 
 export interface SessionData {
@@ -29,6 +50,7 @@ export interface SessionData {
   username: string;
   userId: string;
   name: string;
+  verified: boolean;
   loggedIn: boolean;
 }
 

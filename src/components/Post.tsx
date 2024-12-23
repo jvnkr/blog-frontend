@@ -6,8 +6,6 @@ import {
   Dot,
   EllipsisVertical,
   Flag,
-  Heart,
-  MessageSquare,
   Share,
   Trash2,
   UserRoundMinus,
@@ -16,12 +14,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState, useRef } from "react";
 import useResponsiveClass from "@/hooks/useResponsiveClass";
 import Avatar from "./Avatar";
-import { fetcher, formatTimeDifference } from "@/lib/utils";
+import { formatTimeDifference } from "@/lib/utils";
 import { useAuthContext } from "@/context/AuthContext";
-import { getCookie } from "cookies-next";
 import { Card } from "./ui/card";
 import { toast } from "sonner";
-import PostInteraction from "./PostInteraction";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,8 +28,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import PostInteraction from "./PostInteraction";
+import useFetcher from "@/hooks/useFetcher";
 
 interface PostProps {
   post: PostData;
@@ -50,6 +47,7 @@ export const Post = ({
 }: PostProps) => {
   const [post, setPost] = useState(initialPost);
   const postRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [options, setOptions] = useState(false);
@@ -57,36 +55,38 @@ export const Post = ({
   const [hoverReport, setHoverReport] = useState(false);
   const [hoverMinus, setHoverMinus] = useState(false);
   const responsiveClass = useResponsiveClass();
-  const { loggedIn, setUnauthWall, userId } = useAuthContext();
+  const { accessToken, loggedIn, setUnauthWall, userId } = useAuthContext();
+  const fetcher = useFetcher();
 
-  const updatePost = async (postId: string, updatedPost: PostData) => {
+  const handleLike = async () => {
     try {
-      const endpoint = updatedPost.liked ? "like" : "unlike";
-
-      await fetcher(`/api/v1/posts/${endpoint}/${postId}`, {
-        method: "GET",
-        credentials: "include",
-        keepalive: true, // Ensures request completes even on page unload
+      const res = await fetcher("/api/v1/posts/like/" + post.id, {
+        method: post.liked ? "DELETE" : "GET",
         headers: {
-          Authorization: `Bearer ${getCookie("a_t")}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
+        credentials: "include",
       });
-      onUpdatePost?.(updatedPost);
+      if (res.ok) {
+        setPost((prev) => ({
+          ...prev,
+          liked: !prev.liked,
+          likes: prev.liked ? prev.likes - 1 : prev.likes + 1,
+        }));
+        onUpdatePost({
+          ...post,
+          liked: !post.liked,
+          likes: post.liked ? post.likes - 1 : post.likes + 1,
+        });
+      }
     } catch (error) {
-      console.log(error);
-      // Revert UI state on error
-      setPost((prev) => ({
-        ...prev,
-        liked: updatedPost.liked,
-        likes: updatedPost.liked ? prev.likes + 1 : prev.likes - 1,
-      }));
-      onUpdatePost?.(updatedPost);
+      console.error(error);
     }
   };
 
   const handlePostClick = () => {
-    if (triggerAuthWall()) return;
-    redirect(`/post/${post.id}`);
+    triggerAuthWall(`/post/${post.id}`);
   };
 
   const handleDelete = async () => {
@@ -100,7 +100,7 @@ export const Post = ({
         method: "DELETE",
         credentials: "include",
         headers: {
-          Authorization: `Bearer ${getCookie("a_t")}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
       const newPosts = posts.filter((p) => p.id !== post.id);
@@ -113,28 +113,13 @@ export const Post = ({
     setShowDeleteDialog(false);
   };
 
-  const triggerAuthWall = () => {
+  const triggerAuthWall = (url = "") => {
     if (!loggedIn) {
-      setUnauthWall(true);
+      setUnauthWall(url);
       return true;
     }
+    router.push(url);
     return false;
-  };
-
-  const handleLike = async () => {
-    if (triggerAuthWall()) return;
-
-    // Optimistic update
-    const newLiked = !post.liked;
-    const updatedPost = {
-      ...post,
-      liked: newLiked,
-      likes: newLiked ? post.likes + 1 : post.likes - 1,
-    };
-    setPost(updatedPost);
-    onUpdatePost?.(updatedPost);
-
-    updatePost(post.id, updatedPost);
   };
 
   return (
@@ -174,10 +159,12 @@ export const Post = ({
             "flex absolute bg-[#202023] overflow-hidden top-0 w-[calc(100%+2px)] pl-2 h-[60px] left-[-1px] border border-t-0 rounded-b-xl dark:border-[#272629] justify-between items-center"
           }
         >
-          <Link
-            href={`/@${post.author.username}`}
+          <div
+            onClick={() => {
+              triggerAuthWall(`/@${post.author.username}`);
+            }}
             className={
-              "flex select-none h-full justify-start gap-2 items-center w-fit"
+              "flex cursor-pointer select-none h-full justify-start gap-2 items-center w-fit"
             }
           >
             <Avatar name={post.author.name} />
@@ -210,7 +197,7 @@ export const Post = ({
                 </span>
               </div>
             </div>
-          </Link>
+          </div>
           <motion.div
             animate={{
               minWidth: options
@@ -341,65 +328,13 @@ export const Post = ({
               </div>
             </div>
           </div>
-          <div className="flex p-3 gap-4 pt-0 justify-start border-0 border-t-[#272629] border-x-0 border-b-0 items-center mt-1 w-full h-fit">
-            <div
-              onMouseUp={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleLike();
-              }}
-              className="flex relative w-fit gap-1 items-center text-neutral-400"
-            >
-              <PostInteraction>
-                <Heart
-                  style={{
-                    zIndex: 1,
-                  }}
-                  className={`font-semibold  w-[20px] h-[20px] ${
-                    loggedIn && post.liked ? "text-red-500 fill-red-500" : ""
-                  }`}
-                />
-                <span
-                  style={{
-                    zIndex: 1,
-                  }}
-                >
-                  {post.likes}
-                </span>
-              </PostInteraction>
-            </div>
-            <div
-              onMouseUp={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (triggerAuthWall()) return;
-              }}
-              className="flex relative w-fit gap-1 items-center text-neutral-400"
-            >
-              <PostInteraction>
-                <MessageSquare
-                  style={{
-                    zIndex: 1,
-                  }}
-                  className="font-semibold w-[20px] h-[20px]"
-                />
-                <span
-                  style={{
-                    zIndex: 1,
-                  }}
-                >
-                  {post.comments}
-                </span>
-              </PostInteraction>
-            </div>
+          <div className="p-3 pt-0">
+            <PostInteraction
+              handleLike={handleLike}
+              liked={post.liked}
+              likes={post.likes}
+              replies={post.comments}
+            />
           </div>
         </div>
       </Card>

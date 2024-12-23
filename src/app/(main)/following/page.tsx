@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { useFetchPosts } from "@/hooks/useFetchPosts";
+import { useFetchItems } from "@/hooks/useFetchPosts";
 import { usePostsContext } from "@/context/PostsContext";
-import { VirtualizedPosts } from "@/components/VirtualizedPosts";
+import { VirtualizedItems } from "@/components/VirtualizedPosts";
 import { PostData } from "@/lib/types";
+import { Post } from "@/components/Post";
 
 export default function FollowingPage() {
   const {
@@ -26,9 +27,9 @@ export default function FollowingPage() {
     loading,
     initialLoading,
     skeletonCount,
-    fetchPosts,
-    handleUpdatePost,
-  } = useFetchPosts(
+    fetchItems: fetchPosts,
+    handleUpdateItem: handleUpdatePost,
+  } = useFetchItems(
     followingPosts,
     setFollowingPosts,
     "/api/v1/posts/batch/following",
@@ -37,11 +38,6 @@ export default function FollowingPage() {
     hasMoreFollowingPosts,
     setHasMoreFollowingPosts
   );
-
-  const handleCreatePost = (newPost: PostData) => {
-    setFollowingPosts([newPost, ...followingPosts]);
-    setUpdateKey((prevKey) => prevKey + 1);
-  };
 
   const handleDeletePost = (newPosts: PostData[], deletedPostId: string) => {
     setFollowingPosts(newPosts);
@@ -59,18 +55,24 @@ export default function FollowingPage() {
   };
 
   return (
-    <VirtualizedPosts
+    <VirtualizedItems
       key={updateKey}
       id="following"
-      handleCreatePost={handleCreatePost}
-      hasMorePosts={hasMoreFollowingPosts}
-      posts={followingPosts}
+      items={followingPosts}
       loading={loading}
       initialLoading={initialLoading}
       skeletonCount={skeletonCount}
       onEndReached={fetchPosts}
-      onUpdatePost={onUpdatePost}
-      handleDeletePost={handleDeletePost}
+      hasMoreItems={hasMoreFollowingPosts}
+      ItemComponent={(index) => (
+        <Post
+          key={index}
+          post={followingPosts[index]}
+          posts={followingPosts}
+          onUpdatePost={onUpdatePost}
+          handleDeletePost={handleDeletePost}
+        />
+      )}
     />
   );
 }

@@ -3,11 +3,9 @@
 import React, { useEffect } from "react";
 import LoginCard from "./LoginCard";
 import { useAuthContext } from "@/context/AuthContext";
-import { usePathname } from "next/navigation";
 
-const AuthWall = () => {
+const AuthWall = ({ next = "/home" }: { next: string }) => {
   const { setUnauthWall } = useAuthContext();
-  const pathname = usePathname();
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -22,11 +20,11 @@ const AuthWall = () => {
       style={{
         zIndex: 999999,
       }}
-      onClick={() => setUnauthWall(false)}
+      onClick={() => setUnauthWall("")}
       className="flex truncate fixed top-0 left-0 bottom-0 right-0 bg-black/90 w-full justify-center items-center"
     >
       <div onClick={(e) => e.stopPropagation()}>
-        <LoginCard next={pathname} />
+        <LoginCard next={next} />
       </div>
     </div>
   );

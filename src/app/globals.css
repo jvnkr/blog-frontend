@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+.epr_-vj00gx {
+  --epr-search-input-bg-color-active: #303030 !important;
+  --epr-emoji-hover-color: #272629 !important;
+}
+
 html {
   overflow: -moz-scrollbars-vertical;
   overflow-y: scroll;
@@ -15,6 +20,20 @@ body {
 
 html body[style] {
   margin-right: 0px !important;
+}
+em-emoji-picker {
+  --background-rgb: 255, 255, 255;
+  /* --border-radius: 24px; */
+  /* --category-icon-size: 24px; */
+  /* --color-border-over: rgba(0, 0, 0, 0.1); */
+  /* --color-border: rgba(0, 0, 0, 0.05); */
+  /* --font-size: 20px; */
+  --rgb-accent: 255, 255, 255;
+  --rgb-background: 24, 24, 27;
+  border: 1px solid #272629;
+  /* --rgb-color: 102, 51, 153; */
+  /* --rgb-input: 255, 235, 235; */
+  --shadow: 0px 0px 18px -15px rgb(144, 144, 144);
 }
 
 @layer base {
