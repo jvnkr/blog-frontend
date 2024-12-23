@@ -114,7 +114,6 @@ const Comment = ({
     });
     if (res.ok) {
       const data = await res.json();
-      console.log(data);
       if (Array.isArray(data) && data.length > 0) {
         onRepliesClick(data, true);
         setRepliesOpen(true);

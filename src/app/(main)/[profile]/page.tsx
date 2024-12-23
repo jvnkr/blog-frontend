@@ -46,7 +46,6 @@ export default function Page() {
           router.push("/");
           return;
         }
-        console.log(data);
 
         setProfileData(data);
       } catch (error) {
@@ -58,7 +57,14 @@ export default function Page() {
     };
 
     if (!profileData) fetchUser();
-  }, [accessToken, fetcher, params.profile, profileData, router, setProfileData]);
+  }, [
+    accessToken,
+    fetcher,
+    params.profile,
+    profileData,
+    router,
+    setProfileData,
+  ]);
 
   if (loading || !profileData) {
     return (

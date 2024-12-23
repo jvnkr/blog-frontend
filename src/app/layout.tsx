@@ -61,10 +61,8 @@ export default async function RootLayout({
       () => null
     );
 
-    console.log("res", res);
     if (res.ok) {
       const data = await res.json();
-      console.log("data", data);
       serverAuthData = {
         accessToken: data.accessToken || "",
         username: data.username || "",
