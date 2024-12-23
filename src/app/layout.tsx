@@ -52,7 +52,7 @@ export default async function RootLayout({
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Cookie: await cookies().toString(),
+          Cookie: (await cookies()).toString(),
         },
         body: JSON.stringify({
           accessToken: "",
