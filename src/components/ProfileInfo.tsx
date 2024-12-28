@@ -35,6 +35,7 @@ const ProfileInfo = ({
   const [currentBio, setCurrentBio] = useState<string | null>(bio);
   const [currentUsername, setCurrentUsername] = useState(username);
   const [currentName, setCurrentName] = useState(name);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const {
     username: authUsername,
     loggedIn,
@@ -172,6 +173,8 @@ const ProfileInfo = ({
                   className="flex relative justify-between items-center w-full bg-zinc-900 p-1 rounded-b-md border border-t-0 border-zinc-700"
                 >
                   <EmojiPicker
+                    setShowEmojiPicker={setShowEmojiPicker}
+                    showEmojiPicker={showEmojiPicker}
                     isPortal={false}
                     isVisible={showEditProfile}
                     top={0}

@@ -15,6 +15,8 @@ interface EmojiPickerProps {
   top?: number;
   left?: number;
   size?: number;
+  setShowEmojiPicker: React.Dispatch<React.SetStateAction<boolean>>;
+  showEmojiPicker: boolean;
 }
 
 const EmojiPicker = ({
@@ -22,13 +24,14 @@ const EmojiPicker = ({
   zIndex = 999,
   onClick,
   className,
+  setShowEmojiPicker,
+  showEmojiPicker,
   isVisible = true,
   isPortal = true,
   top = 0,
   left = !isPortal ? 50 : 0,
   size = 20,
 }: EmojiPickerProps) => {
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [pickerPosition, setPickerPosition] = useState({
     top: top,
     left: left,

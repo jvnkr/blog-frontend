@@ -68,7 +68,7 @@ const PostInteraction = ({
                 zIndex: 1,
               }}
               className={`font-semibold w-[20px] h-[20px] ${
-                repliesOpen ? "fill-blue-500 text-blue-500" : ""
+                repliesOpen && replies > 0 ? "fill-blue-500 text-blue-500" : ""
               }`}
             />
             <span

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import EmojiPicker from "./EmojiPicker";
 
@@ -25,6 +25,8 @@ const PostFooter = ({
   emojiZIndex = 999,
   isPortal = true,
 }: PostFooterProps) => {
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
   return (
     <div
       style={{
@@ -35,6 +37,8 @@ const PostFooter = ({
       }
     >
       <EmojiPicker
+        setShowEmojiPicker={setShowEmojiPicker}
+        showEmojiPicker={showEmojiPicker}
         isPortal={isPortal}
         zIndex={emojiZIndex}
         onEmojiClick={onEmojiClick}
@@ -62,7 +66,12 @@ const PostFooter = ({
         <Button
           disabled={disabled}
           type="button"
-          onClick={handleCreate}
+          onClick={() => {
+            setShowEmojiPicker(false);
+            if (handleCreate) {
+              handleCreate();
+            }
+          }}
           className="select-none"
         >
           {buttonValue}

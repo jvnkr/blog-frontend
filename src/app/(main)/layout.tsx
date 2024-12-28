@@ -180,7 +180,7 @@ export default function HomeLayout({
                 pathname.split("/")[1] === "post" ||
                 pathname.split("/")[1] === "home") && (
                 <Button
-                  className="w-full font-bold mt-2 bg-[#e1e1e1] text-lg rounded-full p-6"
+                  className="w-full font-bold mt-2 hover:bg-[#e1e1e1]/70 bg-[#e1e1e1] text-lg rounded-full p-6"
                   onClick={() => setShowCreatePostDialog(true)}
                 >
                   <span>

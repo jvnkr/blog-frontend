@@ -23,6 +23,8 @@ import PostInteraction from "./PostInteraction";
 import useFetcher from "@/hooks/useFetcher";
 import VirtualPopup from "./VirtualPopup";
 import DeletePost from "./DeletePost";
+import { usePostsContext } from "@/context/PostsContext";
+import Tooltip from "./Tooltip";
 
 interface PostProps {
   post: PostData;
@@ -42,6 +44,15 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
   const [hoverMinus, setHoverMinus] = useState(false);
   const responsiveClass = useResponsiveClass();
   const { accessToken, loggedIn, setUnauthWall, userId } = useAuthContext();
+  const {
+    posts,
+    profilePosts,
+    followingPosts,
+    setPosts,
+    setIsPopup,
+    setProfilePosts,
+    setFollowingPosts,
+  } = usePostsContext();
 
   const fetcher = useFetcher();
 
@@ -83,12 +94,55 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
   const handlePostClick = () => {
     triggerAuthWall(`/post/${post.id}`);
   };
+  const handleDelete = async () => {
+    const previousPosts = posts;
+    const previousProfilePosts = profilePosts;
+    const previousFollowingPosts = followingPosts;
+    try {
+      setPosts(posts.filter((p) => p.id !== post.id));
+      setProfilePosts(profilePosts.filter((p) => p.id !== post.id));
+      setFollowingPosts(followingPosts.filter((p) => p.id !== post.id));
+      setShowDeleteDialog(false);
+      setIsPopup(false);
+      await fetcher(`/api/v1/posts/${post.id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      toast.success("Post deleted");
+    } catch (error) {
+      setPosts(previousPosts);
+      setProfilePosts(previousProfilePosts);
+      setFollowingPosts(previousFollowingPosts);
+      toast.error("Failed to delete post");
+      console.log(error);
+    }
+  };
+
+  // Calculate number of action items
+  const getActionItemCount = () => {
+    let count = 1; // Share button always present
+    if (post.author.id === userId) {
+      count++; // Delete button
+    } else {
+      count += 2; // Block and Report buttons
+    }
+    return count;
+  };
+
+  const padding = 40;
+  const expandedWidth = `${getActionItemCount() * 50 + padding}px`; // 50px per action item
 
   return (
     <>
       {showDeleteDialog && (
         <VirtualPopup onOverlayClick={() => setShowDeleteDialog(false)}>
-          <DeletePost setShowDeleteDialog={setShowDeleteDialog} post={post} />
+          <DeletePost
+            setShowDeleteDialog={setShowDeleteDialog}
+            handleDelete={handleDelete}
+          />
         </VirtualPopup>
       )}
       <Card
@@ -135,20 +189,39 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
                 >
                   @{post.author.username}
                   <Dot className="w-[16px] h-full font-light text-neutral-600" />
-                  <span className="font-extralight text-neutral-600">
-                    {formatTimeDifference(new Date(post.createdAt))}
-                    {/* {formatTimeDifference(new Date("2025-01-01T12:00:00Z"))} */}
-                    {/* {formatTimeDifference(new Date("2024-01-01T12:00:00Z"))} */}
-                  </span>
+                  <Tooltip
+                    tooltipTrigger={
+                      <span className="hover:underline font-extralight text-neutral-600">
+                        {formatTimeDifference(new Date(post.createdAt))}
+                      </span>
+                    }
+                    tooltipContent={
+                      <>
+                        <p>
+                          {new Date(post.createdAt).toLocaleString("en-US", {
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}{" "}
+                        </p>
+                        <Dot className="w-[16px] h-full font-light text-neutral-600" />
+                        <p>
+                          {new Date(post.createdAt).toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </p>
+                      </>
+                    }
+                  />
                 </span>
               </div>
             </div>
           </div>
           <motion.div
             animate={{
-              minWidth: options
-                ? "var(--width-expanded)"
-                : "var(--width-collapsed)",
+              minWidth: options ? expandedWidth : "var(--width-collapsed)",
             }}
             transition={{
               duration: 0.03,
@@ -159,7 +232,7 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
             <AnimatePresence>
               {options && (
                 <motion.div
-                  initial={{ paddingLeft: "195px", opacity: 0 }}
+                  initial={{ paddingLeft: expandedWidth, opacity: 0 }}
                   animate={{
                     paddingLeft: "10px",
                     opacity: 1,
@@ -168,70 +241,92 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
                     },
                   }}
                   exit={{
-                    paddingLeft: "195px",
+                    paddingLeft: expandedWidth,
                     transition: {
                       duration: 1.2,
                       type: "spring",
                       ease: "easeInOut",
                     },
                   }}
-                  className="flex bg-[#212123] h-full justify-center items-center w-full p-2 gap-3 overflow-hidden"
+                  className="flex bg-[#212123] h-full justify-center items-center w-full p-2 gap-4 overflow-hidden"
                 >
                   {post.author.id !== userId && (
-                    <div
-                      onMouseEnter={() => setHoverMinus(true)}
-                      onMouseLeave={() => setHoverMinus(false)}
-                      className="flex cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
-                    >
-                      <UserRoundMinus
-                        className={`${
-                          hoverMinus ? "text-yellow-500" : ""
-                        } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
-                      />
-                    </div>
+                    <Tooltip
+                      tooltipTrigger={
+                        <div
+                          onMouseEnter={() => setHoverMinus(true)}
+                          onMouseLeave={() => setHoverMinus(false)}
+                          className="flex cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
+                        >
+                          <UserRoundMinus
+                            className={`${
+                              hoverMinus ? "text-red-500" : ""
+                            } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
+                          />
+                        </div>
+                      }
+                      tooltipContent={<span>Unfollow user</span>}
+                    />
                   )}
                   {post.author.id === userId && (
-                    <div
-                      onMouseEnter={() => setHoverMinus(true)}
-                      onMouseLeave={() => setHoverMinus(false)}
-                      onClick={() => setShowDeleteDialog(true)}
-                      className="flex cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
-                    >
-                      <Trash2
-                        className={`${
-                          hoverMinus ? "text-red-500" : ""
-                        } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
-                      />
-                    </div>
+                    <Tooltip
+                      tooltipTrigger={
+                        <div
+                          onMouseEnter={() => setHoverMinus(true)}
+                          onMouseLeave={() => setHoverMinus(false)}
+                          onClick={() => setShowDeleteDialog(true)}
+                          className="flex cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
+                        >
+                          <Trash2
+                            className={`${
+                              hoverMinus ? "text-red-500" : ""
+                            } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
+                          />
+                        </div>
+                      }
+                      tooltipContent={<span>Delete post</span>}
+                    />
                   )}
-                  <div
-                    onMouseEnter={() => setHoverReport(true)}
-                    onMouseLeave={() => setHoverReport(false)}
-                    className="flex cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
-                  >
-                    <Flag
-                      className={`${
-                        hoverReport ? "text-red-500" : ""
-                      } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
+                  {userId !== post.author.id && (
+                    <Tooltip
+                      tooltipTrigger={
+                        <div
+                          onMouseEnter={() => setHoverReport(true)}
+                          onMouseLeave={() => setHoverReport(false)}
+                          className="flex cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
+                        >
+                          <Flag
+                            className={`${
+                              hoverReport ? "text-yellow-500" : ""
+                            } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
+                          />
+                        </div>
+                      }
+                      tooltipContent={<span>Report post</span>}
                     />
-                  </div>
-                  <div
-                    onMouseEnter={() => setHoverShare(true)}
-                    onMouseLeave={() => setHoverShare(false)}
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        `${window.location.origin}/post/${post.id}`
-                      );
-                      toast.success("Link copied to clipboard");
-                    }}
-                    className="flex hover:text-green cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
-                  >
-                    <Share
-                      className={`${
-                        hoverShare ? "text-green-500" : ""
-                      } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
-                    />
-                  </div>
+                  )}
+                  <Tooltip
+                    tooltipTrigger={
+                      <div
+                        onMouseEnter={() => setHoverShare(true)}
+                        onMouseLeave={() => setHoverShare(false)}
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            `${window.location.origin}/post/${post.id}`
+                          );
+                          toast.success("Link copied to clipboard");
+                        }}
+                        className="flex hover:text-green cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
+                      >
+                        <Share
+                          className={`${
+                            hoverShare ? "text-green-500" : ""
+                          } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
+                        />
+                      </div>
+                    }
+                    tooltipContent={<span>Share post</span>}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
