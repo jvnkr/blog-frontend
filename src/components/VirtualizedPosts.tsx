@@ -1,20 +1,21 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { useWindowVirtualizer, VirtualItem } from "@tanstack/react-virtual";
 import { useWindowScroll, useDebounce } from "@uidotdev/usehooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import LoadingSpinner from "./LoadingSpinner";
+import { usePostsContext } from "@/context/PostsContext";
+import { CommentData, PostData } from "@/lib/types";
 
 interface VirtualizedItemsProps {
   id: string;
-  items: unknown[];
+  items: (PostData | CommentData)[];
   loading: boolean;
   initialLoading: boolean;
   skeletonCount: number;
   hasMoreItems: boolean;
   onEndReached: () => void;
-  showCreateItem?: boolean;
   paddingStart?: number;
   ItemComponent: (index: number) => React.ReactNode;
   CreateItemComponent?: React.ReactNode;
@@ -30,12 +31,17 @@ export function VirtualizedItems({
   onEndReached,
   ItemComponent,
   CreateItemComponent,
-  showCreateItem = false,
   paddingStart = 60 + 16,
 }: VirtualizedItemsProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const initialFetchPreventedRef = useRef(false);
+  const { isPopup } = usePostsContext();
+  const virtualizerStateRef = useRef<{
+    items: VirtualItem[];
+    totalSize: number;
+    scrollPosition: number;
+  } | null>(null);
 
   // Retrieve scroll position and virtualization state from browser history
   const {
@@ -56,7 +62,7 @@ export function VirtualizedItems({
     count:
       posts.length === undefined
         ? restoreItemCount
-        : posts.length + (showCreateItem ? 1 : 0),
+        : posts.length + (CreateItemComponent ? 1 : 0),
     initialOffset: restoreOffset,
     initialMeasurementsCache: restoreMeasurementsCache,
   });
@@ -71,7 +77,7 @@ export function VirtualizedItems({
     window.history.replaceState(
       {
         ...window.history.state,
-        [`vtableItemCount_${id}`]: posts.length + (showCreateItem ? 1 : 0),
+        [`vtableItemCount_${id}`]: posts.length + (CreateItemComponent ? 1 : 0),
         [`vtableOffset_${id}`]: scrollPos,
         [`vtableMeasureCache_${id}`]: virtualizer.measurementsCache,
       },
@@ -81,8 +87,38 @@ export function VirtualizedItems({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posts.length, scrollPos, virtualizer.measurementsCache]);
 
+  // Used to restore scroll position when popup is closed.
+  useEffect(() => {
+    if (!isPopup) {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      window.scrollTo(0, virtualizerStateRef.current?.scrollPosition ?? 0);
+      virtualizerStateRef.current = null;
+    } else {
+      const scrollPosition = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollPosition}px`;
+      document.body.style.width = "100%";
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPopup]);
+
   useEffect(() => {
     if (!mounted) return;
+
+    if (isPopup) {
+      // Important to only run this when popup is open and state ref is null!
+      // The virtualizer could call this twice and put the scroll position in the wrong place, so we restrict it to only run when the state ref is null.
+      if (!virtualizerStateRef.current) {
+        virtualizerStateRef.current = {
+          items: virtualizer.getVirtualItems(),
+          totalSize: virtualizer.getTotalSize(),
+          scrollPosition: parseInt(document.body.style.top.replace("-", "")),
+        };
+      }
+      return;
+    }
 
     const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
     if (!lastItem) return;
@@ -96,6 +132,7 @@ export function VirtualizedItems({
     if (lastItem.index >= posts.length - 1 && !loading && hasMoreItems) {
       onEndReached();
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -105,6 +142,7 @@ export function VirtualizedItems({
     hasMoreItems,
     mounted,
     onEndReached,
+    isPopup,
   ]);
 
   if (!mounted) {
@@ -136,7 +174,10 @@ export function VirtualizedItems({
     >
       <div
         style={{
-          height: virtualizer.getTotalSize(),
+          height:
+            isPopup && virtualizerStateRef.current
+              ? virtualizerStateRef.current.totalSize
+              : virtualizer.getTotalSize(),
           width: "100%",
           position: "relative",
         }}
@@ -148,14 +189,18 @@ export function VirtualizedItems({
             left: 0,
             width: "100%",
             transform: `translateY(${
-              virtualizer.getVirtualItems()[0]?.start ?? 0
+              isPopup && virtualizerStateRef.current
+                ? virtualizerStateRef.current.items[0]?.start
+                : virtualizer.getVirtualItems()[0]?.start ?? 0
             }px)`,
           }}
         >
-          {virtualizer.getVirtualItems().map((virtualRow) => {
+          {(isPopup && virtualizerStateRef.current
+            ? virtualizerStateRef.current.items
+            : virtualizer.getVirtualItems()
+          ).map((virtualRow) => {
             if (
               !initialLoading &&
-              showCreateItem &&
               CreateItemComponent &&
               virtualRow.index === 0
             ) {
@@ -188,7 +233,7 @@ export function VirtualizedItems({
               );
             }
 
-            const postIndex = showCreateItem
+            const postIndex = CreateItemComponent
               ? virtualRow.index - 1
               : virtualRow.index;
 

@@ -5,22 +5,38 @@ import { toast } from "sonner";
 import PostFooter from "./PostFooter";
 import useFetcher from "@/hooks/useFetcher";
 import { useAuthContext } from "@/context/AuthContext";
+import { usePostsContext } from "@/context/PostsContext";
 
 interface CreatePostProps {
-  setPosts: (newPost: PostData) => void;
+  emojiZIndex?: number;
+  isPortal?: boolean;
+  className?: string;
+  setShowCreatePostDialog?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 let postTitleCache: string = "";
 let postDescCache: string = "";
 
-const CreatePost = ({ setPosts }: CreatePostProps) => {
+const CreatePost = ({
+  isPortal = true,
+  emojiZIndex = 999,
+  className,
+  setShowCreatePostDialog,
+}: CreatePostProps) => {
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const [descValue, setDescValue] = useState(postDescCache);
   const [titleValue, setTitleValue] = useState(postTitleCache);
   const lastActiveInputRef = useRef<"title" | "content">("content");
   const fetcher = useFetcher();
-  const { accessToken } = useAuthContext();
+  const {
+    setProfilePosts,
+    setIsPopup,
+    setFollowingPosts,
+    setPosts: setHomePosts,
+    cachedProfilePath,
+  } = usePostsContext();
+  const { accessToken, username } = useAuthContext();
 
   const handlePost = async () => {
     if (!titleRef.current?.value || !contentRef.current?.value) {
@@ -55,7 +71,17 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
           postDescCache = "";
           setTitleValue("");
           setDescValue("");
-          setPosts(data);
+
+          setHomePosts((prev) => [data, ...prev]);
+          if (data.author.username !== username) {
+            setFollowingPosts((prev) => [data, ...prev]);
+          }
+          if (cachedProfilePath.endsWith(data.author.username)) {
+            setProfilePosts((prev) => [data, ...prev]);
+          }
+          setIsPopup(false);
+          if (setShowCreatePostDialog) setShowCreatePostDialog(false);
+
           toast.success("Post created successfully", {
             action: {
               label: "Close",
@@ -88,13 +114,12 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
       style={{
         zIndex: 999,
       }}
-      className={
-        "flex relative border-[#272629] bg-transparent text-white flex-col w-full h-full max-h-[22rem]"
-      }
+      className={`flex relative border-[#272629] bg-transparent text-white flex-col w-full h-full max-h-[22rem] ${className}`}
     >
-      <div className="flex relative rounded-t-xl overflow-auto pt-0 max-h-[500px] w-full h-full bg-zinc-900 flex-col">
+      <div className="flex relative rounded-t-[11px] overflow-auto pt-0 max-h-[500px] w-full h-full bg-zinc-900 flex-col">
         <div className="sticky top-0 p-3 pb-2 bg-zinc-900 z-10">
           <textarea
+            spellCheck={false}
             value={titleValue}
             onFocus={() => (lastActiveInputRef.current = "title")}
             onClick={() => (lastActiveInputRef.current = "title")}
@@ -117,6 +142,7 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
           />
         </div>
         <textarea
+          spellCheck={false}
           placeholder="Share your thoughts, ideas, or story..."
           ref={contentRef}
           value={descValue}
@@ -145,6 +171,8 @@ const CreatePost = ({ setPosts }: CreatePostProps) => {
         />
       </div>
       <PostFooter
+        isPortal={isPortal}
+        emojiZIndex={emojiZIndex}
         disabled={descValue.length <= 0 || titleValue.length <= 0}
         buttonValue="Post"
         onEmojiClick={(emoji) => {

@@ -2,7 +2,6 @@
 
 import { createContext, useEffect } from "react";
 
-import { deleteCookie } from "cookies-next";
 import { ReactNode, useState, useContext } from "react";
 import { refreshSession } from "@/lib/utils";
 import useSWR from "swr";
@@ -40,7 +39,7 @@ const AuthContext = createContext<AuthContextProps>({
   setName: (): string => "",
   setUsername: (): string => "",
   setUserId: (): string => "",
-  clearAll: () => null,
+  clearAll: async () => null,
   setUnauthWall: (): string => "",
 });
 
@@ -67,14 +66,10 @@ export const AuthContextProvider = ({
   const [userId, setUserId] = useState(serverData.userId || "");
   const [accessToken, setAccessToken] = useState(serverData.accessToken || "");
   const [verified, setVerified] = useState(serverData.verified || false);
-  // const pathname = usePathname();
-  // const router = useRouter();
 
-  const clearAll = () => {
+  const clearAll = async () => {
     setLoggedIn(false);
     setUnauthWall("");
-    deleteCookie("a_t");
-    deleteCookie("r_t");
     setUsername("");
     setName("");
     setUserId("");

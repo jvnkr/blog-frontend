@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useState } from "react";
 import { useFetchItems } from "@/hooks/useFetchPosts";
 import { usePostsContext } from "@/context/PostsContext";
 import { VirtualizedItems } from "@/components/VirtualizedPosts";
@@ -23,7 +22,6 @@ export default function HomePage() {
     setHasMorePosts,
     cachedProfilePath,
   } = usePostsContext();
-  const [updateKey, setUpdateKey] = useState(0);
   const { loggedIn } = useAuthContext();
 
   const {
@@ -42,21 +40,6 @@ export default function HomePage() {
     setHasMorePosts
   );
 
-  const handleCreatePost = (newPost: PostData) => {
-    setPosts([newPost, ...posts]);
-    if (cachedProfilePath.endsWith(newPost.author.username)) {
-      setProfilePosts([newPost, ...profilePosts]);
-    }
-    setUpdateKey((prevKey) => prevKey + 1);
-  };
-
-  const handleDeletePost = (newPosts: PostData[], deletedPostId: string) => {
-    setPosts(newPosts);
-    setProfilePosts(profilePosts.filter((p) => p.id !== deletedPostId));
-    setFollowingPosts(followingPosts.filter((p) => p.id !== deletedPostId));
-    setUpdateKey((prevKey) => prevKey + 1);
-  };
-
   const onUpdatePost = (post: PostData) => {
     handleUpdateItem(post);
     if (cachedProfilePath.endsWith(post.author.username)) {
@@ -69,17 +52,15 @@ export default function HomePage() {
     <VirtualizedItems
       ItemComponent={(index) => (
         <Post
+          key={posts[index].id}
           posts={posts}
           post={posts[index]}
           onUpdatePost={onUpdatePost}
-          handleDeletePost={handleDeletePost}
         />
       )}
       id="home"
-      key={updateKey}
       initialLoading={initialLoading}
-      showCreateItem={loggedIn ?? false}
-      CreateItemComponent={<CreatePost setPosts={handleCreatePost} />}
+      CreateItemComponent={loggedIn ? <CreatePost /> : null}
       items={posts}
       loading={loading}
       hasMoreItems={hasMorePosts}

@@ -5,19 +5,32 @@ import { toast } from "sonner";
 import PostFooter from "./PostFooter";
 import useFetcher from "@/hooks/useFetcher";
 import { useAuthContext } from "@/context/AuthContext";
+import { usePostsContext } from "@/context/PostsContext";
 
 interface CreateCommentProps {
   handleCreateComment: (newComment: CommentData) => void;
   postId: string;
+  emojiZIndex?: number;
+  className?: string;
+  isPortal?: boolean;
+  setIsPopup?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const commentCache = new Map<string, string>();
 
-const CreateComment = ({ handleCreateComment, postId }: CreateCommentProps) => {
+const CreateComment = ({
+  handleCreateComment,
+  postId,
+  emojiZIndex = 999,
+  className,
+  isPortal = true,
+  setIsPopup,
+}: CreateCommentProps) => {
   const textRef = useRef<HTMLTextAreaElement>(null);
   const [value, setValue] = useState(commentCache.get(postId) || "");
   const fetcher = useFetcher();
   const { accessToken } = useAuthContext();
+  const { commentCreated } = usePostsContext();
 
   useEffect(() => {
     if (textRef.current) {
@@ -29,6 +42,13 @@ const CreateComment = ({ handleCreateComment, postId }: CreateCommentProps) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (commentCreated) {
+      setValue("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [commentCreated]);
 
   const handleCreate = async () => {
     if (!textRef.current?.value) {
@@ -58,8 +78,9 @@ const CreateComment = ({ handleCreateComment, postId }: CreateCommentProps) => {
           const data = (await res.json()) as CommentData;
           textRef.current!.value = "";
           setValue("");
-          commentCache.set(postId, "");
+          commentCache.delete(postId);
           handleCreateComment(data);
+          if (setIsPopup) setIsPopup(false);
           toast.success("Comment created successfully", {
             action: {
               label: "Close",
@@ -82,7 +103,8 @@ const CreateComment = ({ handleCreateComment, postId }: CreateCommentProps) => {
         zIndex: 99,
       }}
       className={
-        "flex relative rounded-xl border-[#272629] bg-transparent text-white flex-col w-full h-full max-h-[22rem]"
+        "flex relative rounded-xl border-[#272629] bg-transparent text-white flex-col w-full h-full max-h-[22rem] " +
+        className
       }
     >
       <div className="flex rounded-t-xl relative overflow-auto pt-0 max-h-[500px] w-full h-full bg-zinc-900 flex-col">
@@ -110,6 +132,8 @@ const CreateComment = ({ handleCreateComment, postId }: CreateCommentProps) => {
         </div>
       </div>
       <PostFooter
+        isPortal={isPortal}
+        emojiZIndex={emojiZIndex}
         disabled={value.length <= 0}
         buttonValue="Comment"
         handleCreate={handleCreate}

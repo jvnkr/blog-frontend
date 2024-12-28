@@ -5,13 +5,19 @@ import { Header } from "@/components/Header";
 import Logo from "@/components/Logo";
 import { PiHouse, PiHouseFill } from "react-icons/pi";
 import { TbSettings, TbSettingsFilled } from "react-icons/tb";
-import { FaRegUserCircle, FaUserCircle } from "react-icons/fa";
+import { HiOutlineUser } from "react-icons/hi";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/context/AuthContext";
-import { Ellipsis, Search } from "lucide-react";
+import { Ellipsis, PencilLine, Search, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import useFetcher from "@/hooks/useFetcher";
+import CreatePost from "@/components/CreatePost";
+import { usePostsContext } from "@/context/PostsContext";
+import CreateComment from "@/components/CreateComment";
+import { CommentData } from "@/lib/types";
+import VirtualPopup from "@/components/VirtualPopup";
 
 export default function HomeLayout({
   children,
@@ -19,26 +25,83 @@ export default function HomeLayout({
   children: React.ReactNode;
 }>) {
   const { loggedIn, clearAll, username, name } = useAuthContext();
+  const { setCommentCreated } = usePostsContext();
+  const [showCreatePostDialog, setShowCreatePostDialog] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const fetcher = useFetcher();
   const handleLogout = async () => {
-    clearAll();
-    if (typeof window !== "undefined") {
-      window.location.reload();
+    try {
+      const res = await fetcher("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (res.ok) {
+        clearAll();
+        router.push("/");
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
   useEffect(() => {
     if (pathname === "/following" && !loggedIn) {
-      window.location.href = "/home";
+      router.replace("/home");
     }
-  }, [loggedIn, pathname]);
+  }, [loggedIn, pathname, router]);
 
   return (
     <>
-      <div
-
-        className="flex bg-zinc-900/30 bg-opacity-[0.45] border border-y-0 border-[#272629] min-h-screen overflow-x-hidden justify-start items-center flex-col w-[45rem] mx-auto"
-      >
+      {loggedIn && showCreatePostDialog && (
+        <VirtualPopup onOverlayClick={() => setShowCreatePostDialog(false)}>
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="flex bg-zinc-900 rounded-xl pt-2 border border-[#272629] flex-col w-[calc(45rem-34px)]"
+          >
+            <div className="flex pb-2 border border-[#272629] border-t-0 border-x-0 justify-between items-center w-full px-2">
+              <div className="flex select-none gap-2 items-center w-fit">
+                <PencilLine className="w-5 h-5 text-white" />
+                <span className="text-white text-lg">
+                  {pathname.startsWith("/post")
+                    ? "Create a comment"
+                    : "Create a post"}
+                </span>
+              </div>
+              <X
+                onClick={() => setShowCreatePostDialog(false)}
+                className="p-1 cursor-pointer rounded-full hover:bg-zinc-800 min-w-7 min-h-7 text-white"
+              />
+            </div>
+            {pathname.startsWith("/post") ? (
+              <CreateComment
+                isPortal={false}
+                postId={pathname.split("/")[2]}
+                handleCreateComment={(newComment: CommentData) => {
+                  setShowCreatePostDialog(false);
+                  setCommentCreated(newComment);
+                }}
+                className="border-none pt-0"
+                emojiZIndex={99999}
+              />
+            ) : (
+              <CreatePost
+                setShowCreatePostDialog={setShowCreatePostDialog}
+                className="border-none"
+                isPortal={false}
+                emojiZIndex={99999}
+              />
+            )}
+          </div>
+        </VirtualPopup>
+      )}
+      <div className="flex bg-zinc-900/30 bg-opacity-[0.45] border border-y-0 border-[#272629] min-h-screen overflow-x-hidden justify-start items-center flex-col w-[45rem] mx-auto">
         <Header />
         {children}
       </div>
@@ -94,9 +157,9 @@ export default function HomeLayout({
                 }`}
               >
                 {pathname.endsWith(`/@${username}`) ? (
-                  <FaUserCircle className="w-6 h-6 fill-white" />
+                  <HiOutlineUser className="w-6 h-6 fill-white" />
                 ) : (
-                  <FaRegUserCircle className="w-6 h-6" />
+                  <HiOutlineUser className="w-6 h-6" />
                 )}
                 <span>Profile</span>
               </Link>
@@ -113,6 +176,18 @@ export default function HomeLayout({
                 )}
                 <span>Settings</span>
               </Link>
+              {(pathname.split("/")[1].replace("@", "") === username ||
+                pathname.split("/")[1] === "post" ||
+                pathname.split("/")[1] === "home") && (
+                <Button
+                  className="w-full font-bold mt-2 bg-[#e1e1e1] text-lg rounded-full p-6"
+                  onClick={() => setShowCreatePostDialog(true)}
+                >
+                  <span>
+                    {pathname.startsWith("/post") ? "Comment" : "Post"}
+                  </span>
+                </Button>
+              )}
             </>
           )}
         </div>

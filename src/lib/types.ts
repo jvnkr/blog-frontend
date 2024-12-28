@@ -42,6 +42,7 @@ export interface UserData {
   name: string;
   email: string;
   verified: boolean;
+  followingUser: boolean;
 }
 
 export interface SessionData {

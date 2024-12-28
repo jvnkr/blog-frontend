@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useState } from "react";
 import { useFetchItems } from "@/hooks/useFetchPosts";
 import { usePostsContext } from "@/context/PostsContext";
 import { VirtualizedItems } from "@/components/VirtualizedPosts";
@@ -21,7 +20,6 @@ export default function FollowingPage() {
     setHasMoreFollowingPosts,
     cachedProfilePath,
   } = usePostsContext();
-  const [updateKey, setUpdateKey] = useState(0);
 
   const {
     loading,
@@ -39,13 +37,6 @@ export default function FollowingPage() {
     setHasMoreFollowingPosts
   );
 
-  const handleDeletePost = (newPosts: PostData[], deletedPostId: string) => {
-    setFollowingPosts(newPosts);
-    setPosts(posts.filter((p) => p.id !== deletedPostId));
-    setProfilePosts(profilePosts.filter((p) => p.id !== deletedPostId));
-    setUpdateKey((prevKey) => prevKey + 1);
-  };
-
   const onUpdatePost = (post: PostData) => {
     handleUpdatePost(post);
     if (cachedProfilePath.endsWith(post.author.username)) {
@@ -56,7 +47,6 @@ export default function FollowingPage() {
 
   return (
     <VirtualizedItems
-      key={updateKey}
       id="following"
       items={followingPosts}
       loading={loading}
@@ -66,11 +56,10 @@ export default function FollowingPage() {
       hasMoreItems={hasMoreFollowingPosts}
       ItemComponent={(index) => (
         <Post
-          key={index}
+          key={followingPosts[index].id}
           post={followingPosts[index]}
           posts={followingPosts}
           onUpdatePost={onUpdatePost}
-          handleDeletePost={handleDeletePost}
         />
       )}
     />

@@ -19,13 +19,11 @@ import { toast } from "sonner";
 import useFetcher from "@/hooks/useFetcher";
 
 const PostPage = (initialPost: PostData) => {
-  const { accessToken, loggedIn, verified, userId, username, name } =
-    useAuthContext();
+  const { accessToken, verified, userId, username, name } = useAuthContext();
   const [post, setPost] = useState(initialPost);
   const [comments, setComments] = useState<CommentData[]>([]);
   const [hasMoreComments, setHasMoreComments] = useState(true);
   const [commentsPageNumber, setCommentsPageNumber] = useState(0);
-  const [updateKey, setUpdateKey] = useState(0);
   const fetcher = useFetcher();
   const {
     setPosts,
@@ -35,6 +33,8 @@ const PostPage = (initialPost: PostData) => {
     setProfilePosts,
     profilePosts,
     cachedProfilePath,
+    commentCreated,
+    setCommentCreated,
   } = usePostsContext();
 
   const {
@@ -114,11 +114,31 @@ const PostPage = (initialPost: PostData) => {
   };
 
   const handleCreateComment = async (newComment: CommentData) => {
-    setComments([newComment, ...comments]);
+    console.log(newComment);
+    console.log(comments);
+    setComments((prev) => [newComment, ...prev]);
     setPost({
       ...post,
       comments: post.comments + 1,
     });
+    if (cachedProfilePath.endsWith(post.author.username)) {
+      setProfilePosts(
+        profilePosts.map((p) => {
+          if (p.id === post.id) {
+            return { ...p, comments: p.comments + 1 };
+          }
+          return p;
+        })
+      );
+    }
+    setFollowingPosts(
+      followingPosts.map((p) => {
+        if (p.id === post.id) {
+          return { ...p, comments: p.comments + 1 };
+        }
+        return p;
+      })
+    );
     setPosts(
       posts.map((p) => {
         if (p.id === post.id) {
@@ -127,8 +147,16 @@ const PostPage = (initialPost: PostData) => {
         return p;
       })
     );
-    setUpdateKey((prev) => prev + 1);
   };
+
+  useEffect(() => {
+    if (commentCreated) {
+      handleCreateComment(commentCreated);
+      setCommentCreated(null);
+      commentCache.delete(post.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [commentCreated]);
 
   useEffect(() => {
     return () => {
@@ -199,10 +227,8 @@ const PostPage = (initialPost: PostData) => {
       </div>
       <VirtualizedItems
         id="comments"
-        key={updateKey}
         onEndReached={fetchItems}
         hasMoreItems={hasMoreComments}
-        showCreateItem={loggedIn ?? false}
         CreateItemComponent={
           <CreateComment
             handleCreateComment={handleCreateComment}
@@ -218,12 +244,13 @@ const PostPage = (initialPost: PostData) => {
           const item = comments[index];
 
           if (item.id.startsWith("loading-")) {
-            return <LoadingSpinner />;
+            return <LoadingSpinner key={"loading-" + item.id} />;
           }
 
           if (item.id === "view-more") {
             return (
               <ViewMoreReplies
+                key={"view-more-" + item.id}
                 onClick={async () => {
                   const pageNum =
                     (commentCache.get(item.rootId || item.id)?.pageNumber ??
@@ -322,6 +349,7 @@ const PostPage = (initialPost: PostData) => {
           if (item.id.startsWith("reply-")) {
             return (
               <CreateReply
+                key={"reply-" + item.id}
                 rootId={item.rootId || item.id.replace("reply-", "")}
                 handleCreateReply={(newReply) => {
                   const newComments = [...comments];
@@ -368,6 +396,7 @@ const PostPage = (initialPost: PostData) => {
           // Regular comment display
           return (
             <Comment
+              key={item.id}
               onRepliesLoading={(loading: boolean) => {
                 if (loading) {
                   const newComments = [...comments];

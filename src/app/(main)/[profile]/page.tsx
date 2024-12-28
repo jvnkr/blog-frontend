@@ -9,7 +9,8 @@ import { useAuthContext } from "@/context/AuthContext";
 
 export default function Page() {
   const router = useRouter();
-  const { setProfileData, profileData } = usePostsContext();
+  const { setProfileData, profileData, setFollowers, setFollowingUser } =
+    usePostsContext();
   const [loading, setLoading] = useState(profileData ? false : true);
   const params = useParams();
   const { accessToken } = useAuthContext();
@@ -48,6 +49,8 @@ export default function Page() {
         }
 
         setProfileData(data);
+        setFollowers(data.followers);
+        setFollowingUser(data.followingUser);
       } catch (error) {
         console.error(error);
         router.push("/");
@@ -63,6 +66,8 @@ export default function Page() {
     params.profile,
     profileData,
     router,
+    setFollowers,
+    setFollowingUser,
     setProfileData,
   ]);
 

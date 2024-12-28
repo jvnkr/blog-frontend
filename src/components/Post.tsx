@@ -18,33 +18,19 @@ import { formatTimeDifference } from "@/lib/utils";
 import { useAuthContext } from "@/context/AuthContext";
 import { Card } from "./ui/card";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import PostInteraction from "./PostInteraction";
 import useFetcher from "@/hooks/useFetcher";
+import VirtualPopup from "./VirtualPopup";
+import DeletePost from "./DeletePost";
 
 interface PostProps {
   post: PostData;
   posts: PostData[];
   onUpdatePost: (post: PostData) => void;
-  handleDeletePost: (newPosts: PostData[], deletedPostUsername: string) => void;
 }
 
-export const Post = ({
-  post: initialPost,
-  posts,
-  onUpdatePost,
-  handleDeletePost,
-}: PostProps) => {
+export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
   const [post, setPost] = useState(initialPost);
   const postRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -56,6 +42,7 @@ export const Post = ({
   const [hoverMinus, setHoverMinus] = useState(false);
   const responsiveClass = useResponsiveClass();
   const { accessToken, loggedIn, setUnauthWall, userId } = useAuthContext();
+
   const fetcher = useFetcher();
 
   const handleLike = async () => {
@@ -84,35 +71,6 @@ export const Post = ({
       console.error(error);
     }
   };
-
-  const handlePostClick = () => {
-    triggerAuthWall(`/post/${post.id}`);
-  };
-
-  const handleDelete = async () => {
-    if (triggerAuthWall()) {
-      setShowDeleteDialog(false);
-      return;
-    }
-
-    try {
-      await fetcher(`/api/v1/posts/${post.id}`, {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const newPosts = posts.filter((p) => p.id !== post.id);
-      handleDeletePost(newPosts, post.id);
-      toast.success("Post deleted");
-    } catch (error) {
-      console.log(error);
-    }
-
-    setShowDeleteDialog(false);
-  };
-
   const triggerAuthWall = (url = "") => {
     if (!loggedIn) {
       setUnauthWall(url);
@@ -122,28 +80,16 @@ export const Post = ({
     return false;
   };
 
+  const handlePostClick = () => {
+    triggerAuthWall(`/post/${post.id}`);
+  };
+
   return (
     <>
       {showDeleteDialog && (
-        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent className="fixed bg-zinc-900 border-[#272629]">
-            <AlertDialogHeader className="text-white">
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your
-                post and remove your data from our servers.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <VirtualPopup onOverlayClick={() => setShowDeleteDialog(false)}>
+          <DeletePost setShowDeleteDialog={setShowDeleteDialog} post={post} />
+        </VirtualPopup>
       )}
       <Card
         ref={postRef}
@@ -272,6 +218,12 @@ export const Post = ({
                   <div
                     onMouseEnter={() => setHoverShare(true)}
                     onMouseLeave={() => setHoverShare(false)}
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        `${window.location.origin}/post/${post.id}`
+                      );
+                      toast.success("Link copied to clipboard");
+                    }}
                     className="flex hover:text-green cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
                   >
                     <Share

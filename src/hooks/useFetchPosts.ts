@@ -22,7 +22,6 @@ export function useFetchItems(
 
   useEffect(() => {
     if (items.length === 0 && !initialFetchRef.current && hasMoreItems) {
-      // Hide overflow when initially loading with no items
       document.body.style.overflow = "hidden";
       setSkeletonCount(Math.floor(window.innerHeight / (16 * 16)));
       setInitialLoading(true);
@@ -31,14 +30,19 @@ export function useFetchItems(
       });
     }
     return () => {
-      // Restore overflow when component unmounts
       document.body.style.overflow = "visible";
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items.length, hasMoreItems]); // Add dependencies to prevent double fetch
 
   const fetchItems = async () => {
-    if (loading || !hasMoreItems || initialFetchRef.current) return;
+    if (
+      loading ||
+      !hasMoreItems ||
+      initialFetchRef.current ||
+      endpoint.length === 0
+    )
+      return;
     initialFetchRef.current = true;
     if (!initialLoading) setLoading(true);
 

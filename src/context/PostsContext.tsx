@@ -1,14 +1,17 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { PostData } from "@/lib/types";
+import { CommentData, PostData } from "@/lib/types";
 import { ProfileProps } from "@/components/Profile";
 
 interface PostsContextType {
   posts: PostData[];
+  isPopup: boolean;
   pageNumber: number;
   followingPosts: PostData[];
   followingPageNumber: number;
+  followingUser: boolean | null;
+  followers: number | null;
   profilePosts: PostData[];
   profilePageNumber: number;
   hasMoreFollowingPosts: boolean;
@@ -16,8 +19,13 @@ interface PostsContextType {
   hasMoreProfilePosts: boolean;
   cachedProfilePath: string;
   profileData: ProfileProps | null;
+  commentCreated: CommentData | null;
+  setCommentCreated: React.Dispatch<React.SetStateAction<CommentData | null>>;
+  setIsPopup: React.Dispatch<React.SetStateAction<boolean>>;
   setProfileData: React.Dispatch<React.SetStateAction<ProfileProps | null>>;
   setPageNumber: React.Dispatch<React.SetStateAction<number>>;
+  setFollowingUser: React.Dispatch<React.SetStateAction<boolean | null>>;
+  setFollowers: React.Dispatch<React.SetStateAction<number | null>>;
   setHasMorePosts: React.Dispatch<React.SetStateAction<boolean>>;
   setHasMoreFollowingPosts: React.Dispatch<React.SetStateAction<boolean>>;
   setHasMoreProfilePosts: React.Dispatch<React.SetStateAction<boolean>>;
@@ -33,24 +41,40 @@ const PostsContext = createContext<PostsContextType | undefined>(undefined);
 
 export const PostsProvider = ({ children }: { children: ReactNode }) => {
   const [posts, setPosts] = useState<PostData[]>([]);
+  const [isPopup, setIsPopup] = useState(false);
   const [followingPosts, setFollowingPosts] = useState<PostData[]>([]);
   const [pageNumber, setPageNumber] = useState(0);
   const [followingPageNumber, setFollowingPageNumber] = useState(0);
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [hasMoreFollowingPosts, setHasMoreFollowingPosts] = useState(true);
+
   const [profilePosts, setProfilePosts] = useState<PostData[]>([]);
+  const [followingUser, setFollowingUser] = useState<boolean | null>(null);
+  const [followers, setFollowers] = useState<number | null>(null);
   const [profilePageNumber, setProfilePageNumber] = useState(0);
   const [hasMoreProfilePosts, setHasMoreProfilePosts] = useState(true);
   const [cachedProfilePath, setCachedProfilePath] = useState<string>("");
   const [profileData, setProfileData] = useState<ProfileProps | null>(null);
 
+  const [commentCreated, setCommentCreated] = useState<CommentData | null>(
+    null
+  );
+
   return (
     <PostsContext.Provider
       value={{
         posts,
+        commentCreated,
+        setCommentCreated,
+        isPopup,
+        setIsPopup,
         setPosts,
         followingPosts,
         setFollowingPosts,
+        followingUser,
+        setFollowingUser,
+        followers,
+        setFollowers,
         pageNumber,
         setPageNumber,
         followingPageNumber,

@@ -11,6 +11,13 @@ export const Header = () => {
   const { loggedIn } = useAuthContext();
   const pathname = usePathname();
   const router = useRouter();
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/home");
+    }
+  };
   return (
     <div
       style={{
@@ -40,7 +47,7 @@ export const Header = () => {
         <>
           <ArrowLeft
             className="absolute left-2 text-white w-9 h-9 cursor-pointer p-2 rounded-full hover:bg-neutral-500 hover:bg-opacity-[0.5] transition-all duration-150"
-            onClick={() => router.back()}
+            onClick={handleBack}
           />
           <HeaderElement
             className="focus-within:rounded-bl-[1px] rounded-br-[14px]"
@@ -54,7 +61,7 @@ export const Header = () => {
         <>
           <ArrowLeft
             className="absolute transition-all duration-300 left-2 text-white w-9 h-9 cursor-pointer p-2 rounded-full hover:bg-neutral-500 hover:bg-opacity-[0.5]"
-            onClick={() => router.back()}
+            onClick={handleBack}
           />
           <HeaderElement
             className="focus-within:rounded-bl-[1px] rounded-br-[14px]"
