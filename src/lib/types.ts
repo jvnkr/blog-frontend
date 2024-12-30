@@ -17,6 +17,11 @@ export interface PostData {
   };
 }
 
+export enum Role {
+  ADMIN = "ROLE_ADMIN",
+  USER = "ROLE_USER",
+}
+
 export interface CommentData {
   id: string;
   rootId?: string;
@@ -41,6 +46,7 @@ export interface UserData {
   username: string;
   name: string;
   email: string;
+  role: string;
   verified: boolean;
   followingUser: boolean;
 }
@@ -51,6 +57,9 @@ export interface SessionData {
   username: string;
   userId: string;
   name: string;
+  email: string;
+  bio: string;
+  role: string;
   verified: boolean;
   loggedIn: boolean;
 }

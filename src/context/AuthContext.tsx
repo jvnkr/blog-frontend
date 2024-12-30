@@ -13,8 +13,14 @@ interface AuthContextProps {
   username: string;
   verified: boolean;
   userId: string;
+  role: string;
   unauthWall: string;
+  bio: string;
   accessToken: string;
+  email: string;
+  setRole: (value: string) => void;
+  setBio: (value: string) => void;
+  setEmail: (value: string) => void;
   setAccessToken: (value: string) => void;
   setVerified: (value: boolean) => void;
   setLoggedIn: (value: boolean | null) => void;
@@ -28,12 +34,18 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps>({
   loggedIn: null,
   name: "",
+  role: "",
   username: "",
   verified: false,
   userId: "",
   unauthWall: "",
   accessToken: "",
+  email: "",
+  bio: "",
+  setRole: (): string => "",
+  setBio: (): string => "",
   setAccessToken: (): string => "",
+  setEmail: (): string => "",
   setLoggedIn: (): null => null,
   setVerified: (): boolean => false,
   setName: (): string => "",
@@ -55,6 +67,9 @@ export const AuthContextProvider = ({
     userId?: string;
     accessToken?: string;
     verified?: boolean;
+    bio?: string;
+    role?: string;
+    email?: string;
   };
 }) => {
   const [loggedIn, setLoggedIn] = useState<boolean | null>(
@@ -66,6 +81,9 @@ export const AuthContextProvider = ({
   const [userId, setUserId] = useState(serverData.userId || "");
   const [accessToken, setAccessToken] = useState(serverData.accessToken || "");
   const [verified, setVerified] = useState(serverData.verified || false);
+  const [bio, setBio] = useState(serverData.bio || "");
+  const [email, setEmail] = useState(serverData.email || "");
+  const [role, setRole] = useState(serverData.role || "");
 
   const clearAll = async () => {
     setLoggedIn(false);
@@ -75,6 +93,9 @@ export const AuthContextProvider = ({
     setUserId("");
     setAccessToken("");
     setVerified(false);
+    setBio("");
+    setEmail("");
+    setRole("");
   };
 
   /**
@@ -92,6 +113,9 @@ export const AuthContextProvider = ({
       setName(data.name);
       setUserId(data.userId);
       setVerified(data.verified);
+      setBio(data.bio || "");
+      setEmail(data.email || "");
+      setRole(data.role || "");
       if (data.accessToken) {
         setLoggedIn(true);
       }
@@ -117,7 +141,13 @@ export const AuthContextProvider = ({
   return (
     <AuthContext.Provider
       value={{
+        role,
+        setRole,
         name,
+        bio,
+        email,
+        setEmail,
+        setBio,
         setName,
         clearAll,
         loggedIn,

@@ -13,7 +13,7 @@ export default function Page() {
     usePostsContext();
   const [loading, setLoading] = useState(profileData ? false : true);
   const params = useParams();
-  const { accessToken } = useAuthContext();
+  const { accessToken, loggedIn } = useAuthContext();
   const fetcher = useFetcher();
 
   useEffect(() => {
@@ -70,6 +70,10 @@ export default function Page() {
     setFollowingUser,
     setProfileData,
   ]);
+
+  if (!loggedIn) {
+    router.back();
+  }
 
   if (loading || !profileData) {
     return (

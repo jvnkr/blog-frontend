@@ -8,7 +8,7 @@ import { TbSettings, TbSettingsFilled } from "react-icons/tb";
 import { HiOutlineUser } from "react-icons/hi";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/context/AuthContext";
-import { Ellipsis, PencilLine, Search, X } from "lucide-react";
+import { Ellipsis, LayoutDashboard, PencilLine, Search, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ import useFetcher from "@/hooks/useFetcher";
 import CreatePost from "@/components/CreatePost";
 import { usePostsContext } from "@/context/PostsContext";
 import CreateComment from "@/components/CreateComment";
-import { CommentData } from "@/lib/types";
+import { CommentData, Role } from "@/lib/types";
 import VirtualPopup from "@/components/VirtualPopup";
 
 export default function HomeLayout({
@@ -24,7 +24,7 @@ export default function HomeLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { loggedIn, clearAll, username, name } = useAuthContext();
+  const { loggedIn, clearAll, username, role, name } = useAuthContext();
   const { setCommentCreated } = usePostsContext();
   const [showCreatePostDialog, setShowCreatePostDialog] = useState(false);
   const pathname = usePathname();
@@ -164,7 +164,7 @@ export default function HomeLayout({
                 <span>Profile</span>
               </Link>
               <Link
-                href={"/settings"}
+                href={"/settings/profile"}
                 className={`flex outline-[#888] outline-2 text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
                   pathname === "/settings" ? " font-bold" : ""
                 }`}
@@ -176,6 +176,21 @@ export default function HomeLayout({
                 )}
                 <span>Settings</span>
               </Link>
+              {loggedIn && role === Role.ADMIN && (
+                <Link
+                  href={"/dashboard"}
+                  className={`flex outline-[#888] outline-2 text-xl text-white gap-2 items-center transition-all duration-150 ease-in-out hover:bg-zinc-900 border border-transparent hover:border-[#272629] cursor-pointer p-2 rounded-lg${
+                    pathname === "/dashboard" ? " font-bold" : ""
+                  }`}
+                >
+                  {pathname === "/dashboard" ? (
+                    <LayoutDashboard className="w-6 h-6 fill-white" />
+                  ) : (
+                    <LayoutDashboard className="w-6 h-6" />
+                  )}
+                  <span>Dashboard</span>
+                </Link>
+              )}
               {(pathname.split("/")[1].replace("@", "") === username ||
                 pathname.split("/")[1] === "post" ||
                 pathname.split("/")[1] === "home") && (

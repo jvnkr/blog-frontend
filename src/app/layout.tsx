@@ -37,9 +37,12 @@ export default async function RootLayout({
 }>) {
   let serverAuthData: SessionData = {
     accessToken: "",
+    role: "",
     username: "",
     userId: "",
     name: "",
+    email: "",
+    bio: "",
     loggedIn: false,
     verified: false,
   };
@@ -68,6 +71,9 @@ export default async function RootLayout({
         username: data.username || "",
         userId: data.userId || "",
         name: data.name || "",
+        email: data.email || "",
+        bio: data.bio || "",
+        role: data.role || "",
         loggedIn: true,
         verified: data.verified || false,
       };
