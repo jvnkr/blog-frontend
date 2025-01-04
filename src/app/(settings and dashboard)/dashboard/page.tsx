@@ -1,5 +1,3 @@
-"use client";
-
 import DashboardPage from "@/components/DashboardPage";
 import React from "react";
 

@@ -3,7 +3,7 @@
 import { ArrowLeft, PanelLeftClose, PanelLeftOpen, Shield } from "lucide-react";
 import { motion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { HiOutlineUser } from "react-icons/hi";
 interface SettingsLayoutProps {
   children: React.ReactNode;
@@ -20,13 +20,6 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
       router.push("/home");
     }
   };
-
-  useEffect(() => {
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.documentElement.style.overflow = "auto";
-    };
-  }, []);
 
   // Calculate the width for closed sidebar to ensure equal padding
   const iconSize = 36; // Assuming icon size is 36px (9 * 4)

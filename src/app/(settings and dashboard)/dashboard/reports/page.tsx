@@ -1,5 +1,3 @@
-"use client";
-
 import ReportsPage from "@/components/ReportsPage";
 import React from "react";
 

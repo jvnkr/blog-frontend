@@ -1,6 +1,5 @@
 "use client";
 
-import Avatar from "@/components/Avatar";
 import { Header } from "@/components/Header";
 import Logo from "@/components/Logo";
 import { PiHouse, PiHouseFill } from "react-icons/pi";
@@ -18,13 +17,15 @@ import { usePostsContext } from "@/context/PostsContext";
 import CreateComment from "@/components/CreateComment";
 import { CommentData, Role } from "@/lib/types";
 import VirtualPopup from "@/components/VirtualPopup";
+import AvatarInfo from "@/components/AvatarInfo";
 
 export default function HomeLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { loggedIn, clearAll, username, role, name } = useAuthContext();
+  const { loggedIn, clearAll, username, role, name, verified } =
+    useAuthContext();
   const { setCommentCreated } = usePostsContext();
   const [showCreatePostDialog, setShowCreatePostDialog] = useState(false);
   const pathname = usePathname();
@@ -101,7 +102,7 @@ export default function HomeLayout({
           </div>
         </VirtualPopup>
       )}
-      <div className="flex bg-zinc-900/30 bg-opacity-[0.45] border border-y-0 border-[#272629] min-h-screen overflow-x-hidden justify-start items-center flex-col w-[45rem] mx-auto">
+      <div className="flex bg-zinc-900/30 bg-opacity-[0.45] border border-y-0 border-[#272629] min-h-screen overflow-x-hidden justify-start items-center flex-col w-[45rem] relative mx-auto">
         <Header />
         {children}
       </div>
@@ -213,23 +214,14 @@ export default function HomeLayout({
               "flex justify-between items-center select-none cursor-pointer hover:bg-zinc-900 border border-transparent hover:border-[#272629] rounded-xl transition-all duration-150 ease-in-out p-2  gap-8"
             }
           >
-            <div className="flex gap-2">
-              <Avatar name={name} />
-              <div
-                className={
-                  "flex flex-col relative justify-start items-start text-[15px] font-semibold"
-                }
-              >
-                <span className="flex items-center h-[19px]">{name}</span>
-                <span
-                  className={
-                    "flex font-normal text-neutral-500 items-center h-full text-[12px]"
-                  }
-                >
-                  @{username}
-                </span>
-              </div>
-            </div>
+            <AvatarInfo
+              name={name}
+              username={username}
+              verified={verified}
+              onClick={() => {
+                handleLogout();
+              }}
+            />
             <Ellipsis className="text-[#555] w-5 h-5" />
           </div>
         )}

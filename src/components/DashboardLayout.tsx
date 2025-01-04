@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthContext } from "@/context/AuthContext";
+import { Role } from "@/lib/types";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -18,7 +19,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const router = useRouter();
-  const { name } = useAuthContext();
+  const { name, loggedIn, role } = useAuthContext();
   const pathname = usePathname();
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -29,11 +30,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   };
 
   useEffect(() => {
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.documentElement.style.overflow = "auto";
-    };
-  }, []);
+    if (!loggedIn || role !== Role.ADMIN) {
+      router.replace("/home");
+    }
+  }, [loggedIn, role, router]);
 
   // Calculate the width for closed sidebar to ensure equal padding
   const iconSize = 36; // Assuming icon size is 36px (9 * 4)
@@ -110,7 +110,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               {pathname === "/dashboard" ? (
                 <LayoutDashboard className="min-w-5 min-h-5 max-w-5 max-h-5 fill-white" />
               ) : (
-                <LayoutDashboard className="min-w-5 min-h-5" />
+                <LayoutDashboard className="min-w-5 min-h-5 max-w-5 max-h-5" />
               )}
               <span>Overview</span>
             </div>
@@ -147,7 +147,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 : "You can manage all reports here"}
             </span>
           </div>
-          <div className="flex-grow">{children}</div>
+          <div className="flex-grow overflow-y-auto">
+            {children}
+          </div>
         </div>
       </div>
     </>

@@ -71,9 +71,11 @@ export default function Page() {
     setProfileData,
   ]);
 
-  if (!loggedIn) {
-    router.back();
-  }
+  useEffect(() => {
+    if (!loggedIn) {
+      router.back();
+    }
+  }, [loggedIn, router]);
 
   if (loading || !profileData) {
     return (

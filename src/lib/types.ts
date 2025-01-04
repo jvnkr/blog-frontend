@@ -1,5 +1,28 @@
 import { FieldError, UseFormRegister } from "react-hook-form";
 
+export interface DashboardData {
+  postsCount: number;
+  usersCount: number;
+  reportsCount: number;
+  topUsers: PostAuthor[];
+  topPosts: PostData[];
+  postsPerMonth: { month: string; postsCount: number }[];
+}
+
+export enum ReportReasons {
+  Spam = "SPAM",
+  Inappropriate = "INAPPROPRIATE",
+  Harassment = "HARASSMENT",
+  Misinformation = "MISINFORMATION",
+  Other = "OTHER",
+}
+
+export enum ReportStatus {
+  Pending = "PENDING",
+  Resolved = "RESOLVED",
+  Dismissed = "DISMISSED",
+}
+
 export interface PostData {
   id: string;
   title: string;
@@ -9,17 +32,19 @@ export interface PostData {
   liked: boolean;
   likes: number;
   comments: number;
-  author: {
-    id: string;
-    username: string;
-    name: string;
-    verified: boolean;
-  };
+  author: PostAuthor;
 }
 
 export enum Role {
   ADMIN = "ROLE_ADMIN",
   USER = "ROLE_USER",
+}
+
+export interface PostAuthor {
+  id: string;
+  username: string;
+  name: string;
+  verified: boolean;
 }
 
 export interface CommentData {
@@ -34,12 +59,7 @@ export interface CommentData {
   liked: boolean;
   likes: number;
   replies: number;
-  author: {
-    id: string;
-    username: string;
-    name: string;
-    verified: boolean;
-  };
+  author: PostAuthor;
 }
 
 export interface UserData {

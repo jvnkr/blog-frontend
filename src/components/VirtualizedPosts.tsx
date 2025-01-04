@@ -219,7 +219,7 @@ export function VirtualizedItems({
             if (
               loading &&
               !initialLoading &&
-              virtualRow.index >= posts.length - 1
+              virtualRow.index >= posts.length
             ) {
               return (
                 <div

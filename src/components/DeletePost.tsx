@@ -30,7 +30,7 @@ const DeletePost = ({
       }}
       className="flex bg-zinc-900 w-[30rem] rounded-xl p-4 border border-[#272629] justify-between items-center"
     >
-      <div className="flex flex-col select-none gap-2 items-center">
+      <div className="flex flex-col w-full select-none gap-2 items-start">
         <div className="flex justify-start w-full items-center gap-2">
           <CircleX className="w-6 h-6 fill-red-500" />
           <span className="text-white font-semibold text-xl">{title}</span>

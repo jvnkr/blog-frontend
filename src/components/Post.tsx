@@ -2,8 +2,6 @@
 
 import { PostData } from "@/lib/types";
 import {
-  BadgeCheck,
-  Dot,
   EllipsisVertical,
   Flag,
   Share,
@@ -13,8 +11,6 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useState, useRef } from "react";
 import useResponsiveClass from "@/hooks/useResponsiveClass";
-import Avatar from "./Avatar";
-import { formatTimeDifference } from "@/lib/utils";
 import { useAuthContext } from "@/context/AuthContext";
 import { Card } from "./ui/card";
 import { toast } from "sonner";
@@ -25,6 +21,8 @@ import VirtualPopup from "./VirtualPopup";
 import DeletePost from "./DeletePost";
 import { usePostsContext } from "@/context/PostsContext";
 import Tooltip from "./Tooltip";
+import AvatarInfo from "./AvatarInfo";
+import ReportPost from "./ReportPost";
 
 interface PostProps {
   post: PostData;
@@ -38,6 +36,7 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
   const router = useRouter();
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
   const [options, setOptions] = useState(false);
   const [hoverShare, setHoverShare] = useState(false);
   const [hoverReport, setHoverReport] = useState(false);
@@ -145,80 +144,37 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
           />
         </VirtualPopup>
       )}
+      {showReportDialog && (
+        <VirtualPopup onOverlayClick={() => setShowReportDialog(false)}>
+          <ReportPost
+            setShowReportDialog={setShowReportDialog}
+            postId={post.id}
+          />
+        </VirtualPopup>
+      )}
       <Card
         ref={postRef}
         style={{
           zIndex: 99,
         }}
         className={
-          "flex relative bg-transparent border-[#272629] text-white overflow-hidden flex-col w-full h-full max-h-[30rem]"
+          "flex relative bg-transparent border border-[#272629] text-white overflow-hidden flex-col w-full h-full max-h-[30rem]"
         }
       >
         <div
           className={
-            "flex absolute bg-[#202023] overflow-hidden top-0 w-[calc(100%+2px)] pl-2 h-[60px] left-[-1px] border border-t-0 rounded-b-xl dark:border-[#272629] justify-between items-center"
+            "flex absolute bg-[#202023] overflow-hidden top-0 w-[calc(100%+2px)] pl-2 h-[60px] left-[-1px] border border-t-0 rounded-b-xl border-[#272629] justify-between items-center"
           }
         >
-          <div
+          <AvatarInfo
+            name={post.author.name}
+            username={post.author.username}
+            verified={post.author.verified}
+            createdAt={new Date(post.createdAt)}
             onClick={() => {
               triggerAuthWall(`/@${post.author.username}`);
             }}
-            className={
-              "flex cursor-pointer select-none h-full justify-start gap-2 items-center w-fit"
-            }
-          >
-            <Avatar name={post.author.name} />
-            <div className={"flex h-fit"}>
-              <div
-                className={
-                  "flex flex-col relative justify-start items-start text-[15px] font-semibold"
-                }
-              >
-                <div className="flex items-center gap-1">
-                  <span className="flex items-center h-[19px]">
-                    {post.author.name}
-                  </span>
-                  {post.author.verified && (
-                    <BadgeCheck className="w-4 h-4 fill-blue-500" />
-                  )}
-                </div>
-                <span
-                  className={
-                    "flex font-normal text-neutral-500 items-center h-full text-[12px]"
-                  }
-                >
-                  @{post.author.username}
-                  <Dot className="w-[16px] h-full font-light text-neutral-600" />
-                  <Tooltip
-                    tooltipTrigger={
-                      <span className="hover:underline font-extralight text-neutral-600">
-                        {formatTimeDifference(new Date(post.createdAt))}
-                      </span>
-                    }
-                    tooltipContent={
-                      <>
-                        <p>
-                          {new Date(post.createdAt).toLocaleString("en-US", {
-                            hour: "numeric",
-                            minute: "2-digit",
-                            hour12: true,
-                          })}{" "}
-                        </p>
-                        <Dot className="w-[16px] h-full font-light text-neutral-600" />
-                        <p>
-                          {new Date(post.createdAt).toLocaleString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
-                      </>
-                    }
-                  />
-                </span>
-              </div>
-            </div>
-          </div>
+          />
           <motion.div
             animate={{
               minWidth: options ? expandedWidth : "var(--width-collapsed)",
@@ -293,6 +249,7 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
                         <div
                           onMouseEnter={() => setHoverReport(true)}
                           onMouseLeave={() => setHoverReport(false)}
+                          onClick={() => setShowReportDialog(true)}
                           className="flex cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
                         >
                           <Flag

@@ -34,11 +34,13 @@ import {
 import VirtualPopup from "./VirtualPopup";
 import DeletePost from "./DeletePost";
 import { useRouter } from "next/navigation";
+import ReportPost from "./ReportPost";
 
 const PostPage = (initialPost: PostData) => {
   const { accessToken, verified, userId, username, name } = useAuthContext();
   const [post, setPost] = useState(initialPost);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
   const [comments, setComments] = useState<CommentData[]>([]);
   const [hasMoreComments, setHasMoreComments] = useState(true);
   const [commentsPageNumber, setCommentsPageNumber] = useState(0);
@@ -223,6 +225,14 @@ const PostPage = (initialPost: PostData) => {
           />
         </VirtualPopup>
       )}
+      {showReportDialog && (
+        <VirtualPopup onOverlayClick={() => setShowReportDialog(false)}>
+          <ReportPost
+            setShowReportDialog={setShowReportDialog}
+            postId={post.id}
+          />
+        </VirtualPopup>
+      )}
       <div className="flex relative flex-col w-full">
         <div className="flex relative rounded-b-3xl border ml-[-1px] mr-[-1px] border-zinc-800 pt-[76px] p-6 flex-col gap-2 bg-zinc-900">
           <div className="flex w-full justify-between items-start">
@@ -275,7 +285,10 @@ const PostPage = (initialPost: PostData) => {
                   </DropdownMenuItem>
                 )}
                 {userId !== post.author.id && (
-                  <DropdownMenuItem className="focus:bg-yellow-500 focus:text-white">
+                  <DropdownMenuItem
+                    onClick={() => setShowReportDialog(true)}
+                    className="focus:bg-yellow-500 focus:text-white"
+                  >
                     <Flag className="w-4 h-4 mr-0" />
                     Report
                   </DropdownMenuItem>
