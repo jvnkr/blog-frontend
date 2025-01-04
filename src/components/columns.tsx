@@ -216,6 +216,10 @@ export const columns: ColumnDef<Report>[] = [
         </div>
       );
     },
+    filterFn: (row, columnId, filterValue: string[]) => {
+      const status = row.getValue(columnId) as ReportStatus;
+      return filterValue.includes(status);
+    },
   },
   {
     accessorKey: "createdAt",

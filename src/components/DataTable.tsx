@@ -71,6 +71,7 @@ export function DataTable<TData, TValue>({
   const fetcher = useFetcher();
   const { accessToken } = useAuthContext();
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
   const updateReportStatus = async (reportId: string, newStatus: string) => {
     setReports((prevReports) =>
@@ -190,6 +191,24 @@ export function DataTable<TData, TValue>({
       ?.setFilterValue(updatedReasons.length ? updatedReasons : undefined);
   };
 
+  const handleStatusChange = (status: string, checked: boolean) => {
+    const updatedStatus = checked
+      ? [...selectedStatus, status]
+      : selectedStatus.filter((s) => s !== status);
+
+    setSelectedStatus(updatedStatus);
+    table
+      .getColumn("status")
+      ?.setFilterValue(updatedStatus.length ? updatedStatus : undefined);
+  };
+
+  const resetAllFilters = () => {
+    setSelectedReasons([]);
+    setSelectedStatus([]);
+    table.resetColumnFilters();
+    table.setColumnVisibility({});
+  };
+
   if (reports.length === 0) {
     return <LoadingSpinner />;
   }
@@ -198,6 +217,14 @@ export function DataTable<TData, TValue>({
     <div className="w-full">
       <div className="flex h-[3.3rem] justify-between items-center w-full pb-4">
         <div className="flex h-full w-fit gap-2">
+          <Button
+            variant="ghost"
+            className="bg-zinc-900 border border-[#272629] text-white"
+            onClick={resetAllFilters}
+          >
+            <Repeat className="w-4 h-4" />
+            Reset all filters
+          </Button>
           <Input
             placeholder="Filter by username or name"
             value={
@@ -208,38 +235,6 @@ export function DataTable<TData, TValue>({
             }}
             className="min-h-full w-[14rem]"
           />
-          <Select
-            value={
-              (table.getColumn("status")?.getFilterValue() as string) ?? ""
-            }
-            onValueChange={(value) => {
-              table
-                .getColumn("status")
-                ?.setFilterValue(value === "All" ? undefined : value);
-            }}
-          >
-            <SelectTrigger className="h-full w-[150px] border border-[#272629]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent
-              side="top"
-              className="bg-zinc-900 border border-[#272629] text-white"
-            >
-              <SelectItem className="transition-all duration-150" value="All">
-                All
-              </SelectItem>
-              {Object.values(ReportStatus).map((status) => (
-                <SelectItem
-                  key={status as string}
-                  className="transition-all duration-150"
-                  value={status as string}
-                >
-                  {(status as string).charAt(0) +
-                    (status as string).slice(1).toLowerCase()}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex justify-between items-center max-w-fit gap-2 bg-zinc-900 border border-[#272629] text-white px-3 py-2 rounded-md">
@@ -285,6 +280,53 @@ export function DataTable<TData, TValue>({
                   }
                 >
                   {reason.charAt(0) + reason.slice(1).toLowerCase()}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex justify-between items-center max-w-fit gap-2 bg-zinc-900 border border-[#272629] text-white px-3 py-2 rounded-md">
+                <span className="flex text-sm outline-none justify-center items-center">
+                  {selectedStatus.length > 0
+                    ? `Filtered by ${selectedStatus.length} ${
+                        selectedStatus.length === 1 ? "status" : "statuses"
+                      }`
+                    : "Filter by status"}
+                </span>
+                <ChevronDown className="h-4 w-4 opacity-50" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="bg-zinc-900 border border-[#272629] text-white"
+              align="start"
+            >
+              <DropdownMenuCheckboxItem
+                className="pl-2 gap-2 flex"
+                onClick={() => {
+                  setSelectedStatus([]);
+                  table.getColumn("status")?.setFilterValue(undefined);
+                }}
+              >
+                <Repeat className="w-4 h-4" />
+                Reset
+              </DropdownMenuCheckboxItem>
+              {Object.values(ReportStatus).map((status) => (
+                <DropdownMenuCheckboxItem
+                  key={status}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleStatusChange(
+                      status,
+                      !selectedStatus.includes(status)
+                    );
+                  }}
+                  className="capitalize"
+                  checked={selectedStatus.includes(status)}
+                  onCheckedChange={(value) => handleStatusChange(status, value)}
+                >
+                  {status.charAt(0) + status.slice(1).toLowerCase()}
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>
