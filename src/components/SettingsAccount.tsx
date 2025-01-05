@@ -8,6 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "./ui/button";
+import useFetcher from "@/hooks/useFetcher";
+import { toast } from "sonner";
 
 // Define the form schema using zod
 const formSchema = z
@@ -54,8 +56,9 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 const SettingsAccount = () => {
-  const { email } = useAuthContext();
+  const { email, accessToken, setEmail } = useAuthContext();
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const fetcher = useFetcher();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -117,8 +120,37 @@ const SettingsAccount = () => {
     errors,
   ]);
 
-  const onSubmit = (data: FormValues) => {
-    console.log(data);
+  const onSubmit = async () => {
+    const trimmedEmail = watchedEmail.trim();
+    const trimmedCurrentPassword = watchedCurrentPassword.trim();
+    const trimmedNewPassword = newPassword?.trim();
+    const trimmedConfirmPassword = confirmPassword?.trim();
+
+    const res = await fetcher("/api/v1/users/edit/account", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: trimmedEmail,
+        currentPassword: trimmedCurrentPassword,
+        password: trimmedNewPassword,
+        confirmPassword: trimmedConfirmPassword,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.email !== trimmedEmail) {
+        setEmail(data.email);
+      }
+      toast.success("Account updated successfully", {
+        action: {
+          label: "Close",
+          onClick: () => null,
+        },
+      });
+    }
   };
 
   return (

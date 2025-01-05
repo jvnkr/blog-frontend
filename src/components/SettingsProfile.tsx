@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "./ui/button";
+import useFetcher from "@/hooks/useFetcher";
 
 const formSchema = z.object({
   username: z
@@ -25,11 +26,12 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const SettingsProfile = () => {
-  const { username, name, bio } = useAuthContext();
+  const { accessToken, username, name, bio, setName, setUsername, setBio } =
+    useAuthContext();
   const bioRef = useRef<HTMLTextAreaElement>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-
+  const fetcher = useFetcher();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -62,8 +64,29 @@ const SettingsProfile = () => {
     }
   }, [watchedUsername, watchedName, watchedBio, username, name, bio]);
 
-  const onSubmit = (data: FormValues) => {
-    console.log(data);
+  const onSubmit = async () => {
+    const trimmedUsername = watchedUsername.trim();
+    const trimmedName = watchedName.trim();
+    const trimmedBio = watchedBio?.trim() ?? "";
+
+    const res = await fetcher("/api/v1/users/edit", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: trimmedUsername,
+        name: trimmedName,
+        bio: trimmedBio,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setName(data.name);
+      setUsername(data.username);
+      setBio(data.bio);
+    }
   };
 
   return (
