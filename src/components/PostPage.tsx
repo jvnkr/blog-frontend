@@ -15,8 +15,8 @@ import React, { useEffect, useState } from "react";
 import Avatar from "./Avatar";
 import { useAuthContext } from "@/context/AuthContext";
 import Comment, { CommentCache, commentCache } from "./Comment";
-import { VirtualizedItems } from "./VirtualizedPosts";
-import { useFetchItems } from "@/hooks/useFetchPosts";
+import { VirtualizedItems } from "./VirtualizedItems";
+import { useFetchItems } from "@/hooks/useFetchItems";
 import CreateComment from "./CreateComment";
 import { usePostsContext } from "@/context/PostsContext";
 import PostInteraction from "./PostInteraction";
@@ -57,6 +57,8 @@ const PostPage = (initialPost: PostData) => {
     cachedProfilePath,
     commentCreated,
     setCommentCreated,
+    setProfileData,
+    profileData,
   } = usePostsContext();
 
   const {
@@ -188,6 +190,12 @@ const PostPage = (initialPost: PostData) => {
           Authorization: `Bearer ${accessToken}`,
         },
       });
+      if (profileData?.username === username) {
+        setProfileData({
+          ...profileData,
+          postsCount: profileData.postsCount - 1,
+        });
+      }
       toast.success("Post deleted");
       router.push("/home");
     } catch (error) {

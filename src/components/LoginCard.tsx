@@ -68,7 +68,6 @@ const LoginCard = ({ next = "/home" }: LoginCardProps) => {
       if (response.ok) {
         const { accessToken, username, name, userId, verified } =
           await response.json();
-        window.location.href = next;
         setUnauthWall("");
         setUsername(username);
         setName(name);
@@ -76,6 +75,7 @@ const LoginCard = ({ next = "/home" }: LoginCardProps) => {
         setVerified(verified);
         setAccessToken(accessToken);
         setLoggedIn(true);
+        window.location.href = next;
       } else {
         const data = await response.json();
         throw new Error(data.error);

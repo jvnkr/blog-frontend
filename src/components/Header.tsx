@@ -2,12 +2,14 @@
 import { useAuthContext } from "@/context/AuthContext";
 import HeaderElement from "@/components/HeaderElement";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BadgeCheck } from "lucide-react";
+import { usePostsContext } from "@/context/PostsContext";
 
 // export const NGROK_URL = "https://9624-37-122-170-44.ngrok-free.app";
 export const NGROK_URL = "http://localhost:8080";
 
 export const Header = () => {
+  const { profileData } = usePostsContext();
   const { loggedIn } = useAuthContext();
   const pathname = usePathname();
   const router = useRouter();
@@ -66,7 +68,24 @@ export const Header = () => {
           <HeaderElement
             className="focus-within:rounded-bl-[1px] rounded-br-[14px]"
             isClickable={false}
-            text={"Profile"}
+            text={
+              <div className="flex w-full justify-center items-center gap-2">
+                {!profileData && <p>Profile</p>}
+                {profileData && (
+                  <div className="flex justify-center items-center w-fit flex-col">
+                    <span className="flex w-fit items-center gap-1 text-white font-semibold">
+                      {profileData?.name}
+                      {profileData?.verified && (
+                        <BadgeCheck className="w-4 h-4 fill-blue-500" />
+                      )}
+                    </span>
+                    <span className="text-neutral-500 font-normal text-sm">
+                      {profileData?.postsCount} posts
+                    </span>
+                  </div>
+                )}
+              </div>
+            }
             selectedPath={pathname}
           />
         </>

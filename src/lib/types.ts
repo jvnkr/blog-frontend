@@ -5,7 +5,6 @@ export interface DashboardData {
   usersCount: number;
   reportsCount: number;
   topUsers: PostAuthor[];
-  topPosts: PostData[];
   postsPerMonth: { month: string; postsCount: number }[];
 }
 

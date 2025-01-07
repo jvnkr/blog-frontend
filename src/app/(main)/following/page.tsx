@@ -1,8 +1,8 @@
 "use client";
 
-import { useFetchItems } from "@/hooks/useFetchPosts";
+import { useFetchItems } from "@/hooks/useFetchItems";
 import { usePostsContext } from "@/context/PostsContext";
-import { VirtualizedItems } from "@/components/VirtualizedPosts";
+import { VirtualizedItems } from "@/components/VirtualizedItems";
 import { PostData } from "@/lib/types";
 import { Post } from "@/components/Post";
 
@@ -44,6 +44,19 @@ export default function FollowingPage() {
     }
     setPosts(posts.map((p) => (p.id === post.id ? post : p)));
   };
+
+  if (!initialLoading && !loading && followingPosts.length === 0) {
+    return (
+      <div className="flex flex-col text-center w-full absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <span className="text-white text-lg font-semibold">
+          Seems like you are not following anyone yet
+        </span>
+        <span className="text-neutral-500 text-sm">
+          Follow people to see their posts here
+        </span>
+      </div>
+    );
+  }
 
   return (
     <VirtualizedItems

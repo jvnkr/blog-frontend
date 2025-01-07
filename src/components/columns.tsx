@@ -142,7 +142,7 @@ export const columns: ColumnDef<Report>[] = [
     cell: ({ row }) => {
       const reason = row.getValue("reasons") as Array<ReportReasons>;
       return (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2">
           {reason.map((reason) => (
             <div
               key={reason}

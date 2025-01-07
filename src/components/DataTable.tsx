@@ -72,6 +72,7 @@ export function DataTable<TData, TValue>({
   const { accessToken } = useAuthContext();
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const updateReportStatus = async (reportId: string, newStatus: string) => {
     setReports((prevReports) =>
@@ -126,24 +127,31 @@ export function DataTable<TData, TValue>({
   });
 
   const fetchReports = async (pageNumber = 0, batchSize = 10) => {
-    const response = await fetcher("/api/v1/report/batch", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        pageNumber,
-        batchSize,
-      }),
-    });
-    const data = await response.json();
-    for (let i = 0; i < data.reports.length; i++) {
-      data.reports[i].reportId = i + 1 + pageNumber * batchSize;
+    setLoading(true);
+    try {
+      const response = await fetcher("/api/v1/report/batch", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          pageNumber,
+          batchSize,
+        }),
+      });
+      const data = await response.json();
+      for (let i = 0; i < data.reports.length; i++) {
+        data.reports[i].reportId = i + 1 + pageNumber * batchSize;
+      }
+      setPageCount(data.pages);
+      setReports(data.reports);
+      setPagination({ pageIndex: pageNumber, pageSize: batchSize });
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
     }
-    setPageCount(data.pages);
-    setReports(data.reports);
-    setPagination({ pageIndex: pageNumber, pageSize: batchSize });
   };
 
   const table = useReactTable({
@@ -209,17 +217,36 @@ export function DataTable<TData, TValue>({
     table.setColumnVisibility({});
   };
 
-  if (reports.length === 0) {
-    return <LoadingSpinner />;
+  if (loading && reports.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-full w-full">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (!loading && reports.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-full w-full">
+        <div className="flex text-center flex-col items-center">
+          <span className="text-lg font-semibold text-muted-foreground">
+            No reports found
+          </span>
+          <span className="text-sm text-muted-foreground">
+            When users report posts, they will appear here for review.
+          </span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="w-full">
-      <div className="flex h-[3.3rem] justify-between items-center w-full pb-4">
-        <div className="flex h-full w-fit gap-2">
+    <div className="flex flex-col gap-1 overflow-hidden h-full w-full">
+      <div className="md:flex hidden flex-wrap overflow-hidden min-h-[3.4rem] h-[3.4rem] justify-between items-center pb-4 w-full">
+        <div className="flex overflow-hidden flex-wrap h-full w-fit gap-2">
           <Button
             variant="ghost"
-            className="bg-zinc-900 border border-[#272629] text-white"
+            className="bg-zinc-900 h-full border border-[#272629] text-white"
             onClick={resetAllFilters}
           >
             <Repeat className="w-4 h-4" />
@@ -238,7 +265,7 @@ export function DataTable<TData, TValue>({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex justify-between items-center max-w-fit gap-2 bg-zinc-900 border border-[#272629] text-white px-3 py-2 rounded-md">
-                <span className="flex text-sm outline-none justify-center items-center">
+                <span className="flex whitespace-nowrap text-sm outline-none justify-center items-center">
                   {selectedReasons.length > 0
                     ? `Filtered by ${selectedReasons.length} ${
                         selectedReasons.length === 1 ? "reason" : "reasons"
@@ -287,7 +314,7 @@ export function DataTable<TData, TValue>({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex justify-between items-center max-w-fit gap-2 bg-zinc-900 border border-[#272629] text-white px-3 py-2 rounded-md">
-                <span className="flex text-sm outline-none justify-center items-center">
+                <span className="flex whitespace-nowrap text-sm outline-none justify-center items-center">
                   {selectedStatus.length > 0
                     ? `Filtered by ${selectedStatus.length} ${
                         selectedStatus.length === 1 ? "status" : "statuses"
@@ -366,14 +393,14 @@ export function DataTable<TData, TValue>({
           {table.getFilteredRowModel().rows.length} row(s) selected
         </div>
       </div>
-      <div className="rounded-md border overflow-hidden">
-        <Table>
+      <div className="flex w-full rounded-md border overflow-hidden">
+        <Table className="w-full overflow-hidden">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="sticky top-0 z-[100]">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -420,8 +447,8 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex justify-end w-full pt-4 items-center">
-        <div className="flex w-full items-center space-x-2">
+      <div className="md:flex hidden min-h-[3.3rem] h-[3.3rem] justify-end w-full pt-4 items-center overflow-hidden">
+        <div className="flex w-full items-center space-x-2 overflow-hidden">
           <p className="text-sm font-medium text-muted-foreground">
             Rows per page
           </p>
@@ -453,7 +480,7 @@ export function DataTable<TData, TValue>({
         <div className="flex w-[100px] items-center justify-center text-sm font-medium text-muted-foreground">
           Page {pagination.pageIndex + 1} of {table.getPageCount()}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 overflow-hidden">
           <Button
             variant="outline"
             className="hidden h-8 w-8 p-0 lg:flex"

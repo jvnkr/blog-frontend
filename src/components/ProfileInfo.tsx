@@ -9,6 +9,7 @@ import { Label } from "./ui/label";
 import EmojiPicker from "./EmojiPicker";
 import { usePostsContext } from "@/context/PostsContext";
 import VirtualPopup from "./VirtualPopup";
+import { useRouter } from "next/navigation";
 
 interface ProfileInfoProps {
   username: string;
@@ -18,6 +19,7 @@ interface ProfileInfoProps {
   followers: number;
   following: number;
   createdAt: string;
+  postsCount: number;
 }
 
 const ProfileInfo = ({
@@ -45,6 +47,7 @@ const ProfileInfo = ({
   } = useAuthContext();
   const bioRef = useRef<HTMLTextAreaElement>(null);
   const fetcher = useFetcher();
+  const router = useRouter();
 
   const {
     setFollowingPosts,
@@ -81,6 +84,8 @@ const ProfileInfo = ({
       setCurrentUsername(data.username);
       setCurrentName(data.name);
       setShowEditProfile(false);
+      router.replace(`/@${data.username}`);
+      router.refresh();
     }
   };
 

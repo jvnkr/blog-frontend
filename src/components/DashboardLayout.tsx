@@ -48,6 +48,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           width: sidebarOpen ? "300px" : `${closedWidth + 6}px`,
         }}
         transition={{ duration: 0.125 }}
+        style={{
+          minWidth: `${closedWidth + 3.5}px`,
+        }}
         className="flex p-2 overflow-x-hidden flex-col h-full w-[300px]"
       >
         <div className="flex overflow-x-hidden relative bg-zinc-900/30 border border-[#272629] rounded-xl flex-col h-full">
@@ -77,12 +80,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <motion.span
               initial={{
                 opacity: 1,
+                width: "auto",
               }}
               animate={{
                 opacity: sidebarOpen ? 1 : 0,
+                width: sidebarOpen ? "auto" : 0,
               }}
               transition={{ duration: 0.125 }}
-              className="text-xl"
+              className="text-xl whitespace-nowrap overflow-hidden"
             >
               Dashboard
             </motion.span>
@@ -112,7 +117,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               ) : (
                 <LayoutDashboard className="min-w-5 min-h-5 max-w-5 max-h-5" />
               )}
-              <span>Overview</span>
+              <motion.span
+                initial={{ width: "auto" }}
+                animate={{ width: sidebarOpen ? "auto" : 0 }}
+                transition={{ duration: 0.125 }}
+                className="whitespace-nowrap overflow-hidden"
+              >
+                Overview
+              </motion.span>
             </div>
             <div
               className={`flex overflow-hidden items-center gap-2 transition-all duration-150 ease-in-out text-white hover:bg-zinc-900 border hover:border-[#272629] cursor-pointer p-2 rounded-lg${
@@ -127,7 +139,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               ) : (
                 <Flag className="min-w-5 min-h-5 max-w-5 max-h-5" />
               )}
-              <span>Reports</span>
+              <motion.span
+                initial={{ width: "auto" }}
+                animate={{ width: sidebarOpen ? "auto" : 0 }}
+                transition={{ duration: 0.125 }}
+                className="whitespace-nowrap overflow-hidden"
+              >
+                Reports
+              </motion.span>
             </div>
           </div>
         </div>
@@ -136,10 +155,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         style={{
           zIndex: 1,
         }}
-        className="flex w-full min-h-screen"
+        className="flex w-full min-h-screen overflow-hidden"
       >
         <div className="w-full mt-[-1px] mb-[-1px] p-6 bg-zinc-900 border border-zinc-800 border-r-0 rounded-l-3xl flex flex-col justify-between">
-          <div className="flex flex-col justify-center items-start border border-zinc-700 border-x-0 border-t-0 pb-7 mb-7">
+          <div className="flex flex-col justify-center items-start border border-zinc-700 border-x-0 border-t-0 pb-7 mb-7 overflow-hidden min-h-fit">
             <span className="text-2xl font-bold">{`Welcome, ${name} 👋`}</span>
             <span className="text-sm text-zinc-400">
               {pathname === "/dashboard"
@@ -147,9 +166,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 : "You can manage all reports here"}
             </span>
           </div>
-          <div className="flex-grow overflow-y-auto">
-            {children}
-          </div>
+          <div className="flex-grow overflow-y-auto">{children}</div>
         </div>
       </div>
     </>

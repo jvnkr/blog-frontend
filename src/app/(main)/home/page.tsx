@@ -1,8 +1,8 @@
 "use client";
 
-import { useFetchItems } from "@/hooks/useFetchPosts";
+import { useFetchItems } from "@/hooks/useFetchItems";
 import { usePostsContext } from "@/context/PostsContext";
-import { VirtualizedItems } from "@/components/VirtualizedPosts";
+import { VirtualizedItems } from "@/components/VirtualizedItems";
 import { PostData } from "@/lib/types";
 import { Post } from "@/components/Post";
 import CreatePost from "@/components/CreatePost";
@@ -49,23 +49,35 @@ export default function HomePage() {
   };
 
   return (
-    <VirtualizedItems
-      ItemComponent={(index) => (
-        <Post
-          key={posts[index].id}
-          posts={posts}
-          post={posts[index]}
-          onUpdatePost={onUpdatePost}
-        />
+    <>
+      <VirtualizedItems
+        ItemComponent={(index) => (
+          <Post
+            key={posts[index].id}
+            posts={posts}
+            post={posts[index]}
+            onUpdatePost={onUpdatePost}
+          />
+        )}
+        id="home"
+        initialLoading={initialLoading}
+        CreateItemComponent={loggedIn ? <CreatePost /> : null}
+        items={posts}
+        loading={loading}
+        hasMoreItems={hasMorePosts}
+        skeletonCount={skeletonCount}
+        onEndReached={fetchPosts}
+      />
+      {!initialLoading && !loading && posts.length === 0 && (
+        <div className="flex flex-col text-center w-full absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <span className="text-white text-lg font-semibold">
+            Seems like there are no posts yet
+          </span>
+          <span className="text-neutral-500 text-sm">
+            Be the first to post something
+          </span>
+        </div>
       )}
-      id="home"
-      initialLoading={initialLoading}
-      CreateItemComponent={loggedIn ? <CreatePost /> : null}
-      items={posts}
-      loading={loading}
-      hasMoreItems={hasMorePosts}
-      skeletonCount={skeletonCount}
-      onEndReached={fetchPosts}
-    />
+    </>
   );
 }

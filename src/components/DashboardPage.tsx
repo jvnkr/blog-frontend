@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardData } from "@/lib/types";
+import { DashboardData, PostData } from "@/lib/types";
 import React, { useEffect, useState } from "react";
 import {
   ChartLegendContent,
@@ -17,23 +17,56 @@ import { Flag, Heart, MessageSquare, NotepadText } from "lucide-react";
 import AvatarInfo from "./AvatarInfo";
 import Tooltip from "./Tooltip";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { VirtualizedItems } from "./VirtualizedItems";
+import { useFetchItems } from "@/hooks/useFetchItems";
+import { useAuthContext } from "@/context/AuthContext";
 
 const DashboardPage = () => {
   const fetcher = useFetcher();
+  const { accessToken } = useAuthContext();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
+
+  const [dashboardPageNumber, setDashboardPageNumber] = useState(0);
+  const [hasMoreDashboardPosts, setHasMoreDashboardPosts] = useState(true);
+  const [dashboardPosts, setDashboardPosts] = useState<PostData[]>([]);
 
   useEffect(() => {
     fetchDashboardData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const {
+    loading,
+    initialLoading,
+    fetchItems: fetchDashboardPosts,
+  } = useFetchItems(
+    dashboardPosts,
+    setDashboardPosts,
+    `/api/v1/dashboard/posts`,
+    dashboardPageNumber,
+    setDashboardPageNumber,
+    hasMoreDashboardPosts,
+    setHasMoreDashboardPosts
+  );
+
   const fetchDashboardData = async () => {
-    const response = await fetcher("/api/v1/dashboard");
-    const data = (await response.json()) as DashboardData;
-    console.log(data);
-    setDashboardData(data);
+    try {
+      const response = await fetcher("/api/v1/dashboard", {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const data = (await response.json()) as DashboardData;
+      console.log(data);
+      setDashboardData(data);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const chartConfig = {
@@ -43,16 +76,30 @@ const DashboardPage = () => {
     },
   } satisfies ChartConfig;
 
+  if (!loading && dashboardData === null) {
+    return (
+      <div className="flex justify-center items-center h-full w-full">
+        <div className="flex text-center flex-col items-center">
+          <span className="text-lg font-semibold text-muted-foreground">
+            No data found
+          </span>
+          <span className="text-sm text-muted-foreground">
+            When data is available, it will appear here.
+          </span>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex overflow-hidden gap-4 h-full">
-      <div className="flex relative flex-grow flex-col gap-4 w-full h-full">
-        <div className="gap-4 hidden xl:flex">
+      <div className="flex relative flex-grow flex-col gap-4 w-full h-full min-h-[10rem]">
+        <div className="gap-4 hidden xl:flex min-h-[106px]">
           <div
-            className={`flex overflow-hidden relative min-h-[106px] border border-[#333236] p-4 gap-3 justify-between flex-col h-fit bg-zinc-800 rounded-xl w-full${
-              !dashboardData ? " animate-pulse" : ""
+            className={`flex overflow-hidden relative border border-[#333236] p-4 gap-3 justify-between flex-col h-full bg-zinc-800 rounded-xl w-full${
+              !dashboardData || initialLoading ? " animate-pulse" : ""
             }`}
           >
-            {!dashboardData && (
+            {(!dashboardData || initialLoading) && (
               <motion.div
                 className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-600/10 to-transparent"
                 initial={{ y: "-100%" }}
@@ -75,11 +122,11 @@ const DashboardPage = () => {
             )}
           </div>
           <div
-            className={`flex overflow-hidden relative min-h-[106px] border border-[#333236] p-4 gap-3 justify-between flex-col h-fit bg-zinc-800 rounded-xl w-full${
-              !dashboardData ? " animate-pulse" : ""
+            className={`flex overflow-hidden relative border border-[#333236] p-4 gap-3 justify-between flex-col h-full bg-zinc-800 rounded-xl w-full${
+              !dashboardData || initialLoading ? " animate-pulse" : ""
             }`}
           >
-            {!dashboardData && (
+            {(!dashboardData || initialLoading) && (
               <motion.div
                 className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-600/10 to-transparent"
                 initial={{ y: "-100%" }}
@@ -102,11 +149,11 @@ const DashboardPage = () => {
             )}
           </div>
           <div
-            className={`flex overflow-hidden relative min-h-[106px] border border-[#333236] p-4 gap-3 justify-between flex-col h-fit bg-zinc-800 rounded-xl w-full${
-              !dashboardData ? " animate-pulse" : ""
+            className={`flex overflow-hidden relative border border-[#333236] p-4 gap-3 justify-between flex-col h-full bg-zinc-800 rounded-xl w-full${
+              !dashboardData || initialLoading ? " animate-pulse" : ""
             }`}
           >
-            {!dashboardData && (
+            {(!dashboardData || initialLoading) && (
               <motion.div
                 className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-600/10 to-transparent"
                 initial={{ y: "-100%" }}
@@ -131,10 +178,10 @@ const DashboardPage = () => {
         </div>
         <div
           className={`flex overflow-hidden relative border border-[#333236] rounded-xl w-full h-full bg-zinc-800${
-            !dashboardData ? " animate-pulse" : ""
+            !dashboardData || initialLoading ? " animate-pulse" : ""
           }`}
         >
-          {!dashboardData && (
+          {(!dashboardData || initialLoading) && (
             <motion.div
               className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-600/10 to-transparent"
               initial={{ y: "-100%" }}
@@ -176,13 +223,14 @@ const DashboardPage = () => {
       <div className="hidden overflow-hidden flex-shrink flex-col gap-4 w-[24rem] h-full xl:flex">
         <div
           style={{
-            minHeight: !dashboardData ? "359px" : "fit-content",
+            minHeight:
+              !dashboardData || initialLoading ? "359px" : "fit-content",
           }}
           className={`select-none relative border border-[#333236] flex flex-col overflow-hidden gap-4 bg-zinc-800 rounded-xl w-full${
-            !dashboardData ? " animate-pulse" : ""
+            !dashboardData || initialLoading ? " animate-pulse" : ""
           }`}
         >
-          {!dashboardData && (
+          {(!dashboardData || initialLoading) && (
             <motion.div
               className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-600/10 to-transparent"
               initial={{ y: "-100%" }}
@@ -196,7 +244,7 @@ const DashboardPage = () => {
                 style={{
                   zIndex: 3,
                 }}
-                className="sticky flex justify-center items-center top-0 text-xl font-bold w-full backdrop-blur-sm bg-zinc-900/80 border border-x-0 border-t-0 ml-[-1px] mr-[-1px] border-b-[#333236] p-2 rounded-b-xl"
+                className="sticky flex justify-center items-center top-0 text-xl font-bold w-full backdrop-blur-sm bg-zinc-900/80 border border-x-0 border-t-0 ml-[-1px] translate-x-[1px] border-b-[#333236] p-2 rounded-b-xl"
               >
                 <Tooltip
                   triggerStyle={{
@@ -263,13 +311,13 @@ const DashboardPage = () => {
           )}
         </div>
         <div
-          className={`select-none rounded-xl flex relative border border-[#333236] flex-col w-full h-full gap-4 overflow-x-hidden bg-zinc-800 rounded-xl${
-            !dashboardData
+          className={`select-none rounded-xl flex relative border border-[#333236] flex-col w-full h-full overflow-x-hidden bg-zinc-800 rounded-xl${
+            !dashboardData || initialLoading
               ? " animate-pulse overflow-hidden"
               : "overflow-y-auto"
           }`}
         >
-          {!dashboardData && (
+          {(!dashboardData || initialLoading) && (
             <motion.div
               className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-600/10 to-transparent"
               initial={{ y: "-100%" }}
@@ -319,46 +367,62 @@ const DashboardPage = () => {
                   }
                 />
               </div>
-              <div className="flex p-4 pt-0 flex-col gap-4">
-                {dashboardData.topPosts.map((post, index) => (
-                  <div
-                    style={{
-                      marginTop: index === 0 ? "0px" : "10px",
-                    }}
-                    className="flex relative flex-col items-center"
-                    key={post.id}
+              <VirtualizedItems
+                isWindowVirtualizer={false}
+                paddingStart={16}
+                ItemComponent={(index) => (
+                  <Link
+                    href={`/post/${dashboardPosts[index].id}`}
+                    target="_blank"
+                    className="flex cursor-pointer relative flex-col items-center gap-0"
+                    key={dashboardPosts[index].id}
                   >
                     <div
                       style={{
                         zIndex: 1,
                       }}
-                      className="flex w-full bg-[#2D2D33] rounded-xl p-2"
+                      className="flex w-full bg-[#2D2D33] border border-[#333236] rounded-xl p-2"
                     >
                       <AvatarInfo
-                        username={post.author.username}
-                        name={post.author.name}
-                        verified={post.author.verified}
-                        createdAt={new Date(post.createdAt)}
+                        username={dashboardPosts[index].author.username}
+                        name={dashboardPosts[index].author.name}
+                        verified={dashboardPosts[index].author.verified}
+                        createdAt={new Date(dashboardPosts[index].createdAt)}
                       />
                     </div>
-                    <div className="flex rounded-t-xl absolute top-0 bg-zinc-900 w-full h-[56px]"></div>
+                    <div className="flex rounded-t-xl absolute top-0 bg-zinc-900 w-full h-[58px]"></div>
                     <div className="flex flex-col bg-zinc-900 w-full h-fit rounded-b-xl p-2">
-                      <span className="text-lg font-bold">{post.title}</span>
-                      <span className="text-sm">{post.description}</span>
+                      <span className="text-lg font-bold break-all">
+                        {dashboardPosts[index].title}
+                      </span>
+                      <span className="text-sm break-all">
+                        {dashboardPosts[index].description}
+                      </span>
                       <div className="flex mt-2 w-full h-fit items-center gap-2">
                         <div className="flex items-center gap-1">
                           <Heart className="w-4 h-4 text-red-500" />
-                          <span className="text-sm">{post.likes}</span>
+                          <span className="text-sm">
+                            {dashboardPosts[index].likes}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <MessageSquare className="w-4 h-4 text-blue-500" />
-                          <span className="text-sm">{post.comments}</span>
+                          <span className="text-sm">
+                            {dashboardPosts[index].comments}
+                          </span>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  </Link>
+                )}
+                id={"topPosts"}
+                items={dashboardPosts}
+                loading={loading}
+                initialLoading={initialLoading}
+                skeletonCount={0}
+                hasMoreItems={hasMoreDashboardPosts}
+                onEndReached={fetchDashboardPosts}
+              />
             </>
           )}
         </div>

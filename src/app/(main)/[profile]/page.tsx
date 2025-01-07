@@ -48,6 +48,8 @@ export default function Page() {
           return;
         }
 
+        console.log(data);
+
         setProfileData(data);
         setFollowers(data.followers);
         setFollowingUser(data.followingUser);

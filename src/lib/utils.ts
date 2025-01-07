@@ -6,13 +6,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const API_URL = `http://localhost:8080`;
+const API_URL = "http://localhost:8080";
+
 export async function fetcher(
   url: string,
   options: RequestInit = {},
-  refreshCallback: (newAccessToken: string) => void
+  refreshCallback: (newAccessToken: string) => void,
+  dockerUrl?: string
 ) {
-  const mainResponse = await fetch(API_URL + url, {
+  const mainResponse = await fetch((dockerUrl ? dockerUrl : API_URL) + url, {
     ...options,
     credentials: "include",
   });

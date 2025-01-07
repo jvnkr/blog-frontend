@@ -53,7 +53,6 @@ export function useFetchItems(
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        cache: "force-cache",
         body: JSON.stringify({ pageNumber }),
         credentials: "include",
       });

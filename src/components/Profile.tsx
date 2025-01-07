@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { VirtualizedItems } from "./VirtualizedPosts";
+import { VirtualizedItems } from "./VirtualizedItems";
 import { usePostsContext } from "@/context/PostsContext";
-import { useFetchItems } from "@/hooks/useFetchPosts";
+import { useFetchItems } from "@/hooks/useFetchItems";
 import { PostData } from "@/lib/types";
 import { usePathname } from "next/navigation";
 import { Post } from "./Post";
@@ -18,6 +18,7 @@ export interface ProfileProps {
   verified: boolean;
   followers: number;
   following: number;
+  postsCount: number;
   createdAt: string;
 }
 
@@ -68,15 +69,15 @@ const Profile = ({
   );
 
   useEffect(() => {
-    if (loggedIn && !cachedProfilePath.endsWith(pathUsername)) {
+    if (cachedProfilePath && cachedProfilePath !== pathname) {
       setProfilePosts([]);
       setProfilePageNumber(0);
       setProfileData(null);
       setFollowers(null);
       setFollowingUser(null);
-
       setHasMoreProfilePosts(true);
     }
+
     setCachedProfilePath(pathname);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
@@ -97,6 +98,7 @@ const Profile = ({
         followers={followers}
         following={following}
         createdAt={createdAt}
+        postsCount={posts.length}
       />
       <VirtualizedItems
         ItemComponent={(index) => (
@@ -119,6 +121,32 @@ const Profile = ({
         onEndReached={fetchPosts}
         paddingStart={16}
       />
+      {authUsername !== username &&
+        !initialLoading &&
+        !loading &&
+        profilePosts.length === 0 && (
+          <div className="flex flex-col text-center w-full py-[4rem]">
+            <span className="text-white text-lg font-semibold">
+              Seems like this user doesn&apos;t have any posts yet
+            </span>
+            <span className="text-neutral-500 text-sm">
+              Their posts will appear here once they start creating them
+            </span>
+          </div>
+        )}
+      {authUsername === username &&
+        !initialLoading &&
+        !loading &&
+        profilePosts.length === 0 && (
+          <div className="flex flex-col text-center w-full py-[4rem]">
+            <span className="text-white text-lg font-semibold">
+              Seems like you don&apos;t have any posts yet
+            </span>
+            <span className="text-neutral-500 text-sm">
+              Your posts will appear here once you start creating them
+            </span>
+          </div>
+        )}
     </div>
   );
 };

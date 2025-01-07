@@ -32,7 +32,11 @@ const CreatePost = ({
   const {
     setProfilePosts,
     setIsPopup,
+    followingPosts,
     setFollowingPosts,
+    profileData,
+    setProfileData,
+    posts: homePosts,
     setPosts: setHomePosts,
     cachedProfilePath,
   } = usePostsContext();
@@ -72,11 +76,25 @@ const CreatePost = ({
           setTitleValue("");
           setDescValue("");
 
-          setHomePosts((prev) => [data, ...prev]);
-          if (data.author.username !== username) {
+          if (homePosts.length > 0) {
+            setHomePosts((prev) => [data, ...prev]);
+          }
+
+          if (profileData?.username === username) {
+            setProfileData({
+              ...profileData,
+              postsCount: profileData.postsCount + 1,
+            });
+          }
+
+          if (followingPosts.length > 0 && data.author.username !== username) {
             setFollowingPosts((prev) => [data, ...prev]);
           }
-          if (cachedProfilePath.endsWith(data.author.username)) {
+
+          if (
+            cachedProfilePath &&
+            cachedProfilePath.endsWith(data.author.username)
+          ) {
             setProfilePosts((prev) => [data, ...prev]);
           }
           setIsPopup(false);
@@ -114,7 +132,7 @@ const CreatePost = ({
       style={{
         zIndex: 999,
       }}
-      className={`flex relative border-[#272629] bg-transparent text-white flex-col w-full h-full max-h-[22rem] ${className}`}
+      className={`flex relative border-[#272629] bg-transparent text-white flex-col w-full h-full max-h-[21rem] ${className}`}
     >
       <div className="flex relative rounded-t-[11px] overflow-auto pt-0 max-h-[500px] w-full h-full bg-zinc-900 flex-col">
         <div className="sticky top-0 p-3 pb-2 bg-zinc-900 z-10">

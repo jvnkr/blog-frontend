@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useWindowVirtualizer, VirtualItem } from "@tanstack/react-virtual";
+import {
+  useWindowVirtualizer,
+  useVirtualizer,
+  VirtualItem,
+} from "@tanstack/react-virtual";
 import { useWindowScroll, useDebounce } from "@uidotdev/usehooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import LoadingSpinner from "./LoadingSpinner";
@@ -19,11 +23,12 @@ interface VirtualizedItemsProps {
   paddingStart?: number;
   ItemComponent: (index: number) => React.ReactNode;
   CreateItemComponent?: React.ReactNode;
+  isWindowVirtualizer?: boolean;
 }
 
 export function VirtualizedItems({
   id,
-  items: posts,
+  items,
   loading,
   initialLoading,
   skeletonCount,
@@ -32,6 +37,7 @@ export function VirtualizedItems({
   ItemComponent,
   CreateItemComponent,
   paddingStart = 60 + 16,
+  isWindowVirtualizer = true,
 }: VirtualizedItemsProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -53,19 +59,32 @@ export function VirtualizedItems({
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Initialize TanStack virtual window scroller
-  const virtualizer = useWindowVirtualizer({
-    estimateSize: () => 256, // Estimated height of each post
-    overscan: 5, // Number of items to render outside of viewport
+  const baseOpts = {
+    estimateSize: () => 256,
+    overscan: 5,
     paddingStart,
     count:
-      posts.length === undefined
+      items.length === undefined
         ? restoreItemCount
-        : posts.length + (CreateItemComponent ? 1 : 0),
+        : items.length + (CreateItemComponent ? 1 : 0),
     initialOffset: restoreOffset,
     initialMeasurementsCache: restoreMeasurementsCache,
+  };
+
+  const windowVirtualizer = useWindowVirtualizer({
+    ...baseOpts,
+    getScrollElement: () => window,
   });
+
+  const normalVirtualizer = useVirtualizer({
+    ...baseOpts,
+    getScrollElement: () => parentRef.current,
+  });
+
+  // Initialize virtualizer based on type
+  const virtualizer = isWindowVirtualizer
+    ? windowVirtualizer
+    : normalVirtualizer;
 
   // Track scroll position with debounce to avoid too frequent updates
   const scrollPos = useDebounce(useWindowScroll()[0]?.y || 0, 500);
@@ -77,7 +96,7 @@ export function VirtualizedItems({
     window.history.replaceState(
       {
         ...window.history.state,
-        [`vtableItemCount_${id}`]: posts.length + (CreateItemComponent ? 1 : 0),
+        [`vtableItemCount_${id}`]: items.length + (CreateItemComponent ? 1 : 0),
         [`vtableOffset_${id}`]: scrollPos,
         [`vtableMeasureCache_${id}`]: virtualizer.measurementsCache,
       },
@@ -85,7 +104,7 @@ export function VirtualizedItems({
       window.location.href
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [posts.length, scrollPos, virtualizer.measurementsCache]);
+  }, [items.length, scrollPos, virtualizer.measurementsCache]);
 
   // Used to restore scroll position when popup is closed.
   useEffect(() => {
@@ -129,7 +148,7 @@ export function VirtualizedItems({
       return;
     }
 
-    if (lastItem.index >= posts.length - 1 && !loading && hasMoreItems) {
+    if (lastItem.index >= items.length - 1 && !loading && hasMoreItems) {
       onEndReached();
     }
 
@@ -138,7 +157,7 @@ export function VirtualizedItems({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     virtualizer.getVirtualItems(),
     loading,
-    posts.length,
+    items.length,
     hasMoreItems,
     mounted,
     onEndReached,
@@ -149,7 +168,7 @@ export function VirtualizedItems({
     return null;
   }
 
-  if (initialLoading && posts.length === 0) {
+  if (initialLoading && items.length === 0) {
     return (
       <div
         style={{
@@ -170,7 +189,9 @@ export function VirtualizedItems({
   return (
     <div
       ref={parentRef}
-      className="flex overflow-hidden px-4 justify-start items-center flex-col w-full"
+      className={`flex px-4 justify-start items-center flex-col w-full ${
+        !isWindowVirtualizer ? "h-full overflow-auto" : "overflow-hidden"
+      }`}
     >
       <div
         style={{
@@ -219,7 +240,7 @@ export function VirtualizedItems({
             if (
               loading &&
               !initialLoading &&
-              virtualRow.index >= posts.length
+              virtualRow.index >= items.length
             ) {
               return (
                 <div

@@ -7,7 +7,14 @@ import { TbSettings, TbSettingsFilled } from "react-icons/tb";
 import { HiOutlineUser } from "react-icons/hi";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/context/AuthContext";
-import { Ellipsis, LayoutDashboard, PencilLine, Search, X } from "lucide-react";
+import {
+  Ellipsis,
+  LayoutDashboard,
+  LogOut,
+  PencilLine,
+  Search,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -18,6 +25,7 @@ import CreateComment from "@/components/CreateComment";
 import { CommentData, Role } from "@/lib/types";
 import VirtualPopup from "@/components/VirtualPopup";
 import AvatarInfo from "@/components/AvatarInfo";
+import { AnimatePresence, motion } from "motion/react";
 
 export default function HomeLayout({
   children,
@@ -28,6 +36,7 @@ export default function HomeLayout({
     useAuthContext();
   const { setCommentCreated } = usePostsContext();
   const [showCreatePostDialog, setShowCreatePostDialog] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const fetcher = useFetcher();
@@ -48,6 +57,17 @@ export default function HomeLayout({
       console.error(e);
     }
   };
+
+  const handleCloseMenu = () => {
+    setShowMenu(false);
+  };
+
+  useEffect(() => {
+    window.addEventListener("click", handleCloseMenu);
+    return () => {
+      window.removeEventListener("click", handleCloseMenu);
+    };
+  }, []);
 
   useEffect(() => {
     if (pathname === "/following" && !loggedIn) {
@@ -209,18 +229,38 @@ export default function HomeLayout({
         </div>
         {loggedIn && (
           <div
-            onClick={handleLogout}
-            className={
-              "flex justify-between items-center select-none cursor-pointer hover:bg-zinc-900 border border-transparent hover:border-[#272629] rounded-xl transition-all duration-150 ease-in-out p-2  gap-8"
-            }
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMenu(!showMenu);
+            }}
+            className={`flex relative justify-between items-center select-none cursor-pointer hover:bg-zinc-900 border hover:border-[#272629] rounded-xl transition-all duration-150 ease-in-out p-2 gap-8 ${
+              showMenu ? "bg-zinc-900 border-[#272629]" : "border-transparent"
+            }`}
           >
+            <AnimatePresence>
+              {showMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute p-1 w-full left-0 rounded-md bg-zinc-900 border border-[#272629] top-[-3rem]"
+                >
+                  <button
+                    onClick={handleLogout}
+                    className="flex gap-2 items-center w-full h-fit hover:bg-zinc-800 rounded-sm text-white p-1 hover:text-red-500 transition-colors duration-150 ease-in-out"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    Logout
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <AvatarInfo
               name={name}
               username={username}
               verified={verified}
-              onClick={() => {
-                handleLogout();
-              }}
+              onClick={() => null}
             />
             <Ellipsis className="text-[#555] w-5 h-5" />
           </div>

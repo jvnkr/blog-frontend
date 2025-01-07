@@ -42,14 +42,17 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
   const [hoverReport, setHoverReport] = useState(false);
   const [hoverMinus, setHoverMinus] = useState(false);
   const responsiveClass = useResponsiveClass();
-  const { accessToken, loggedIn, setUnauthWall, userId } = useAuthContext();
+  const { accessToken, loggedIn, setUnauthWall, username, userId } =
+    useAuthContext();
   const {
     posts,
-    profilePosts,
-    followingPosts,
     setPosts,
     setIsPopup,
+    profileData,
+    setProfileData,
+    profilePosts,
     setProfilePosts,
+    followingPosts,
     setFollowingPosts,
   } = usePostsContext();
 
@@ -71,6 +74,7 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
           liked: !prev.liked,
           likes: prev.liked ? prev.likes - 1 : prev.likes + 1,
         }));
+
         onUpdatePost({
           ...post,
           liked: !post.liked,
@@ -98,11 +102,23 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
     const previousProfilePosts = profilePosts;
     const previousFollowingPosts = followingPosts;
     try {
-      setPosts(posts.filter((p) => p.id !== post.id));
-      setProfilePosts(profilePosts.filter((p) => p.id !== post.id));
-      setFollowingPosts(followingPosts.filter((p) => p.id !== post.id));
+      if (posts.length > 0) {
+        setPosts(posts.filter((p) => p.id !== post.id));
+      }
+      if (profilePosts.length > 0) {
+        setProfilePosts(profilePosts.filter((p) => p.id !== post.id));
+      }
+      if (followingPosts.length > 0) {
+        setFollowingPosts(followingPosts.filter((p) => p.id !== post.id));
+      }
       setShowDeleteDialog(false);
       setIsPopup(false);
+      if (profileData?.username === username) {
+        setProfileData({
+          ...profileData,
+          postsCount: profileData.postsCount - 1,
+        });
+      }
       await fetcher(`/api/v1/posts/${post.id}`, {
         method: "DELETE",
         credentials: "include",
@@ -243,7 +259,7 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
                       tooltipContent={<span>Delete post</span>}
                     />
                   )}
-                  {userId !== post.author.id && (
+                  {userId !== post.author.id && loggedIn && (
                     <Tooltip
                       tooltipTrigger={
                         <div
@@ -268,9 +284,23 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
                         onMouseEnter={() => setHoverShare(true)}
                         onMouseLeave={() => setHoverShare(false)}
                         onClick={() => {
-                          navigator.clipboard.writeText(
-                            `${window.location.origin}/post/${post.id}`
-                          );
+                          if (navigator?.share) {
+                            navigator
+                              ?.share({
+                                title: post.title,
+                                text: post.description,
+                                url: `${window.location.origin}/post/${post.id}`,
+                              })
+                              .catch(() => {
+                                navigator?.clipboard?.writeText(
+                                  `${window.location.origin}/post/${post.id}`
+                                );
+                              });
+                          } else {
+                            navigator?.clipboard?.writeText(
+                              `${window.location.origin}/post/${post.id}`
+                            );
+                          }
                           toast.success("Link copied to clipboard");
                         }}
                         className="flex hover:text-green cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"

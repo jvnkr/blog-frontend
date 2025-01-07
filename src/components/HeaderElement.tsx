@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 interface HeaderElementProps {
   selectedPath: string;
-  text: string;
+  text: React.ReactNode;
   isClickable?: boolean;
   className?: string;
 }

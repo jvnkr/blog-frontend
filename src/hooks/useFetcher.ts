@@ -5,6 +5,7 @@ const useFetcher = () => {
   const { setAccessToken } = useAuthContext();
 
   const fetcher = (url: string, options: RequestInit = {}) => {
+    console.log("fetcher", url, options);
     return authFetcher(url, options, setAccessToken);
   };
 
