@@ -7,11 +7,10 @@ import Link from "next/link";
 
 interface AvatarInfoProps {
   username: string;
-  name: string;
+  name: React.ReactNode;
   verified: boolean;
   createdAt?: Date;
   onClick?: () => void;
-  showTooltip?: boolean;
   style?: React.CSSProperties;
   linkHref?: string;
   target?: string;
@@ -31,15 +30,17 @@ const AvatarInfo = ({
     return (
       <>
         <Avatar name={name} />
-        <div className={"flex h-fit"}>
+        <div className="flex h-fit min-w-0">
           <div
             className={
-              "flex flex-col relative justify-start items-start text-[15px] font-semibold"
+              "flex flex-col relative justify-start items-start text-[15px] font-semibold min-w-0 w-full"
             }
           >
-            <div className="flex items-center gap-1">
-              <span className="flex items-center h-[19px]">{name}</span>
-              {verified && <BadgeCheck className="w-4 h-4 fill-blue-500" />}
+            <div className="flex relative items-center gap-1 min-w-0 w-full">
+              <span className="truncate">{name}</span>
+              {verified && (
+                <BadgeCheck className="flex-shrink-0 w-4 h-4 fill-blue-500" />
+              )}
             </div>
             <span
               className={
@@ -93,7 +94,7 @@ const AvatarInfo = ({
           target={target}
           onClick={onClick}
           style={style}
-          className="flex select-none h-fit justify-start gap-2 items-center w-fit"
+          className="flex select-none h-fit justify-start gap-2 items-center w-fit min-w-0"
         >
           <AvatarContent />
         </Link>
@@ -104,7 +105,7 @@ const AvatarInfo = ({
             cursor: onClick ? "pointer" : "default",
             ...style,
           }}
-          className="flex select-none h-fit justify-start gap-2 items-center w-fit"
+          className="flex select-none h-fit justify-start gap-2 items-center w-fit min-w-0"
         >
           <AvatarContent />
         </div>

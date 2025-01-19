@@ -14,6 +14,7 @@ import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 import useFetcher from "@/hooks/useFetcher";
 import { HiOutlineUser } from "react-icons/hi";
 import { Flag, Heart, MessageSquare, NotepadText } from "lucide-react";
+import { FaMedal } from "react-icons/fa";
 import AvatarInfo from "./AvatarInfo";
 import Tooltip from "./Tooltip";
 import { motion } from "framer-motion";
@@ -56,6 +57,7 @@ const DashboardPage = () => {
     try {
       const response = await fetcher("/api/v1/dashboard", {
         credentials: "include",
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
@@ -84,7 +86,7 @@ const DashboardPage = () => {
             No data found
           </span>
           <span className="text-sm text-muted-foreground">
-            When data is available, it will appear here.
+            When the data is available, it will appear here.
           </span>
         </div>
       </div>
@@ -281,25 +283,50 @@ const DashboardPage = () => {
               <div className="flex flex-col gap-5 p-4 pt-0 h-full">
                 {dashboardData.topUsers.map((user, index) => (
                   <div key={user.id} className="flex items-center gap-3">
-                    <div
-                      style={{
-                        backgroundColor:
-                          index + 1 === 1
-                            ? "#E6C200" // gold
-                            : index + 1 === 2
-                            ? "#A9A9A9" // darker silver
-                            : index + 1 === 3
-                            ? "#8B5A2B" // darker bronze
-                            : "#2D2D33", // darker bg-zinc-700 equivalent
-                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // shading
-                        border: "2px solid #444", // border
-                        color: "#FFF", // text color for better contrast
-                      }}
-                      className="text-[0.8rem] rounded-full w-6 h-6 flex items-center justify-center font-bold"
-                    >
-                      {index + 1}
-                    </div>
+                    {index > 2 && (
+                      <div
+                        style={{
+                          backgroundColor:
+                            index + 1 === 1
+                              ? "#E6C200" // gold
+                              : index + 1 === 2
+                              ? "#A9A9A9" // darker silver
+                              : index + 1 === 3
+                              ? "#8B5A2B" // darker bronze
+                              : "#2D2D33", // darker bg-zinc-700 equivalent
+                          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // shading
+                          border: "2px solid #444", // border
+                          color: "#FFF", // text color for better contrast
+                        }}
+                        className="text-[0.8rem] rounded-full min-w-6 min-h-6 w-6 h-6 flex items-center justify-center font-bold"
+                      >
+                        {index + 1}
+                      </div>
+                    )}
+                    {index <= 2 && (
+                      <FaMedal
+                        style={{
+                          fill:
+                            index + 1 === 1
+                              ? "#FFD700" // brighter gold
+                              : index + 1 === 2
+                              ? "#C0C0C0" // brighter silver
+                              : "#CD7F32", // brighter bronze
+                          color:
+                            index + 1 === 1
+                              ? "#FFD700" // brighter gold
+                              : index + 1 === 2
+                              ? "#C0C0C0" // brighter silver
+                              : "#CD7F32", // brighter bronze
+                          filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                          transform: "scale(1.2)",
+                        }}
+                        className="w-4 h-4 min-w-4 min-h-4"
+                      />
+                    )}
                     <AvatarInfo
+                      target="_blank"
+                      linkHref={`/@${user.username}`}
                       username={user.username}
                       name={user.name}
                       verified={user.verified}
@@ -371,10 +398,8 @@ const DashboardPage = () => {
                 isWindowVirtualizer={false}
                 paddingStart={16}
                 ItemComponent={(index) => (
-                  <Link
-                    href={`/post/${dashboardPosts[index].id}`}
-                    target="_blank"
-                    className="flex cursor-pointer relative flex-col items-center gap-0"
+                  <div
+                    className="flex relative flex-col items-center gap-0"
                     key={dashboardPosts[index].id}
                   >
                     <div
@@ -384,14 +409,20 @@ const DashboardPage = () => {
                       className="flex w-full bg-[#2D2D33] border border-[#333236] rounded-xl p-2"
                     >
                       <AvatarInfo
+                        target="_blank"
+                        linkHref={`/@${dashboardPosts[index].author.username}`}
                         username={dashboardPosts[index].author.username}
                         name={dashboardPosts[index].author.name}
                         verified={dashboardPosts[index].author.verified}
                         createdAt={new Date(dashboardPosts[index].createdAt)}
                       />
                     </div>
-                    <div className="flex rounded-t-xl absolute top-0 bg-zinc-900 w-full h-[58px]"></div>
-                    <div className="flex flex-col bg-zinc-900 w-full h-fit rounded-b-xl p-2">
+                    <div className="flex rounded-t-xl absolute top-0 bg-zinc-900 w-full h-[59px]"></div>
+                    <Link
+                      href={`/post/${dashboardPosts[index].id}`}
+                      target="_blank"
+                      className="flex flex-col bg-zinc-900 w-full h-fit rounded-b-xl p-2"
+                    >
                       <span className="text-lg font-bold break-all">
                         {dashboardPosts[index].title}
                       </span>
@@ -412,8 +443,8 @@ const DashboardPage = () => {
                           </span>
                         </div>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  </div>
                 )}
                 id={"topPosts"}
                 items={dashboardPosts}

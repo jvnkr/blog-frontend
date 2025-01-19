@@ -10,11 +10,11 @@ import { useWindowScroll, useDebounce } from "@uidotdev/usehooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import LoadingSpinner from "./LoadingSpinner";
 import { usePostsContext } from "@/context/PostsContext";
-import { CommentData, PostData } from "@/lib/types";
+import { CommentData, PostData, UserData } from "@/lib/types";
 
 interface VirtualizedItemsProps {
   id: string;
-  items: (PostData | CommentData)[];
+  items: (PostData | CommentData | UserData)[];
   loading: boolean;
   initialLoading: boolean;
   skeletonCount: number;
@@ -163,6 +163,42 @@ export function VirtualizedItems({
     onEndReached,
     isPopup,
   ]);
+
+  const onResize = () => {
+    const newVirtualItems = virtualizer.getVirtualItems();
+    const newTotalSize = virtualizer.getTotalSize();
+    const lastVirtualItem = newVirtualItems[newVirtualItems.length - 1];
+
+    const shouldUpdateState =
+      !virtualizerStateRef.current ||
+      newVirtualItems.length !== virtualizerStateRef.current.items.length ||
+      newTotalSize !== virtualizerStateRef.current.totalSize;
+
+    if (shouldUpdateState) {
+      virtualizerStateRef.current = {
+        items: newVirtualItems,
+        totalSize: newTotalSize,
+        scrollPosition: parseInt(document.body.style.top.replace("-", "")) || 0,
+      };
+    }
+
+    // Check for fetching more items after the state is updated
+    if (
+      lastVirtualItem?.index >= items.length - 1 &&
+      !loading &&
+      hasMoreItems
+    ) {
+      onEndReached();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, items.length, hasMoreItems, onEndReached]);
 
   if (!mounted) {
     return null;

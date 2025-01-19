@@ -45,9 +45,9 @@ export default function FollowingPage() {
     setPosts(posts.map((p) => (p.id === post.id ? post : p)));
   };
 
-  if (!initialLoading && !loading && followingPosts.length === 0) {
+  if (!initialLoading && !loading && !hasMoreFollowingPosts && followingPosts.length === 0) {
     return (
-      <div className="flex flex-col text-center w-full absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="flex pt-[60px] flex-col text-center w-full absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <span className="text-white text-lg font-semibold">
           Seems like you are not following anyone yet
         </span>

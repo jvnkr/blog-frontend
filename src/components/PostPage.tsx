@@ -254,11 +254,11 @@ const PostPage = (initialPost: PostData) => {
               <div className={"flex h-fit"}>
                 <div
                   className={
-                    "flex flex-col relative justify-start items-start text-[15px] font-semibold"
+                    "flex flex-col break-all relative justify-start items-start text-[15px] font-semibold"
                   }
                 >
-                  <div className="flex items-center gap-1">
-                    <span className="flex items-center h-[19px]">
+                  <div className="flex h-full items-center gap-1">
+                    <span className="flex items-center">
                       {post.author.name}
                     </span>
                     {post.author.verified && (
@@ -327,7 +327,7 @@ const PostPage = (initialPost: PostData) => {
             </DropdownMenu>
           </div>
           <h1 className="text-2xl font-bold">{post.title}</h1>
-          <span className="break-all whitespace-pre-line">
+          <span className="break-words whitespace-pre-line">
             {post.description}
           </span>
           <div className="flex mt-2 flex-col gap-2">
@@ -684,6 +684,15 @@ const PostPage = (initialPost: PostData) => {
                     replies: 0,
                     liked: false,
                   };
+
+                  commentCache.set(replyItem.id, {
+                    ...replyItem,
+                    repliesData: new Set([
+                      ...(commentCache.get(item.rootId || item.id)
+                        ?.repliesData || []),
+                      replyItem.id
+                    ]),
+                  });
 
                   const newComments = [...comments];
                   newComments.splice(index + 1, 0, replyItem);

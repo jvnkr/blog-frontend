@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import React from "react";
+import React, { Suspense } from "react";
 import { fetcher } from "@/lib/utils";
 import { SessionData } from "@/lib/types";
 import { AuthContextProvider } from "@/context/AuthContext";
@@ -10,6 +10,8 @@ import NoiseTexture from "@/components/NoiseTexture";
 import { Toaster } from "@/components/ui/sonner";
 import { ClientProviders } from "@/components/ClientProviders";
 import { cookies } from "next/headers";
+import { SearchProvider } from "@/context/SearchContext";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -89,14 +91,26 @@ export default async function RootLayout({
         suppressHydrationWarning
         className={`min-h-screen h-screen mx-auto bg-zinc-900 ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthContextProvider serverData={serverAuthData}>
-          <ClientProviders>
-            <Toaster />
-            <PatternCircles />
-            <NoiseTexture />
-            <div className="flex justify-center items-center">{children}</div>
-          </ClientProviders>
-        </AuthContextProvider>
+        <Suspense
+          fallback={
+            <div className="flex min-h-screen w-full items-center justify-center">
+              <LoadingSpinner />
+            </div>
+          }
+        >
+          <AuthContextProvider serverData={serverAuthData}>
+            <ClientProviders>
+              <SearchProvider>
+                <Toaster />
+                <PatternCircles />
+                <NoiseTexture />
+                <div className="flex justify-center items-center">
+                  {children}
+                </div>
+              </SearchProvider>
+            </ClientProviders>
+          </AuthContextProvider>
+        </Suspense>
       </body>
     </html>
   );

@@ -106,3 +106,5 @@ export type ValidFieldNames =
   | "yearsOfExperience"
   | "password"
   | "confirmPassword";
+
+export type SearchFilter = "users" | "posts";

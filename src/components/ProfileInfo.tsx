@@ -20,6 +20,7 @@ interface ProfileInfoProps {
   following: number;
   createdAt: string;
   postsCount: number;
+  isNotFound: boolean;
 }
 
 const ProfileInfo = ({
@@ -29,6 +30,7 @@ const ProfileInfo = ({
   verified,
   following,
   createdAt,
+  isNotFound,
 }: ProfileInfoProps) => {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editedUsername, setEditedUsername] = useState(username);
@@ -90,6 +92,8 @@ const ProfileInfo = ({
   };
 
   const handleFollow = async () => {
+    if (isNotFound) return;
+
     const action = followingUserContext ? "unfollow" : "follow";
     const res = await fetcher(`/api/v1/users/${action}/${currentUsername}`, {
       headers: {
@@ -303,17 +307,19 @@ const ProfileInfo = ({
               className="w-10 h-10 cursor-pointer text-zinc-300 hover:text-white transition-all duration-150 p-2 rounded-full hover:bg-zinc-800"
             />
           )}
-          {loggedIn && currentUsername !== authUsername && (
-            <Button
-              onClick={handleFollow}
-              variant={followingUserContext ? "secondary" : "default"}
-              className={`select-none w-fit h-fit cursor-pointer px-3 py-2 rounded-md hover:bg-neutral-100 hover:bg-opacity-[0.5] transition-all duration-150 ${
-                followingUserContext ? "text-white" : "text-black"
-              }`}
-            >
-              {followingUserContext ? "Following" : "Follow"}
-            </Button>
-          )}
+          <div className="w-fit min-h-10">
+            {!isNotFound && loggedIn && currentUsername !== authUsername && (
+              <Button
+                onClick={handleFollow}
+                variant={followingUserContext ? "secondary" : "default"}
+                className={`select-none w-fit h-fit cursor-pointer px-3 py-2 rounded-md hover:bg-neutral-100 hover:bg-opacity-[0.5] transition-all duration-150 ${
+                  followingUserContext ? "text-white" : "text-black"
+                }`}
+              >
+                {followingUserContext ? "Following" : "Follow"}
+              </Button>
+            )}
+          </div>
         </div>
         <div className="flex w-full justify-start items-center">
           <Avatar
@@ -322,40 +328,46 @@ const ProfileInfo = ({
             className="absolute left-[1rem] top-0 -translate-y-1/2 border-4 border-zinc-900"
           />
           <div className="flex flex-col gap-2 p-4">
-            <div className="flex flex-col text-[15px]">
-              <div className="flex items-center gap-1">
+            <div className="flex flex-wrap flex-col text-[15px]">
+              <div className="flex flex-wrap w-full break-all items-center gap-1">
                 <h1 className="text-2xl font-bold">{currentName}</h1>
                 {verified && <BadgeCheck className="w-4 h-4 fill-blue-500" />}
               </div>
               <p className="text-sm text-gray-500">@{username}</p>
             </div>
-            <span className="text-sm whitespace-pre-wrap text-white">
-              {currentBio}
-            </span>
-            <div className="flex items-start gap-1 text-sm text-gray-500">
-              <CalendarDays className="w-4 h-4" />
-              <span className="font-semibold">
-                Joined{" "}
-                {new Date(createdAt).toLocaleString("en-US", {
-                  month: "long",
-                  year: "numeric",
-                })}
+            {!isNotFound && (
+              <span className="text-sm whitespace-pre-wrap text-white">
+                {currentBio}
               </span>
-            </div>
-            <div className="flex text-sm items-center gap-3">
-              <span className="font-semibold">
-                {followersContext}
-                <span className="font-normal text-gray-500 ml-[4px]">
-                  Followers
+            )}
+            {!isNotFound && (
+              <div className="flex items-start gap-1 text-sm text-gray-500">
+                <CalendarDays className="w-4 h-4" />
+                <span className="font-semibold">
+                  Joined{" "}
+                  {new Date(createdAt).toLocaleString("en-US", {
+                    month: "long",
+                    year: "numeric",
+                  })}
                 </span>
-              </span>
-              <span className="font-semibold">
-                {following}
-                <span className="font-normal text-gray-500 ml-[4px]">
-                  Following
+              </div>
+            )}
+            {!isNotFound && (
+              <div className="flex text-sm items-center gap-3">
+                <span className="font-semibold">
+                  {followersContext ?? 0}
+                  <span className="font-normal text-gray-500 ml-[4px]">
+                    Followers
+                  </span>
                 </span>
-              </span>
-            </div>
+                <span className="font-semibold">
+                  {following}
+                  <span className="font-normal text-gray-500 ml-[4px]">
+                    Following
+                  </span>
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

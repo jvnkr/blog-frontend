@@ -1,7 +1,7 @@
 import React from "react";
 
 interface AvatarProps {
-  name: string;
+  name: React.ReactNode;
   children?: React.ReactNode;
   size?: number;
   className?: string;
@@ -42,7 +42,7 @@ export default function Avatar({
     Z: "#4080FF", // Cornflower Blue
   };
 
-  const firstLetter = name?.at(0)?.toUpperCase() || "B";
+  const firstLetter = typeof name === "string" ? name[0]?.toUpperCase() : "B";
   const bgColor = letterColors[firstLetter] || "#6B7280"; // Fallback to neutral gray
 
   return (
@@ -50,6 +50,8 @@ export default function Avatar({
       style={{
         width: `${size}px`,
         height: `${size}px`,
+        minWidth: `${size}px`,
+        minHeight: `${size}px`,
         backgroundColor: bgColor,
       }}
       className={`flex font-medium justify-center items-center rounded-full text-white${
@@ -60,7 +62,7 @@ export default function Avatar({
         style={{
           fontSize: `${size / 2.5}px`,
         }}
-        className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.)]"
+        className="select-none drop-shadow-[0_2px_2px_rgba(0,0,0,0.)]"
       >
         {firstLetter}
       </span>

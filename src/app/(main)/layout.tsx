@@ -9,37 +9,51 @@ import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/context/AuthContext";
 import {
   Ellipsis,
+  Filter,
   LayoutDashboard,
   LogOut,
+  NotepadText,
   PencilLine,
   Search,
+  UsersRound,
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
 import useFetcher from "@/hooks/useFetcher";
 import CreatePost from "@/components/CreatePost";
 import { usePostsContext } from "@/context/PostsContext";
 import CreateComment from "@/components/CreateComment";
-import { CommentData, Role } from "@/lib/types";
+import { CommentData, Role, SearchFilter } from "@/lib/types";
 import VirtualPopup from "@/components/VirtualPopup";
 import AvatarInfo from "@/components/AvatarInfo";
 import { AnimatePresence, motion } from "motion/react";
+import SearchBar from "@/components/SearchBar";
+import { useSearchContext } from "@/context/SearchContext";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function HomeLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { loggedIn, clearAll, username, role, name, verified } =
+  const { loggedIn, setUnauthWall, clearAll, username, role, name, verified } =
     useAuthContext();
   const { setCommentCreated } = usePostsContext();
   const [showCreatePostDialog, setShowCreatePostDialog] = useState(false);
+  const { showSearchDialog, setShowSearchDialog, setFetched, setResults } =
+    useSearchContext();
+  const searchParams = useSearchParams();
   const [showMenu, setShowMenu] = useState(false);
+  const [searchFilter, setSearchFilter] = useState<SearchFilter>(
+    searchParams.get("filter") as SearchFilter
+  );
   const pathname = usePathname();
   const router = useRouter();
+  const searchRef = useRef<HTMLInputElement>(null);
   const fetcher = useFetcher();
+
   const handleLogout = async () => {
     try {
       const res = await fetcher("/api/auth/logout", {
@@ -62,11 +76,56 @@ export default function HomeLayout({
     setShowMenu(false);
   };
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setShowSearchDialog(false);
+    }
+
+    if (
+      (e.key === "k" && (e.metaKey || e.altKey)) ||
+      (e.key === "k" && e.ctrlKey)
+    ) {
+      e.preventDefault();
+
+      if (document.activeElement === searchRef.current) {
+        setShowSearchDialog(false);
+      } else {
+        if (!pathname.startsWith("/search")) {
+          setFetched(false);
+          setResults([]);
+        }
+        setShowSearchDialog(!showSearchDialog);
+        setTimeout(() => {
+          searchRef.current?.focus();
+        }, 0);
+      }
+    }
+  };
+
   useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("click", handleCloseMenu);
+    const url = new URL(window.location.href);
+    const currentQuery = url.searchParams.get("q");
+    const currentFilter = url.searchParams.get("filter");
+
+    if (currentQuery) {
+      url.searchParams.set("q", currentQuery);
+    }
+
+    // Check if filter exists and is valid SearchFilter type
+    if (!currentFilter || !["posts", "users"].includes(currentFilter)) {
+      setSearchFilter("posts");
+      url.searchParams.set("filter", "posts");
+      router.push(url.pathname + url.search);
+    }
+
     return () => {
+      window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("click", handleCloseMenu);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -76,7 +135,20 @@ export default function HomeLayout({
   }, [loggedIn, pathname, router]);
 
   return (
-    <>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen w-full items-center justify-center">
+          <LoadingSpinner />
+        </div>
+      }
+    >
+      <AnimatePresence mode="wait">
+        {loggedIn && showSearchDialog && (
+          <VirtualPopup onOverlayClick={() => setShowSearchDialog(false)}>
+            <SearchBar searchRef={searchRef} />
+          </VirtualPopup>
+        )}
+      </AnimatePresence>
       {loggedIn && showCreatePostDialog && (
         <VirtualPopup onOverlayClick={() => setShowCreatePostDialog(false)}>
           <div
@@ -128,7 +200,7 @@ export default function HomeLayout({
       </div>
       <div
         style={{ left: "calc(50% - 22.5rem - 24px)" }}
-        className="fixed flex flex-col h-full justify-between top-0 py-[10px] translate-x-[-100%]"
+        className="fixed flex w-[12rem] flex-col h-full justify-between top-0 py-[10px] translate-x-[-100%]"
       >
         <div className="flex text-white flex-col gap-2">
           <Logo text />
@@ -262,32 +334,94 @@ export default function HomeLayout({
               verified={verified}
               onClick={() => null}
             />
-            <Ellipsis className="text-[#555] w-5 h-5" />
+            <Ellipsis className="text-[#555] min-w-5 min-h-5" />
           </div>
         )}
       </div>
-      <div
-        style={{ left: "calc(50% + 22.5rem + 24px)" }}
-        className="fixed flex flex-col h-full justify-between top-0 py-[10px]"
-      >
+      {loggedIn && !pathname.startsWith("/search") && (
         <div
-          className={"flex select-none cursor-pointer rounded-xl h-fit w-fit"}
+          style={{ left: "calc(50% + 22.5rem + 24px)" }}
+          className="fixed w-[12rem] flex flex-col h-full justify-between top-0 py-[10px]"
         >
-          <div className="flex search-input cursor-default border border-[#272629] focus-within:outline focus-within:outline-2 focus-within:outline-[#999] bg-zinc-900 p-2 py-0 rounded-lg items-center">
-            <Search className="search-icon text-zinc-500 ml-[0.2rem] w-5 h-5" />
-            <input
-              spellCheck={false}
-              className="pl-2 bg-transparent py-1 outline-none ring-0 text-lg text-white/75 border-none"
-              style={{
-                boxShadow: "none",
-                fontSize: "1rem",
-              }}
-              type="text"
-              placeholder="Search"
-            />
+          <button
+            onClick={() => {
+              if (!loggedIn) {
+                setUnauthWall("search");
+                return;
+              }
+              setShowSearchDialog(true);
+              setFetched(false);
+              setResults([]);
+              setTimeout(() => {
+                searchRef.current?.focus();
+              }, 0);
+            }}
+            className="flex w-full justify-start search-input border border-[#272629] bg-zinc-900 p-2 py-1 gap-2 rounded-lg items-center"
+          >
+            <Search className="text-zinc-500 ml-[0.2rem] w-5 h-5" />
+            <span className="text-white/50">Search</span>
+          </button>
+        </div>
+      )}
+      {loggedIn && pathname.startsWith("/search") && (
+        <div
+          style={{ left: "calc(50% + 22.5rem + 24px)" }}
+          className="fixed w-[12rem] flex flex-col h-full justify-between top-0 py-[10px]"
+        >
+          <div className="flex w-full flex-col h-fit justify-start border border-[#272629] bg-zinc-900 gap-2 rounded-lg items-start">
+            <div className="flex h-fit border border-x-0 border-t-0 w-full border-[#272629] p-3 gap-2 items-center">
+              <Filter className="text-zinc-400 ml-[0.2rem] w-5 h-5 min-w-5 min-h-5" />
+              <span className="text-zinc-300">Filters</span>
+            </div>
+            <div className="flex flex-col w-full gap-2 p-2 pt-0">
+              <button
+                onClick={() => {
+                  setSearchFilter("posts");
+                  const url = new URL(window.location.href);
+                  const currentQuery = url.searchParams.get("q");
+                  url.searchParams.set("filter", "posts");
+                  if (currentQuery) url.searchParams.set("q", currentQuery);
+                  window.location.href = url.pathname + url.search;
+                }}
+                className={`flex items-center gap-2 w-full p-2 rounded-lg transition-colors ${
+                  searchFilter === "posts"
+                    ? "bg-zinc-800 text-white"
+                    : "text-zinc-400 hover:bg-zinc-800/50"
+                }`}
+              >
+                <NotepadText
+                  className={`w-5 h-5 min-w-5 min-h-5 ${
+                    searchFilter === "posts" ? "text-white" : "text-zinc-400"
+                  }`}
+                />
+                <span>Posts</span>
+              </button>
+              <button
+                onClick={() => {
+                  setSearchFilter("users");
+                  const url = new URL(window.location.href);
+                  const currentQuery = url.searchParams.get("q");
+                  url.searchParams.set("filter", "users");
+                  if (currentQuery) url.searchParams.set("q", currentQuery);
+                  window.location.href = url.pathname + url.search;
+                }}
+                className={`flex items-center gap-2 w-full p-2 rounded-lg transition-colors ${
+                  searchFilter === "users"
+                    ? "bg-zinc-800 text-white"
+                    : "text-zinc-400 hover:bg-zinc-800/50"
+                }`}
+              >
+                <UsersRound
+                  className={`w-5 h-5 min-w-5 min-h-5 ${
+                    searchFilter === "users" ? "text-white" : "text-zinc-400"
+                  }`}
+                />
+                <span>Profiles</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </>
+      )}
+    </Suspense>
   );
 }

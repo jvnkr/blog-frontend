@@ -1,18 +1,23 @@
 "use client";
 import { useAuthContext } from "@/context/AuthContext";
 import HeaderElement from "@/components/HeaderElement";
-import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, BadgeCheck } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, BadgeCheck, Search } from "lucide-react";
 import { usePostsContext } from "@/context/PostsContext";
+import Tooltip from "./Tooltip";
+import { useSearchContext } from "@/context/SearchContext";
 
-// export const NGROK_URL = "https://9624-37-122-170-44.ngrok-free.app";
-export const NGROK_URL = "http://localhost:8080";
+export const API_URL = "http://localhost:8080";
 
 export const Header = () => {
   const { profileData } = usePostsContext();
   const { loggedIn } = useAuthContext();
+  const { setShowSearchDialog } = useSearchContext();
+
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q");
   const handleBack = () => {
     if (window.history.length > 1) {
       router.back();
@@ -59,6 +64,23 @@ export const Header = () => {
           />
         </>
       )}
+      {loggedIn && pathname.startsWith("/search") && (
+        <>
+          <ArrowLeft
+            className="absolute transition-all duration-300 left-2 text-white w-9 h-9 cursor-pointer p-2 rounded-full hover:bg-neutral-500 hover:bg-opacity-[0.5]"
+            onClick={handleBack}
+          />
+          <div className="flex w-full justify-center items-center gap-2">
+            <div
+              onClick={() => setShowSearchDialog(true)}
+              className="flex cursor-pointer w-fit h-fit gap-2 items-center bg-zinc-800 rounded-full p-2 px-5"
+            >
+              <Search className="min-w-5 min-h-5 w-5 h-5" />
+              <span className="select-none truncate">{`Search for "${searchQuery}"`}</span>
+            </div>
+          </div>
+        </>
+      )}
       {loggedIn && pathname.startsWith("/@") && (
         <>
           <ArrowLeft
@@ -72,14 +94,33 @@ export const Header = () => {
               <div className="flex w-full justify-center items-center gap-2">
                 {!profileData && <p>Profile</p>}
                 {profileData && (
-                  <div className="flex justify-center items-center w-fit flex-col">
-                    <span className="flex w-fit items-center gap-1 text-white font-semibold">
-                      {profileData?.name}
+                  <div className="flex min-w-fit max-w-[100px] justify-center items-center w-fit flex-col">
+                    <div className="flex w-full justify-center items-center gap-1 text-white font-semibold">
+                      <Tooltip
+                        triggerStyle={{
+                          maxWidth: "100px",
+                          minWidth: "0",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                        contentStyle={{
+                          zIndex: 99999999,
+                        }}
+                        tooltipTrigger={
+                          <span className="truncate">{profileData?.name}</span>
+                        }
+                        tooltipContent={
+                          <span className="text-white">
+                            {profileData?.name}
+                          </span>
+                        }
+                      />
                       {profileData?.verified && (
-                        <BadgeCheck className="w-4 h-4 fill-blue-500" />
+                        <BadgeCheck className="w-4 h-4 fill-blue-500 flex-shrink-0" />
                       )}
-                    </span>
-                    <span className="text-neutral-500 font-normal text-sm">
+                    </div>
+                    <span className="text-neutral-500 font-normal text-sm truncate">
                       {profileData?.postsCount} posts
                     </span>
                   </div>

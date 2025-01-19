@@ -95,9 +95,15 @@ const Comment = ({
 
   const handleDelete = async () => {
     const currentComments = comments;
-    setComments((prev: CommentData[]) =>
-      prev.filter((c) => c.id !== comment.id)
-    );
+    setComments((prev: CommentData[]) => {
+      // Filter out comment and any replies in one pass
+      return prev.filter(
+        (c) =>
+          c.id !== comment.id &&
+          c.rootId !== comment.id &&
+          (!c.repliesTo || c.repliesTo.id !== comment.id)
+      );
+    });
     if (!comment.repliesTo) {
       setCurrentPost((prev: PostData) => {
         return { ...prev, comments: prev.comments - 1 };
@@ -283,8 +289,8 @@ const Comment = ({
                   "flex flex-col relative justify-start items-start text-[15px] font-semibold"
                 }
               >
-                <div className="flex items-center gap-1">
-                  <span className="flex items-center h-[19px]">
+                <div className="flex break-all w-full items-center gap-1">
+                  <span className="flex flex-wrap items-center h-fit">
                     {comment.author.name}
                   </span>
                   {comment.author.verified && (
@@ -373,7 +379,7 @@ const Comment = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <span className="text-white text-sm break-all whitespace-pre-line">
+        <span className="text-white text-sm break-words whitespace-pre-line">
           {comment.repliesTo && (
             <span className="text-blue-300 bg-blue-900 rounded-md mr-[5px] p-[4px]">
               {`@${comment.repliesTo.username}`}

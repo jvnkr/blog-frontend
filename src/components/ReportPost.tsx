@@ -62,8 +62,6 @@ const ReportPost = ({ setShowReportDialog, postId }: ReportPostProps) => {
   const fetcher = useFetcher();
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    toast.success("Report Submitted");
-    console.log(data);
     try {
       const res = await fetcher("/api/v1/report", {
         method: "POST",
@@ -108,14 +106,14 @@ const ReportPost = ({ setShowReportDialog, postId }: ReportPostProps) => {
             control={form.control}
             name="reasons"
             render={() => (
-              <FormItem>
+              <FormItem className="w-full">
                 {Array.from(reasonsMap.entries()).map(([id, label]) => (
                   <FormField
                     key={id}
                     control={form.control}
                     name="reasons"
                     render={({ field }) => (
-                      <FormItem className="flex items-center gap-2">
+                      <FormItem className="flex hover:text-yellow-500 w-full items-center gap-2">
                         <FormControl>
                           <Checkbox
                             className="data-[state=checked]:bg-yellow-500 bg-zinc-400"
@@ -129,7 +127,12 @@ const ReportPost = ({ setShowReportDialog, postId }: ReportPostProps) => {
                             }}
                           />
                         </FormControl>
-                        <FormLabel className="text-sm font-normal">
+                        <FormLabel
+                          style={{
+                            marginTop: "0px",
+                          }}
+                          className="text-sm w-full cursor-pointer font-normal"
+                        >
                           {label}
                         </FormLabel>
                       </FormItem>

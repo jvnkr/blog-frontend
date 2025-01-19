@@ -68,8 +68,8 @@ export default function HomePage() {
         skeletonCount={skeletonCount}
         onEndReached={fetchPosts}
       />
-      {!initialLoading && !loading && posts.length === 0 && (
-        <div className="flex flex-col text-center w-full absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      {!initialLoading && !loading && !hasMorePosts && posts.length === 0 && (
+        <div className="flex pt-[60px] flex-col text-center w-full absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <span className="text-white text-lg font-semibold">
             Seems like there are no posts yet
           </span>

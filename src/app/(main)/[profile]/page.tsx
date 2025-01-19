@@ -6,6 +6,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import { usePostsContext } from "@/context/PostsContext";
 import useFetcher from "@/hooks/useFetcher";
 import { useAuthContext } from "@/context/AuthContext";
+import { notFound } from "next/navigation";
 
 export default function Page() {
   const router = useRouter();
@@ -14,19 +15,17 @@ export default function Page() {
   const [loading, setLoading] = useState(profileData ? false : true);
   const params = useParams();
   const { accessToken, loggedIn } = useAuthContext();
+  const [isNotFound, setIsNotFound] = useState(false);
   const fetcher = useFetcher();
+
+  if (!decodeURIComponent(params.profile as string).startsWith("@")) {
+    notFound();
+  }
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const decodedProfile = decodeURIComponent(
-          params.profile as string
-        ).replace("%40", "@");
-
-        if (!decodedProfile.startsWith("@")) {
-          router.push("/");
-          return;
-        }
+        const decodedProfile = decodeURIComponent(params.profile as string);
 
         const res = await fetcher(`/api/v1/users/${decodedProfile.slice(1)}`, {
           headers: {
@@ -36,27 +35,34 @@ export default function Page() {
           credentials: "include",
         });
 
-        if (res.status === 404) {
-          router.push("/");
-          return;
-        }
-
         const data = await res.json();
 
-        if (!data.username) {
-          router.push("/");
-          return;
+        if (data.error) {
+          throw new Error(data.error, { cause: res.status });
         }
 
-        console.log(data);
-
+        setLoading(false);
         setProfileData(data);
         setFollowers(data.followers);
         setFollowingUser(data.followingUser);
       } catch (error) {
         console.error(error);
-        router.push("/");
-      } finally {
+        if (error instanceof Error) {
+          if (error.cause === 404) {
+            setProfileData({
+              username: decodeURIComponent(params.profile as string).slice(1),
+              name: decodeURIComponent(params.profile as string).slice(1),
+              bio: "",
+              verified: false,
+              followers: 0,
+              following: 0,
+              createdAt: "",
+              postsCount: 0,
+              isNotFound: true,
+            });
+            setIsNotFound(true);
+          }
+        }
         setLoading(false);
       }
     };
@@ -87,5 +93,5 @@ export default function Page() {
     );
   }
 
-  return <Profile {...profileData} />;
+  return <Profile {...profileData} isNotFound={isNotFound} />;
 }

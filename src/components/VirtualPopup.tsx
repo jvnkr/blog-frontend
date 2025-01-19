@@ -3,7 +3,7 @@
 import { usePostsContext } from "@/context/PostsContext";
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
-
+import { AnimatePresence, motion } from "framer-motion";
 interface PopupProps {
   onOverlayClick: () => void;
   className?: string;
@@ -17,7 +17,7 @@ interface PopupProps {
  * @param children Children to be rendered inside the popup
  */
 const VirtualPopup = ({ onOverlayClick, className, children }: PopupProps) => {
-  const { setIsPopup } = usePostsContext();
+  const { setIsPopup, isPopup } = usePostsContext();
 
   useEffect(() => {
     setIsPopup(true);
@@ -29,15 +29,23 @@ const VirtualPopup = ({ onOverlayClick, className, children }: PopupProps) => {
   }, []);
 
   return createPortal(
-    <div
-      onClick={() => {
-        setIsPopup(false);
-        onOverlayClick();
-      }}
-      className={`fixed z-[99999] flex justify-center items-center inset-0 bg-black/50 ${className}`}
-    >
-      {children}
-    </div>,
+    <AnimatePresence mode="wait">
+      {isPopup && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          onClick={() => {
+            setIsPopup(false);
+            onOverlayClick();
+          }}
+          className={`fixed z-[99999] flex justify-center items-center inset-0 bg-black/50 ${className}`}
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>,
     document.body
   );
 };

@@ -77,14 +77,29 @@ const RegisterPage = () => {
       });
       if (response.ok) {
         setRegistered(true);
-        toast.success("Registered successfully", {
-          description: "Please check your email for verification",
-          action: {
-            label: "Close",
-            onClick: () => null,
-          },
-        });
-        // router.push("/home");
+        const data = response.headers
+          .get("content-type")
+          ?.includes("application/json")
+          ? await response.json()
+          : null;
+        if (data === null) {
+          toast.success("Registered successfully", {
+            description: "Please check your email for verification",
+            action: {
+              label: "Close",
+              onClick: () => null,
+            },
+          });
+        } else {
+          toast.success("Registered successfully", {
+            description: "Please login to continue",
+            action: {
+              label: "Close",
+              onClick: () => null,
+            },
+          });
+          // router.replace("/login");
+        }
       } else {
         const data = await response.json();
         throw new Error(data.error);

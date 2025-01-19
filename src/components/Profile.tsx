@@ -20,6 +20,7 @@ export interface ProfileProps {
   following: number;
   postsCount: number;
   createdAt: string;
+  isNotFound: boolean;
 }
 
 const Profile = ({
@@ -30,6 +31,7 @@ const Profile = ({
   followers,
   following,
   createdAt,
+  isNotFound,
 }: ProfileProps) => {
   const {
     profilePosts,
@@ -91,6 +93,7 @@ const Profile = ({
   return (
     <div className="flex relative flex-col w-full">
       <ProfileInfo
+        isNotFound={isNotFound}
         username={username}
         name={name}
         bio={bio}
@@ -100,30 +103,46 @@ const Profile = ({
         createdAt={createdAt}
         postsCount={posts.length}
       />
-      <VirtualizedItems
-        ItemComponent={(index) => (
-          <Post
-            key={profilePosts[index].id}
-            posts={profilePosts}
-            post={profilePosts[index]}
-            onUpdatePost={onUpdatePost}
-          />
-        )}
-        id={authUsername}
-        items={profilePosts}
-        loading={loading}
-        CreateItemComponent={
-          loggedIn && authUsername === username ? <CreatePost /> : null
-        }
-        initialLoading={initialLoading}
-        skeletonCount={skeletonCount}
-        hasMoreItems={hasMoreProfilePosts}
-        onEndReached={fetchPosts}
-        paddingStart={16}
-      />
-      {authUsername !== username &&
+      {!isNotFound && (
+        <VirtualizedItems
+          ItemComponent={(index) => (
+            <Post
+              key={profilePosts[index].id}
+              posts={profilePosts}
+              post={profilePosts[index]}
+              onUpdatePost={onUpdatePost}
+            />
+          )}
+          id={authUsername}
+          items={profilePosts}
+          loading={loading}
+          CreateItemComponent={
+            loggedIn && authUsername === username ? <CreatePost /> : null
+          }
+          initialLoading={initialLoading}
+          skeletonCount={skeletonCount}
+          hasMoreItems={hasMoreProfilePosts}
+          onEndReached={fetchPosts}
+          paddingStart={16}
+        />
+      )}
+      {isNotFound && (
+        <div className="flex relative flex-col w-full">
+          <div className="flex pt-[60px] flex-col text-center w-full">
+            <span className="text-white text-lg font-semibold">
+              Seems like this user doesn&apos;t exist
+            </span>
+            <span className="text-neutral-500 text-sm">
+              Please check the username and try again
+            </span>
+          </div>
+        </div>
+      )}
+      {!isNotFound &&
+        authUsername !== username &&
         !initialLoading &&
         !loading &&
+        !hasMoreProfilePosts &&
         profilePosts.length === 0 && (
           <div className="flex flex-col text-center w-full py-[4rem]">
             <span className="text-white text-lg font-semibold">
@@ -134,11 +153,13 @@ const Profile = ({
             </span>
           </div>
         )}
-      {authUsername === username &&
+      {!isNotFound &&
+        authUsername === username &&
         !initialLoading &&
         !loading &&
+        !hasMoreProfilePosts &&
         profilePosts.length === 0 && (
-          <div className="flex flex-col text-center w-full py-[4rem]">
+          <div className="flex pt-[60px] flex-col text-center w-full">
             <span className="text-white text-lg font-semibold">
               Seems like you don&apos;t have any posts yet
             </span>

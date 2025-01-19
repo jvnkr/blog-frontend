@@ -1,13 +1,7 @@
 "use client";
 
 import { PostData } from "@/lib/types";
-import {
-  EllipsisVertical,
-  Flag,
-  Share,
-  Trash2,
-  UserRoundMinus,
-} from "lucide-react";
+import { EllipsisVertical, Flag, Share, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState, useRef } from "react";
 import useResponsiveClass from "@/hooks/useResponsiveClass";
@@ -137,18 +131,10 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
   };
 
   // Calculate number of action items
-  const getActionItemCount = () => {
-    let count = 1; // Share button always present
-    if (post.author.id === userId) {
-      count++; // Delete button
-    } else {
-      count += 2; // Block and Report buttons
-    }
-    return count;
-  };
 
   const padding = 40;
-  const expandedWidth = `${getActionItemCount() * 50 + padding}px`; // 50px per action item
+  const ITEM_COUNT = !loggedIn ? 1 : 2;
+  const expandedWidth = `${ITEM_COUNT * 50 + padding}px`; // 50px per action item
 
   return (
     <>
@@ -174,15 +160,19 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
           zIndex: 99,
         }}
         className={
-          "flex relative bg-transparent border border-[#272629] text-white overflow-hidden flex-col w-full h-full max-h-[30rem]"
+          "flex relative bg-transparent border border-[#272629] text-white overflow-hidden flex-col w-full h-fit"
         }
       >
         <div
           className={
-            "flex absolute bg-[#202023] overflow-hidden top-0 w-[calc(100%+2px)] pl-2 h-[60px] left-[-1px] border border-t-0 rounded-b-xl border-[#272629] justify-between items-center"
+            "flex absolute bg-[#202023] overflow-hidden top-0 w-[calc(100%+2px)] pl-2 h-[60px] left-[-1px] border border-t-0 rounded-b-xl border-[#272629]  justify-between items-center"
           }
         >
           <AvatarInfo
+            style={{
+              transition: "margin-right 0.3s ease-in-out",
+              marginRight: options ? expandedWidth : "31px",
+            }}
             name={post.author.name}
             username={post.author.username}
             verified={post.author.verified}
@@ -199,7 +189,7 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
               duration: 0.03,
               ease: "easeInOut",
             }}
-            className={`flex absolute right-0 bg-[#202023] w-[21px] transition-all pl-[20px] duration-300 justify-start items-center border border-y-0 border-l-[#272629] h-full border-r-0 ${responsiveClass}`}
+            className={`flex absolute right-0 bg-[#232326] w-[21px] transition-all pl-[20px] duration-300 justify-start items-center border border-y-0 border-l-[#272629] h-full border-r-0 ${responsiveClass}`}
           >
             <AnimatePresence>
               {options && (
@@ -220,26 +210,8 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
                       ease: "easeInOut",
                     },
                   }}
-                  className="flex bg-[#212123] h-full justify-center items-center w-full p-2 gap-4 overflow-hidden"
+                  className="flex bg-[#272629] h-full justify-center items-center w-full p-2 gap-4 overflow-hidden"
                 >
-                  {post.author.id !== userId && (
-                    <Tooltip
-                      tooltipTrigger={
-                        <div
-                          onMouseEnter={() => setHoverMinus(true)}
-                          onMouseLeave={() => setHoverMinus(false)}
-                          className="flex cursor-pointer hover:bg-opacity-[1] transition-all duration-300 justify-center items-center bg-neutral-700 bg-opacity-[0.5] rounded-full p-2"
-                        >
-                          <UserRoundMinus
-                            className={`${
-                              hoverMinus ? "text-red-500" : ""
-                            } min-w-[22px] min-h-[22px] w-[22px] h-[22px]`}
-                          />
-                        </div>
-                      }
-                      tooltipContent={<span>Unfollow user</span>}
-                    />
-                  )}
                   {post.author.id === userId && (
                     <Tooltip
                       tooltipTrigger={
@@ -324,7 +296,11 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
               onClick={() => setOptions(!options)}
               className={`flex text-neutral-600 justify-center items-center absolute border border-y-0 border-l-0 border-r-[#272629] top-[-4px] h-[calc(100%+8px)] left-0 transition-all duration-300 cursor-pointer w-fit`}
             >
-              <EllipsisVertical width={20} height={20} />
+              <EllipsisVertical
+                className="text-[#3d3c40]"
+                width={20}
+                height={20}
+              />
             </motion.div>
           </motion.div>
         </div>
@@ -342,7 +318,7 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
             <div className="flex font-semibold tracking-tight text-2xl w-full h-fit">
               <span>{post.title}</span>
             </div>
-            <div className="flex flex-col w-full h-full break-all">
+            <div className="flex flex-col w-full h-full break-words">
               <div
                 className={`inline-block relative break-words whitespace-pre-wrap`}
               >
@@ -355,7 +331,7 @@ export const Post = ({ post: initialPost, onUpdatePost }: PostProps) => {
                   ))}
                 </span>
                 {post.overDescLimit && (
-                  <div className="inline-block ml-[-4px] text-opacity-[0.7] hover:text-opacity-[1] transition-all duration-300 cursor-pointer text-md text-blue-600">
+                  <div className="inline-block ml-[1px] text-opacity-[0.7] hover:text-opacity-[1] transition-all duration-300 cursor-pointer text-md text-blue-500">
                     ...show more
                   </div>
                 )}
