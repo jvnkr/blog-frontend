@@ -158,7 +158,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         className="flex w-full min-h-screen overflow-hidden"
       >
         <div className="w-full mt-[-1px] mb-[-1px] p-6 bg-zinc-900 border border-zinc-800 border-r-0 rounded-l-3xl flex flex-col justify-between">
-          <div className="flex flex-col justify-center items-start border border-zinc-700 border-x-0 border-t-0 pb-7 mb-7 overflow-hidden min-h-fit">
+          <div className="flex flex-col justify-center items-start border border-zinc-700 border-x-0 border-t-0 pb-7 mb-7 overflow-hidden min-h-[80px]">
             <span className="text-2xl font-bold">{`Welcome, ${name} 👋`}</span>
             <span className="text-sm text-zinc-400">
               {pathname === "/dashboard"

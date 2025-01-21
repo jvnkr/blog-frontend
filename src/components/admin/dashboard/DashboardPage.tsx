@@ -115,6 +115,7 @@ const DashboardPage = () => {
             className={`flex overflow-hidden relative border border-[#333236] p-4 gap-3 justify-between flex-col h-full bg-zinc-800 rounded-xl w-full${
               !dashboardData || initialLoading ? " animate-pulse" : ""
             }`}
+            style={{ overflow: "hidden", minHeight: "106px" }}
           >
             {(!dashboardData || initialLoading) && (
               <motion.div
@@ -142,6 +143,7 @@ const DashboardPage = () => {
             className={`flex overflow-hidden relative border border-[#333236] p-4 gap-3 justify-between flex-col h-full bg-zinc-800 rounded-xl w-full${
               !dashboardData || initialLoading ? " animate-pulse" : ""
             }`}
+            style={{ overflow: "hidden", minHeight: "106px" }}
           >
             {(!dashboardData || initialLoading) && (
               <motion.div
@@ -169,6 +171,7 @@ const DashboardPage = () => {
             className={`flex overflow-hidden relative border border-[#333236] p-4 gap-3 justify-between flex-col h-full bg-zinc-800 rounded-xl w-full${
               !dashboardData || initialLoading ? " animate-pulse" : ""
             }`}
+            style={{ overflow: "hidden", minHeight: "106px" }}
           >
             {(!dashboardData || initialLoading) && (
               <motion.div
@@ -197,6 +200,7 @@ const DashboardPage = () => {
           className={`flex flex-col gap-1 p-2 overflow-hidden relative border border-[#333236] rounded-xl w-full h-full bg-zinc-800${
             !dashboardData || initialLoading ? " animate-pulse" : ""
           }`}
+          style={{ overflow: "hidden" }}
         >
           {dashboardData && (
             <div className="flex items-center gap-2">
@@ -274,13 +278,13 @@ const DashboardPage = () => {
           )}
         </div>
       </div>
-      <div className="hidden overflow-hidden flex-shrink flex-col gap-4 w-[24rem] h-full xl:flex">
+      <div className="hidden overflow-hidden flex-col gap-4 w-[24rem] h-full xl:flex">
         <div
           style={{
             minHeight:
               !dashboardData || initialLoading ? "359px" : "fit-content",
           }}
-          className={`select-none relative border border-[#333236] flex flex-col overflow-hidden gap-4 bg-zinc-800 rounded-xl w-full${
+          className={`select-none min-h-0 relative border border-[#333236] flex flex-col flex-grow overflow-hidden gap-4 bg-zinc-800 rounded-xl w-full${
             !dashboardData || initialLoading ? " animate-pulse" : ""
           }`}
         >
@@ -298,7 +302,7 @@ const DashboardPage = () => {
                 style={{
                   zIndex: 3,
                 }}
-                className="sticky flex justify-center items-center top-0 text-xl font-bold w-full backdrop-blur-sm bg-zinc-900/80 border border-x-0 border-t-0 ml-[-1px] translate-x-[1px] border-b-[#333236] p-2 rounded-b-xl"
+                className="sticky h-fit flex justify-center items-center top-0 text-xl font-bold w-full backdrop-blur-sm bg-zinc-900/80 border border-x-0 border-t-0 ml-[-1px] translate-x-[1px] border-b-[#333236] p-2 rounded-b-xl"
               >
                 <Tooltip
                   triggerStyle={{
@@ -332,7 +336,7 @@ const DashboardPage = () => {
                   }
                 />
               </div>
-              <div className="flex flex-col gap-5 p-4 pt-0 h-full">
+              <div className="flex flex-col flex-grow gap-5 p-4 pt-0 h-full">
                 {dashboardData.topUsers.map((user, index) => (
                   <div
                     key={user.author.id}
@@ -396,7 +400,7 @@ const DashboardPage = () => {
           )}
         </div>
         <div
-          className={`select-none rounded-xl flex relative border border-[#333236] flex-col w-full h-full overflow-x-hidden bg-zinc-800 rounded-xl${
+          className={`select-none rounded-xl flex flex-shrink-[100] relative border border-[#333236] flex-col w-full h-full overflow-x-hidden bg-zinc-800 rounded-xl${
             !dashboardData || initialLoading
               ? " animate-pulse overflow-hidden"
               : "overflow-y-auto"

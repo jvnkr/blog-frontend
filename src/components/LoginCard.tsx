@@ -60,8 +60,10 @@ const LoginCard = ({ next = "/home" }: LoginCardProps) => {
     try {
       const response = await fetcher("/api/auth/login", {
         headers: {
+          "Access-Control-Allow-Origin": "*", 
           "Content-Type": "application/json",
         },
+        credentials: "include",
         method: "POST",
         body: JSON.stringify(values),
       });

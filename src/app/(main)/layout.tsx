@@ -117,7 +117,10 @@ export default function HomeLayout({
     }
 
     // Check if filter exists and is valid SearchFilter type
-    if (!currentFilter || !["posts", "users"].includes(currentFilter)) {
+    if (
+      pathname.startsWith("/settings") &&
+      (!currentFilter || !["posts", "users"].includes(currentFilter))
+    ) {
       setSearchFilter("posts");
       url.searchParams.set("filter", "posts");
       router.push(url.pathname + url.search);
@@ -375,11 +378,9 @@ export default function HomeLayout({
                   {"ALT"}
                 </span>
               )}
-              {!isWindows && (
-                <span className="text-neutral-300 border border-[#333] font-semibold p-1 text-sm rounded-md bg-zinc-800 min-w-6 min-h-6 w-6 h-6 flex justify-center items-center">
-                  {"K"}
-                </span>
-              )}
+              <span className="text-neutral-300 border border-[#333] font-semibold p-1 text-sm rounded-md bg-zinc-800 min-w-6 min-h-6 w-6 h-6 flex justify-center items-center">
+                {"K"}
+              </span>
             </div>
           </button>
         </div>
