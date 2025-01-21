@@ -94,11 +94,10 @@ const RegisterPage = () => {
           toast.success("Registered successfully", {
             description: "Please login to continue",
             action: {
-              label: "Close",
-              onClick: () => null,
+              label: "Login",
+              onClick: () => router.push("/login"),
             },
           });
-          // router.replace("/login");
         }
       } else {
         const data = await response.json();

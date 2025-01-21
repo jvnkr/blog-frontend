@@ -2,7 +2,7 @@ import React from "react";
 import Avatar from "./Avatar";
 import { BadgeCheck, Dot } from "lucide-react";
 import { formatTimeDifference } from "@/lib/utils";
-import Tooltip from "./Tooltip";
+import Tooltip from "../Tooltip";
 import Link from "next/link";
 
 interface AvatarInfoProps {

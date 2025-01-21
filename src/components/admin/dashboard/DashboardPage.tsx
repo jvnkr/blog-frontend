@@ -7,21 +7,34 @@ import {
   ChartLegend,
   ChartTooltip,
   ChartTooltipContent,
-} from "./ui/chart";
+} from "../../ui/chart";
 import { Bar, BarChart, CartesianGrid, YAxis, XAxis } from "recharts";
 
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 import useFetcher from "@/hooks/useFetcher";
 import { HiOutlineUser } from "react-icons/hi";
-import { Flag, Heart, MessageSquare, NotepadText } from "lucide-react";
+import {
+  Calendar,
+  Flag,
+  Heart,
+  MessageSquare,
+  NotepadText,
+} from "lucide-react";
 import { FaMedal } from "react-icons/fa";
-import AvatarInfo from "./AvatarInfo";
-import Tooltip from "./Tooltip";
+import AvatarInfo from "../../profile/AvatarInfo";
+import Tooltip from "../../Tooltip";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { VirtualizedItems } from "./VirtualizedItems";
+import { VirtualizedItems } from "../../VirtualizedItems";
 import { useFetchItems } from "@/hooks/useFetchItems";
 import { useAuthContext } from "@/context/AuthContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../ui/select";
 
 const DashboardPage = () => {
   const fetcher = useFetcher();
@@ -33,7 +46,7 @@ const DashboardPage = () => {
   const [dashboardPageNumber, setDashboardPageNumber] = useState(0);
   const [hasMoreDashboardPosts, setHasMoreDashboardPosts] = useState(true);
   const [dashboardPosts, setDashboardPosts] = useState<PostData[]>([]);
-
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   useEffect(() => {
     fetchDashboardData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -57,14 +70,16 @@ const DashboardPage = () => {
     try {
       const response = await fetcher("/api/v1/dashboard", {
         credentials: "include",
-        method: "GET",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
+        body: JSON.stringify({
+          year: selectedYear,
+        }),
       });
       const data = (await response.json()) as DashboardData;
-      console.log(data);
       setDashboardData(data);
     } catch (error) {
       console.error(error);
@@ -179,10 +194,44 @@ const DashboardPage = () => {
           </div>
         </div>
         <div
-          className={`flex overflow-hidden relative border border-[#333236] rounded-xl w-full h-full bg-zinc-800${
+          className={`flex flex-col gap-1 p-2 overflow-hidden relative border border-[#333236] rounded-xl w-full h-full bg-zinc-800${
             !dashboardData || initialLoading ? " animate-pulse" : ""
           }`}
         >
+          {dashboardData && (
+            <div className="flex items-center gap-2">
+              <Select
+                value={`${selectedYear}`}
+                onValueChange={(value) => setSelectedYear(parseInt(value))}
+              >
+                <SelectTrigger className="flex bg-zinc-900 border border-[#333236] justify-between gap-2 w-[130px]">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    <SelectValue placeholder="Year" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border border-[#333236] text-white">
+                  {dashboardData?.earliestYear &&
+                    Array.from(
+                      {
+                        length:
+                          new Date().getFullYear() -
+                          dashboardData.earliestYear +
+                          1,
+                      },
+                      (_, index) => (
+                        <SelectItem
+                          key={index}
+                          value={`${dashboardData.earliestYear + index}`}
+                        >
+                          {dashboardData.earliestYear + index}
+                        </SelectItem>
+                      )
+                    )}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           {(!dashboardData || initialLoading) && (
             <motion.div
               className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-600/10 to-transparent"
@@ -194,7 +243,7 @@ const DashboardPage = () => {
           {dashboardData && (
             <ChartContainer
               config={chartConfig}
-              className="pt-4 pb-2 pr-4 min-h-[200px] w-full"
+              className="pt-4 flex-grow pb-2 pr-4 min-h-[200px] w-full"
             >
               <BarChart accessibilityLayer data={dashboardData.postsPerMonth}>
                 <CartesianGrid vertical={false} />
@@ -282,55 +331,61 @@ const DashboardPage = () => {
               </div>
               <div className="flex flex-col gap-5 p-4 pt-0 h-full">
                 {dashboardData.topUsers.map((user, index) => (
-                  <div key={user.id} className="flex items-center gap-3">
-                    {index > 2 && (
-                      <div
-                        style={{
-                          backgroundColor:
-                            index + 1 === 1
-                              ? "#E6C200" // gold
-                              : index + 1 === 2
-                              ? "#A9A9A9" // darker silver
-                              : index + 1 === 3
-                              ? "#8B5A2B" // darker bronze
-                              : "#2D2D33", // darker bg-zinc-700 equivalent
-                          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // shading
-                          border: "2px solid #444", // border
-                          color: "#FFF", // text color for better contrast
-                        }}
-                        className="text-[0.8rem] rounded-full min-w-6 min-h-6 w-6 h-6 flex items-center justify-center font-bold"
-                      >
-                        {index + 1}
+                  <div
+                    key={user.author.id}
+                    className="flex justify-between items-center gap-3"
+                  >
+                    <div className="flex items-center truncate gap-3">
+                      <div className="flex justify-center items-center w-6 h-6 min-w-6 min-h-6">
+                        {index > 2 && (
+                          <div
+                            style={{
+                              backgroundColor: "#2D2D33", // darker bg-zinc-700 equivalent
+                              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // shading
+                              border: "2px solid #444", // border
+                              color: "#FFF", // text color for better contrast
+                            }}
+                            className="text-[0.8rem] rounded-full min-w-6 min-h-6 w-6 h-6 flex items-center justify-center font-bold"
+                          >
+                            {index + 1}
+                          </div>
+                        )}
+                        {index <= 2 && (
+                          <FaMedal
+                            style={{
+                              fill:
+                                index + 1 === 1
+                                  ? "#FFD700" // brighter gold
+                                  : index + 1 === 2
+                                  ? "#C0C0C0" // brighter silver
+                                  : "#CD7F32", // brighter bronze
+                              color:
+                                index + 1 === 1
+                                  ? "#FFD700" // brighter gold
+                                  : index + 1 === 2
+                                  ? "#C0C0C0" // brighter silver
+                                  : "#CD7F32", // brighter bronze
+                              filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                              transform: "scale(1.2)",
+                            }}
+                            className="w-4 h-4 min-w-4 min-h-4"
+                          />
+                        )}
                       </div>
-                    )}
-                    {index <= 2 && (
-                      <FaMedal
-                        style={{
-                          fill:
-                            index + 1 === 1
-                              ? "#FFD700" // brighter gold
-                              : index + 1 === 2
-                              ? "#C0C0C0" // brighter silver
-                              : "#CD7F32", // brighter bronze
-                          color:
-                            index + 1 === 1
-                              ? "#FFD700" // brighter gold
-                              : index + 1 === 2
-                              ? "#C0C0C0" // brighter silver
-                              : "#CD7F32", // brighter bronze
-                          filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
-                          transform: "scale(1.2)",
-                        }}
-                        className="w-4 h-4 min-w-4 min-h-4"
+                      <AvatarInfo
+                        target="_blank"
+                        linkHref={`/@${user.author.username}`}
+                        username={user.author.username}
+                        name={user.author.name}
+                        verified={user.author.verified}
                       />
-                    )}
-                    <AvatarInfo
-                      target="_blank"
-                      linkHref={`/@${user.username}`}
-                      username={user.username}
-                      name={user.name}
-                      verified={user.verified}
-                    />
+                    </div>
+                    <div className="flex flex-col justify-center items-center text-zinc-400 text-lg">
+                      <span className="text-sm mb-[-2px] font-semibold">
+                        {user.posts}
+                      </span>
+                      <span className="text-sm mt-[-2px]">posts</span>
+                    </div>
                   </div>
                 ))}
               </div>

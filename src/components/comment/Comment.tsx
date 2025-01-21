@@ -2,19 +2,10 @@
 
 import { CommentData, PostData } from "@/lib/types";
 import React, { useState } from "react";
-import Avatar from "./Avatar";
+import Avatar from "../profile/Avatar";
 import { formatTimeDifference } from "@/lib/utils";
-import {
-  BadgeCheck,
-  Copy,
-  Dot,
-  Ellipsis,
-  Flag,
-  PencilLine,
-  Trash2,
-} from "lucide-react";
+import { BadgeCheck, Copy, Dot, Ellipsis, Flag, Trash2 } from "lucide-react";
 import Link from "next/link";
-import PostInteraction from "./PostInteraction";
 import { useAuthContext } from "@/context/AuthContext";
 import useFetcher from "@/hooks/useFetcher";
 import {
@@ -24,10 +15,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import VirtualPopup from "./VirtualPopup";
-import DeletePost from "./DeletePost";
+import VirtualPopup from "../VirtualPopup";
+import DeletePost from "../post/DeletePost";
 import { usePostsContext } from "@/context/PostsContext";
-import Tooltip from "./Tooltip";
+import Tooltip from "../Tooltip";
+import PostInteraction from "../post/PostInteraction";
 
 interface CommentProps extends CommentData {
   onUpdateItem: (item: CommentData) => void;
@@ -370,12 +362,12 @@ const Comment = ({
                 <Copy className="w-4 h-4 mr-0" />
                 Copy
               </DropdownMenuItem>
-              {comment.author.id === userId && (
+              {/* {comment.author.id === userId && (
                 <DropdownMenuItem>
                   <PencilLine className="w-4 h-4 mr-0" />
                   Edit
                 </DropdownMenuItem>
-              )}
+              )} */}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

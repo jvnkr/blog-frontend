@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "./ui/button";
-import EmojiPicker from "./EmojiPicker";
+import { Button } from "../ui/button";
+import EmojiPicker from "../EmojiPicker";
 
 interface PostFooterProps {
   disabled: boolean;

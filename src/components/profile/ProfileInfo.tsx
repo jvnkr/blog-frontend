@@ -1,14 +1,14 @@
 import React, { useRef, useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import Avatar from "./Avatar";
 import { useAuthContext } from "@/context/AuthContext";
 import useFetcher from "@/hooks/useFetcher";
 import { BadgeCheck, CalendarDays, UserRoundPen, X } from "lucide-react";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import EmojiPicker from "./EmojiPicker";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import EmojiPicker from "../EmojiPicker";
 import { usePostsContext } from "@/context/PostsContext";
-import VirtualPopup from "./VirtualPopup";
+import VirtualPopup from "../VirtualPopup";
 import { useRouter } from "next/navigation";
 
 interface ProfileInfoProps {

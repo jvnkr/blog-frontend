@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Card } from "./ui/card";
+import { Card } from "../ui/card";
 import { PostData } from "@/lib/types";
 import { toast } from "sonner";
 import PostFooter from "./PostFooter";

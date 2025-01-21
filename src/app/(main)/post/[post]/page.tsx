@@ -1,7 +1,7 @@
 "use client";
 
 import LoadingSpinner from "@/components/LoadingSpinner";
-import PostPage from "@/components/PostPage";
+import PostPage from "@/components/post/PostPage";
 import { useAuthContext } from "@/context/AuthContext";
 import useFetcher from "@/hooks/useFetcher";
 import { PostData } from "@/lib/types";

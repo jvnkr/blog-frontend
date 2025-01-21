@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Card } from "./ui/card";
+import { Card } from "../ui/card";
 import { CommentData } from "@/lib/types";
 import { toast } from "sonner";
-import PostFooter from "./PostFooter";
+import PostFooter from "../post/PostFooter";
 import useFetcher from "@/hooks/useFetcher";
 import { useAuthContext } from "@/context/AuthContext";
 import { usePostsContext } from "@/context/PostsContext";

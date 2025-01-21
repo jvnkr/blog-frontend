@@ -4,8 +4,8 @@ import { useFetchItems } from "@/hooks/useFetchItems";
 import { usePostsContext } from "@/context/PostsContext";
 import { VirtualizedItems } from "@/components/VirtualizedItems";
 import { PostData } from "@/lib/types";
-import { Post } from "@/components/Post";
-import CreatePost from "@/components/CreatePost";
+import { Post } from "@/components/post/Post";
+import CreatePost from "@/components/post/CreatePost";
 import { useAuthContext } from "@/context/AuthContext";
 
 export default function HomePage() {

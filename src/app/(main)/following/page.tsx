@@ -4,7 +4,7 @@ import { useFetchItems } from "@/hooks/useFetchItems";
 import { usePostsContext } from "@/context/PostsContext";
 import { VirtualizedItems } from "@/components/VirtualizedItems";
 import { PostData } from "@/lib/types";
-import { Post } from "@/components/Post";
+import { Post } from "@/components/post/Post";
 
 export default function FollowingPage() {
   const {
@@ -45,7 +45,12 @@ export default function FollowingPage() {
     setPosts(posts.map((p) => (p.id === post.id ? post : p)));
   };
 
-  if (!initialLoading && !loading && !hasMoreFollowingPosts && followingPosts.length === 0) {
+  if (
+    !initialLoading &&
+    !loading &&
+    !hasMoreFollowingPosts &&
+    followingPosts.length === 0
+  ) {
     return (
       <div className="flex pt-[60px] flex-col text-center w-full absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <span className="text-white text-lg font-semibold">

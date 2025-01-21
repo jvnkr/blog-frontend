@@ -1,6 +1,6 @@
 "use client";
 
-import { Header } from "@/components/Header";
+import { Header } from "@/components/header/Header";
 import Logo from "@/components/Logo";
 import { PiHouse, PiHouseFill } from "react-icons/pi";
 import { TbSettings, TbSettingsFilled } from "react-icons/tb";
@@ -8,6 +8,7 @@ import { HiOutlineUser } from "react-icons/hi";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/context/AuthContext";
 import {
+  Command,
   Ellipsis,
   Filter,
   LayoutDashboard,
@@ -22,12 +23,12 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import useFetcher from "@/hooks/useFetcher";
-import CreatePost from "@/components/CreatePost";
+import CreatePost from "@/components/post/CreatePost";
 import { usePostsContext } from "@/context/PostsContext";
-import CreateComment from "@/components/CreateComment";
+import CreateComment from "@/components/comment/CreateComment";
 import { CommentData, Role, SearchFilter } from "@/lib/types";
 import VirtualPopup from "@/components/VirtualPopup";
-import AvatarInfo from "@/components/AvatarInfo";
+import AvatarInfo from "@/components/profile/AvatarInfo";
 import { AnimatePresence, motion } from "motion/react";
 import SearchBar from "@/components/SearchBar";
 import { useSearchContext } from "@/context/SearchContext";
@@ -42,6 +43,7 @@ export default function HomeLayout({
     useAuthContext();
   const { setCommentCreated } = usePostsContext();
   const [showCreatePostDialog, setShowCreatePostDialog] = useState(false);
+  const [isWindows, setIsWindows] = useState(false);
   const { showSearchDialog, setShowSearchDialog, setFetched, setResults } =
     useSearchContext();
   const searchParams = useSearchParams();
@@ -121,6 +123,8 @@ export default function HomeLayout({
       router.push(url.pathname + url.search);
     }
 
+    setIsWindows(navigator.userAgent.toLowerCase().includes("windows"));
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("click", handleCloseMenu);
@@ -145,7 +149,7 @@ export default function HomeLayout({
       <AnimatePresence mode="wait">
         {loggedIn && showSearchDialog && (
           <VirtualPopup onOverlayClick={() => setShowSearchDialog(false)}>
-            <SearchBar searchRef={searchRef} />
+            <SearchBar isWindows={isWindows} searchRef={searchRef} />
           </VirtualPopup>
         )}
       </AnimatePresence>
@@ -356,10 +360,27 @@ export default function HomeLayout({
                 searchRef.current?.focus();
               }, 0);
             }}
-            className="flex w-full justify-start search-input border border-[#272629] bg-zinc-900 p-2 py-1 gap-2 rounded-lg items-center"
+            className="flex w-full justify-between search-input border border-[#272629] bg-zinc-900 p-1 gap-2 rounded-lg items-center"
           >
-            <Search className="text-zinc-500 ml-[0.2rem] w-5 h-5" />
-            <span className="text-white/50">Search</span>
+            <div className="flex items-center gap-1">
+              <Search className="text-zinc-500 ml-[0.2rem] w-5 h-5" />
+              <span className="text-white/50">Search</span>
+            </div>
+            <div className="flex gap-1 items-center">
+              {!isWindows && (
+                <Command className="bg-zinc-800 border border-[#333] p-1 rounded-md w-6 h-6 min-w-6 min-h-6 text-neutral-300" />
+              )}
+              {isWindows && (
+                <span className="text-neutral-300 border border-[#333] font-semibold text-xs p-2 rounded-md bg-zinc-800 min-w-6 min-h-6 w-6 h-6 flex justify-center items-center">
+                  {"ALT"}
+                </span>
+              )}
+              {!isWindows && (
+                <span className="text-neutral-300 border border-[#333] font-semibold p-1 text-sm rounded-md bg-zinc-800 min-w-6 min-h-6 w-6 h-6 flex justify-center items-center">
+                  {"K"}
+                </span>
+              )}
+            </div>
           </button>
         </div>
       )}

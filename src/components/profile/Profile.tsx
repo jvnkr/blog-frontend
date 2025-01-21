@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { VirtualizedItems } from "./VirtualizedItems";
+import { VirtualizedItems } from "../VirtualizedItems";
 import { usePostsContext } from "@/context/PostsContext";
 import { useFetchItems } from "@/hooks/useFetchItems";
 import { PostData } from "@/lib/types";
 import { usePathname } from "next/navigation";
-import { Post } from "./Post";
 import { useAuthContext } from "@/context/AuthContext";
+import CreatePost from "../post/CreatePost";
 import ProfileInfo from "./ProfileInfo";
-import CreatePost from "./CreatePost";
+import { Post } from "../post/Post";
 
 export interface ProfileProps {
   username: string;

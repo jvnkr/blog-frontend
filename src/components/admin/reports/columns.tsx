@@ -3,11 +3,11 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ReasonCell } from "./ReasonCell";
 import { ReportReasons, ReportStatus } from "@/lib/types";
-import { Button } from "./ui/button";
+import { Button } from "../../ui/button";
 import { ArrowUpDown, Dot } from "lucide-react";
-import { Checkbox } from "./ui/checkbox";
-import AvatarInfo from "./AvatarInfo";
-import Tooltip from "./Tooltip";
+import { Checkbox } from "../../ui/checkbox";
+import AvatarInfo from "../../profile/AvatarInfo";
+import Tooltip from "../../Tooltip";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.

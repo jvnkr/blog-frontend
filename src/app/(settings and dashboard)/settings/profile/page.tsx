@@ -1,4 +1,4 @@
-import SettingsProfile from "@/components/SettingsProfile";
+import SettingsProfile from "@/components/settings/SettingsProfile";
 import React from "react";
 
 const SettingsProfilePage = () => {

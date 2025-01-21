@@ -22,22 +22,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
-import { Input } from "./ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+
 import {
   ChevronDown,
   ChevronLeft,
@@ -47,12 +33,27 @@ import {
   Repeat,
 } from "lucide-react";
 import useFetcher from "@/hooks/useFetcher";
-import LoadingSpinner from "./LoadingSpinner";
-import { Report } from "./columns";
-import { ActionCell } from "./ActionCell";
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { ReportReasons, ReportStatus } from "@/lib/types";
+import { ActionCell } from "@/components/ActionCell";
+import { Report } from "./columns";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

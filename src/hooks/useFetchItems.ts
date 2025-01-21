@@ -65,7 +65,8 @@ export function useFetchItems(
       const data = await response.json();
       setItems((prev) => [...prev, ...data]);
       setPageNumber((prev) => prev + 1);
-      toast.success("Items fetched successfully");
+      if (process.env.NODE_ENV === "development")
+        toast.success("Items fetched successfully");
       setHasMoreItems(data.length > 0);
       setLoading(false);
       initialFetchRef.current = false;

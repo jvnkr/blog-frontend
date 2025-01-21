@@ -1,6 +1,6 @@
 import { CircleX } from "lucide-react";
 import React from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 interface DeletePostProps {
   setShowDeleteDialog: React.Dispatch<React.SetStateAction<boolean>>;

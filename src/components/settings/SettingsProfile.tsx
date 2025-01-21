@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
 import { useAuthContext } from "@/context/AuthContext";
-import EmojiPicker from "./EmojiPicker";
+import EmojiPicker from "../EmojiPicker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import useFetcher from "@/hooks/useFetcher";
 
 const formSchema = z.object({

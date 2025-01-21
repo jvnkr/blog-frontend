@@ -3,7 +3,7 @@ import { Command, Search } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import LoadingSpinner from "./LoadingSpinner";
 import { motion } from "motion/react";
-import AvatarInfo from "./AvatarInfo";
+import AvatarInfo from "./profile/AvatarInfo";
 import useFetcher from "@/hooks/useFetcher";
 import { useAuthContext } from "@/context/AuthContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -11,15 +11,15 @@ import { useSearchContext } from "@/context/SearchContext";
 import { UserData } from "@/lib/types";
 
 interface SearchBarProps {
+  isWindows: boolean;
   searchRef: React.RefObject<HTMLInputElement>;
 }
 
-const SearchBar = ({ searchRef }: SearchBarProps) => {
+const SearchBar = ({ searchRef, isWindows }: SearchBarProps) => {
   const { accessToken } = useAuthContext();
   const pathname = usePathname();
   const { setShowSearchDialog, setResults, results, setFetched, fetched } =
     useSearchContext();
-  const [isWindows, setIsWindows] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(false);
   const [tempResults, setTempResults] = useState<UserData[]>(
@@ -116,7 +116,6 @@ const SearchBar = ({ searchRef }: SearchBarProps) => {
       setIsSearching(true);
       fetchSearchResult(searchValue);
     }
-    setIsWindows(navigator.userAgent.toLowerCase().includes("windows"));
     searchRef.current?.focus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -1,5 +1,5 @@
 "use client";
-import Profile from "@/components/Profile";
+import Profile from "@/components/profile/Profile";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";

@@ -12,17 +12,16 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import Avatar from "./Avatar";
+import Avatar from "../profile/Avatar";
 import { useAuthContext } from "@/context/AuthContext";
-import Comment, { CommentCache, commentCache } from "./Comment";
-import { VirtualizedItems } from "./VirtualizedItems";
+import Comment, { CommentCache, commentCache } from "../comment/Comment";
+import { VirtualizedItems } from "../VirtualizedItems";
 import { useFetchItems } from "@/hooks/useFetchItems";
-import CreateComment from "./CreateComment";
+import CreateComment from "../comment/CreateComment";
 import { usePostsContext } from "@/context/PostsContext";
-import PostInteraction from "./PostInteraction";
-import CreateReply, { replyCache } from "./CreateReply";
-import LoadingSpinner from "./LoadingSpinner";
-import ViewMoreReplies from "./ViewMoreReplies";
+import CreateReply, { replyCache } from "../comment/CreateReply";
+import LoadingSpinner from "../LoadingSpinner";
+import ViewMoreReplies from "../comment/ViewMoreReplies";
 import { toast } from "sonner";
 import useFetcher from "@/hooks/useFetcher";
 import {
@@ -31,10 +30,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import VirtualPopup from "./VirtualPopup";
+import VirtualPopup from "../VirtualPopup";
 import DeletePost from "./DeletePost";
 import { useRouter } from "next/navigation";
 import ReportPost from "./ReportPost";
+import PostInteraction from "./PostInteraction";
 
 const PostPage = (initialPost: PostData) => {
   const { accessToken, verified, userId, username, name } = useAuthContext();
@@ -138,8 +138,6 @@ const PostPage = (initialPost: PostData) => {
   };
 
   const handleCreateComment = async (newComment: CommentData) => {
-    console.log(newComment);
-    console.log(comments);
     setComments((prev) => [newComment, ...prev]);
     setPost({
       ...post,
@@ -690,7 +688,7 @@ const PostPage = (initialPost: PostData) => {
                     repliesData: new Set([
                       ...(commentCache.get(item.rootId || item.id)
                         ?.repliesData || []),
-                      replyItem.id
+                      replyItem.id,
                     ]),
                   });
 

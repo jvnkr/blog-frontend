@@ -1,7 +1,7 @@
 "use client";
 
-import DashboardLayout from "@/components/DashboardLayout";
-import SettingsLayout from "@/components/SettingsLayout";
+import DashboardLayout from "@/components/admin/dashboard/DashboardLayout";
+import SettingsLayout from "@/components/settings/SettingsLayout";
 import { useAuthContext } from "@/context/AuthContext";
 import { Role } from "@/lib/types";
 import { usePathname, useRouter } from "next/navigation";

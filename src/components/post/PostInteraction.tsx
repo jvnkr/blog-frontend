@@ -1,6 +1,6 @@
 import React from "react";
-import InteractionElement from "./InteractionElement";
 import { Heart, MessageSquare } from "lucide-react";
+import InteractionElement from "./InteractionElement";
 
 interface PostInteractionProps {
   handleLike: () => void;

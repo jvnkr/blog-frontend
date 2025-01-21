@@ -1,11 +1,11 @@
 "use client";
 import { useAuthContext } from "@/context/AuthContext";
-import HeaderElement from "@/components/HeaderElement";
+import HeaderElement from "@/components/header/HeaderElement";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, BadgeCheck, Search } from "lucide-react";
 import { usePostsContext } from "@/context/PostsContext";
-import Tooltip from "./Tooltip";
 import { useSearchContext } from "@/context/SearchContext";
+import Tooltip from "../Tooltip";
 
 export const API_URL = "http://localhost:8080";
 

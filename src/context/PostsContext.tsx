@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { CommentData, PostData } from "@/lib/types";
-import { ProfileProps } from "@/components/Profile";
+import { ProfileProps } from "@/components/profile/Profile";
 
 interface PostsContextType {
   posts: PostData[];

@@ -4,7 +4,11 @@ export interface DashboardData {
   postsCount: number;
   usersCount: number;
   reportsCount: number;
-  topUsers: PostAuthor[];
+  earliestYear: number;
+  topUsers: {
+    author: PostAuthor;
+    posts: number;
+  }[];
   postsPerMonth: { month: string; postsCount: number }[];
 }
 

@@ -6,17 +6,17 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState, useRef } from "react";
 import useResponsiveClass from "@/hooks/useResponsiveClass";
 import { useAuthContext } from "@/context/AuthContext";
-import { Card } from "./ui/card";
+import { Card } from "../ui/card";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import PostInteraction from "./PostInteraction";
 import useFetcher from "@/hooks/useFetcher";
-import VirtualPopup from "./VirtualPopup";
+import VirtualPopup from "../VirtualPopup";
 import DeletePost from "./DeletePost";
 import { usePostsContext } from "@/context/PostsContext";
-import Tooltip from "./Tooltip";
-import AvatarInfo from "./AvatarInfo";
+import Tooltip from "../Tooltip";
+import AvatarInfo from "../profile/AvatarInfo";
 import ReportPost from "./ReportPost";
+import PostInteraction from "./PostInteraction";
 
 interface PostProps {
   post: PostData;
