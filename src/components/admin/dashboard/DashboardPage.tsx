@@ -48,7 +48,7 @@ const DashboardPage = () => {
   const [dashboardPosts, setDashboardPosts] = useState<PostData[]>([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   useEffect(() => {
-    fetchDashboardData();
+    fetchDashboardData(selectedYear);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -66,7 +66,7 @@ const DashboardPage = () => {
     setHasMoreDashboardPosts
   );
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (year: number) => {
     try {
       const response = await fetcher("/api/v1/dashboard", {
         credentials: "include",
@@ -76,7 +76,7 @@ const DashboardPage = () => {
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          year: selectedYear,
+          year,
         }),
       });
       const data = (await response.json()) as DashboardData;
@@ -202,7 +202,10 @@ const DashboardPage = () => {
             <div className="flex items-center gap-2">
               <Select
                 value={`${selectedYear}`}
-                onValueChange={(value) => setSelectedYear(parseInt(value))}
+                onValueChange={(value) => {
+                  setSelectedYear(parseInt(value));
+                  fetchDashboardData(parseInt(value));
+                }}
               >
                 <SelectTrigger className="flex bg-zinc-900 border border-[#333236] justify-between gap-2 w-[130px]">
                   <div className="flex items-center gap-1">
