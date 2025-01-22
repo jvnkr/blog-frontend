@@ -63,8 +63,8 @@ export default async function RootLayout({
           accessToken: "",
         }),
       },
-      () => null
-      // "http://backend:8080" // Server side docker service url fetch through docker network
+      () => null,
+      "http://backend:8080" // Server side docker service url fetch through docker network
     );
 
     if (res.ok) {
