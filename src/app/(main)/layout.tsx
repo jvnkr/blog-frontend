@@ -67,7 +67,7 @@ export default function HomeLayout({
       });
       if (res.ok) {
         clearAll();
-        router.push("/");
+        window.location.href = "/home";
       }
     } catch (e) {
       console.error(e);
