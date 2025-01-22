@@ -369,19 +369,21 @@ export default function HomeLayout({
               <Search className="text-zinc-500 ml-[0.2rem] w-5 h-5" />
               <span className="text-white/50">Search</span>
             </div>
-            <div className="flex gap-1 items-center">
-              {!isWindows && (
-                <Command className="bg-zinc-800 border border-[#333] p-1 rounded-md w-6 h-6 min-w-6 min-h-6 text-neutral-300" />
-              )}
-              {isWindows && (
-                <span className="text-neutral-300 border border-[#333] font-semibold text-xs p-2 rounded-md bg-zinc-800 min-w-6 min-h-6 w-6 h-6 flex justify-center items-center">
-                  {"ALT"}
+            {isWindows !== null && (
+              <div className="flex gap-1 items-center">
+                {!isWindows && (
+                  <Command className="bg-zinc-800 border border-[#333] p-1 rounded-md w-6 h-6 min-w-6 min-h-6 text-neutral-300" />
+                )}
+                {isWindows && (
+                  <span className="text-neutral-300 border border-[#333] font-semibold text-xs p-2 rounded-md bg-zinc-800 min-w-6 min-h-6 w-6 h-6 flex justify-center items-center">
+                    {"ALT"}
+                  </span>
+                )}
+                <span className="text-neutral-300 border border-[#333] font-semibold p-1 text-sm rounded-md bg-zinc-800 min-w-6 min-h-6 w-6 h-6 flex justify-center items-center">
+                  {"K"}
                 </span>
-              )}
-              <span className="text-neutral-300 border border-[#333] font-semibold p-1 text-sm rounded-md bg-zinc-800 min-w-6 min-h-6 w-6 h-6 flex justify-center items-center">
-                {"K"}
-              </span>
-            </div>
+              </div>
+            )}
           </button>
         </div>
       )}
