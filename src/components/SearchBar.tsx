@@ -178,11 +178,9 @@ const SearchBar = ({ searchRef, isWindows }: SearchBarProps) => {
               {"ALT"}
             </span>
           )}
-          {!isWindows && (
-            <span className="text-neutral-300 border border-[#333] font-semibold p-2 rounded-md bg-zinc-800 min-w-8 min-h-8 w-8 h-8 flex justify-center items-center">
-              {"K"}
-            </span>
-          )}
+          <span className="text-neutral-300 border border-[#333] font-semibold p-2 rounded-md bg-zinc-800 min-w-8 min-h-8 w-8 h-8 flex justify-center items-center">
+            {"K"}
+          </span>
         </div>
       </motion.div>
       {(isSearching || fetched) && (
