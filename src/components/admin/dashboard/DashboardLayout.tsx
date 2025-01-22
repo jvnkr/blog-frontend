@@ -31,7 +31,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   useEffect(() => {
     if (!loggedIn || role !== Role.ADMIN) {
-      router.replace("/home");
+      router.push("/home");
     }
   }, [loggedIn, role, router]);
 

@@ -4,7 +4,7 @@ import DashboardLayout from "@/components/admin/dashboard/DashboardLayout";
 import SettingsLayout from "@/components/settings/SettingsLayout";
 import { useAuthContext } from "@/context/AuthContext";
 import { Role } from "@/lib/types";
-import { usePathname, useRouter } from "next/navigation";
+import { redirect, usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Layout({
@@ -18,18 +18,23 @@ export default function Layout({
 
   useEffect(() => {
     if (!loggedIn) {
-      router.replace("/home");
+      redirect("/home");
     }
-  }, [loggedIn, router, pathname, role]);
+  }, [loggedIn, router]);
+
+  if (!loggedIn) {
+    return null;
+  }
 
   let layout = null;
 
   if (pathname === "/settings/profile" || pathname === "/settings/account") {
     layout = <SettingsLayout>{children}</SettingsLayout>;
   } else if (pathname === "/dashboard" || pathname === "/dashboard/reports") {
-    layout = <DashboardLayout>{children}</DashboardLayout>;
-    if (!loggedIn || role !== Role.ADMIN) {
-      return null;
+    if (role === Role.ADMIN) {
+      layout = <DashboardLayout>{children}</DashboardLayout>;
+    } else {
+      redirect("/home");
     }
   }
 

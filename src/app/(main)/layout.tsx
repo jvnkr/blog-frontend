@@ -20,7 +20,12 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  redirect,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import useFetcher from "@/hooks/useFetcher";
 import CreatePost from "@/components/post/CreatePost";
@@ -137,7 +142,7 @@ export default function HomeLayout({
 
   useEffect(() => {
     if (pathname === "/following" && !loggedIn) {
-      router.replace("/home");
+      redirect("/home");
     }
   }, [loggedIn, pathname, router]);
 
