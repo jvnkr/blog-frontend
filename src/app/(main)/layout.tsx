@@ -43,7 +43,7 @@ export default function HomeLayout({
     useAuthContext();
   const { setCommentCreated } = usePostsContext();
   const [showCreatePostDialog, setShowCreatePostDialog] = useState(false);
-  const [isWindows, setIsWindows] = useState(false);
+  const [isWindows, setIsWindows] = useState<boolean | null>(null);
   const { showSearchDialog, setShowSearchDialog, setFetched, setResults } =
     useSearchContext();
   const searchParams = useSearchParams();

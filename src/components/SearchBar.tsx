@@ -11,7 +11,7 @@ import { useSearchContext } from "@/context/SearchContext";
 import { UserData } from "@/lib/types";
 
 interface SearchBarProps {
-  isWindows: boolean;
+  isWindows: null | boolean;
   searchRef: React.RefObject<HTMLInputElement>;
 }
 
@@ -169,19 +169,21 @@ const SearchBar = ({ searchRef, isWindows }: SearchBarProps) => {
           placeholder="Search..."
           className="outline-none text-lg bg-transparent text-white w-full"
         />
-        <div className="flex gap-2 items-center">
-          {!isWindows && (
-            <Command className="bg-zinc-800 border border-[#333] p-2 rounded-md w-8 h-8 min-w-8 min-h-8 text-neutral-300" />
-          )}
-          {isWindows && (
+        {isWindows !== null && (
+          <div className="flex gap-2 items-center">
+            {!isWindows && (
+              <Command className="bg-zinc-800 border border-[#333] p-2 rounded-md w-8 h-8 min-w-8 min-h-8 text-neutral-300" />
+            )}
+            {isWindows && (
+              <span className="text-neutral-300 border border-[#333] font-semibold p-2 rounded-md bg-zinc-800 min-w-8 min-h-8 w-8 h-8 flex justify-center items-center">
+                {"ALT"}
+              </span>
+            )}
             <span className="text-neutral-300 border border-[#333] font-semibold p-2 rounded-md bg-zinc-800 min-w-8 min-h-8 w-8 h-8 flex justify-center items-center">
-              {"ALT"}
+              {"K"}
             </span>
-          )}
-          <span className="text-neutral-300 border border-[#333] font-semibold p-2 rounded-md bg-zinc-800 min-w-8 min-h-8 w-8 h-8 flex justify-center items-center">
-            {"K"}
-          </span>
-        </div>
+          </div>
+        )}
       </motion.div>
       {(isSearching || fetched) && (
         <motion.div
