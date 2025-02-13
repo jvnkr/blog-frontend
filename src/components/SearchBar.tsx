@@ -90,15 +90,17 @@ const SearchBar = ({ searchRef, isWindows }: SearchBarProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
     debounce((value: string) => {
-      fetchSearchResult(value);
+      if (!searchRef.current) return;
+      if (searchRef.current.value.length > 0) fetchSearchResult(value);
     }, 420),
     []
   );
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!searchRef.current) return;
     if (
-      e.target.value.trim().length === 0 ||
-      (e.target.value.trim() === "" && searchValue === "")
+      searchRef.current.value.trim().length === 0 ||
+      (searchRef.current.value.trim() === "" && searchValue === "")
     ) {
       setIsSearching(false);
       setResults([]);

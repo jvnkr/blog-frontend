@@ -1,15 +1,7 @@
 "use client";
 
 import { CommentData, PostData } from "@/lib/types";
-import {
-  BadgeCheck,
-  Dot,
-  Ellipsis,
-  Trash2,
-  Share,
-  PencilLine,
-  Flag,
-} from "lucide-react";
+import { BadgeCheck, Dot, Ellipsis, Trash2, Share, Flag } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import Avatar from "../profile/Avatar";
@@ -315,12 +307,12 @@ const PostPage = (initialPost: PostData) => {
                   <Share className="w-4 h-4 mr-0" />
                   Share
                 </DropdownMenuItem>
-                {post.author.id === userId && (
+                {/* {post.author.id === userId && (
                   <DropdownMenuItem>
                     <PencilLine className="w-4 h-4 mr-0" />
                     Edit
                   </DropdownMenuItem>
-                )}
+                )} */}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

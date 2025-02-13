@@ -4,7 +4,7 @@ import { CommentData, PostData } from "@/lib/types";
 import React, { useState } from "react";
 import Avatar from "../profile/Avatar";
 import { formatTimeDifference } from "@/lib/utils";
-import { BadgeCheck, Copy, Dot, Ellipsis, Flag, Trash2 } from "lucide-react";
+import { BadgeCheck, Copy, Dot, Ellipsis, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useAuthContext } from "@/context/AuthContext";
 import useFetcher from "@/hooks/useFetcher";
@@ -343,10 +343,6 @@ const Comment = ({
                   Delete
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem className="focus:bg-yellow-500 focus:text-white">
-                <Flag className="w-4 h-4 mr-0" />
-                Report
-              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
                   navigator.clipboard.writeText(comment.text);

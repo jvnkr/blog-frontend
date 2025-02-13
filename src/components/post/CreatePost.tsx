@@ -36,7 +36,6 @@ const CreatePost = ({
     setFollowingPosts,
     profileData,
     setProfileData,
-    posts: homePosts,
     setPosts: setHomePosts,
     cachedProfilePath,
   } = usePostsContext();
@@ -76,9 +75,7 @@ const CreatePost = ({
           setTitleValue("");
           setDescValue("");
 
-          if (homePosts.length > 0) {
-            setHomePosts((prev) => [data, ...prev]);
-          }
+          setHomePosts((prev) => [data, ...prev]);
 
           if (profileData?.username === username) {
             setProfileData({
